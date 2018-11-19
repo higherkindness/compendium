@@ -1,11 +1,9 @@
 import microsites._
 import sbtorgpolicies.OrgPoliciesPlugin.autoImport._
 import sbtorgpolicies.model._
-import sbtorgpolicies.runnable.SetSetting
 import sbtorgpolicies.runnable.syntax._
 import sbtorgpolicies.templates._
 import sbtorgpolicies.templates.badges._
-import scoverage.ScoverageKeys
 
 lazy val root = project
   .in(file("."))
@@ -122,7 +120,7 @@ lazy val commonSettings = Seq(
     (test in Test).asRunnableItemFull,
     "docs/tut".asRunnableItem,
   )
-) ++ compilerPlugins
+) ++ compilerPlugins ++ credentialSettings
 
 lazy val compilerPlugins = Seq(
   libraryDependencies ++= Seq(
