@@ -10,3 +10,5 @@ The maintainers of the project are:
 
 These are the people that have contributed to the catamorph project:
 
+* Juan Pedro Moreno <[juanpedromoreno](https://github.com/juanpedromoreno)>
+* Pepe García <[pepegar](https://github.com/pepegar)>
