@@ -26,6 +26,7 @@ lazy val docs = project
     micrositeGithubOwner := "higherkindness",
     micrositeGithubRepo := "catamorph",
     micrositeHighlightTheme := "tomorrow",
+    micrositeOrganizationHomepage := "http://www.47deg.com",
     includeFilter in Jekyll := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.swf" | "*.md",
     micrositePushSiteWith := GitHub4s,
     micrositeExtraMdFiles := Map(
@@ -56,9 +57,16 @@ pgpSecretRing := file(s"$gpgFolder/secring.gpg")
 
 // General Settings
 lazy val commonSettings = Seq(
-  organization := "higherkindness",
+  orgProjectName := "Catamorph",
+  orgGithubSetting := GitHubSettings(
+    organization = "higherkindness",
+    project = (name in LocalRootProject).value,
+    organizationName = "47 Degrees",
+    groupId = "io.higherkindness",
+    organizationHomePage = url("http://47deg.com"),
+    organizationEmail = "hello@47deg.com"
+  ),
   scalaVersion := "2.12.7",
-  startYear := Some(2018),
   crossScalaVersions := Seq(scalaVersion.value, "2.11.12"),
   ThisBuild / scalacOptions -= "-Xplugin-require:macroparadise",
   libraryDependencies ++= Seq(
@@ -69,7 +77,7 @@ lazy val commonSettings = Seq(
     %%("specs2-scalacheck") % Test,
     "io.chrisdavenport"     %% "cats-scalacheck" % "0.1.0" % Test
   ),
-  orgProjectName := "Catamorph",
+  startYear := Some(2018),
   orgMaintainersSetting := List(Dev("developer47deg", Some("47 Degrees (twitter: @47deg)"), Some("hello@47deg.com"))),
   orgBadgeListSetting := List(
     TravisBadge.apply,
@@ -120,7 +128,7 @@ lazy val commonSettings = Seq(
     (test in Test).asRunnableItemFull,
     "docs/tut".asRunnableItem,
   )
-) ++ compilerPlugins ++ credentialSettings
+) ++ compilerPlugins
 
 lazy val compilerPlugins = Seq(
   libraryDependencies ++= Seq(
