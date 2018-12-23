@@ -15,6 +15,9 @@ lazy val V = new {
   val scala: String            = "2.12.7"
   val skeumorph: String        = "0.0.1"
   val specs2: String           = "4.3.5"
+  val http4s: String           = "0.18.21"
+  val shapeless: String        = "2.3.3"
+  val pureConfig: String       = "0.9.0"
 }
 
 lazy val root = project
@@ -79,7 +82,11 @@ lazy val commonSettings = Seq(
   ThisBuild / scalacOptions -= "-Xplugin-require:macroparadise",
   libraryDependencies ++= Seq(
     %%("cats-core", V.cats),
+    %%("shapeless", V.shapeless),
+    %%("pureconfig", V.pureConfig),
     "io.frees" %% "skeuomorph" % V.skeumorph,
+    %%("http4s-dsl", V.http4s),
+    %%("http4s-blaze-server", V.http4s),
     %%("circe-core", V.circe),
     %%("specs2-core", V.specs2)       % Test,
     %%("specs2-scalacheck", V.specs2) % Test,
