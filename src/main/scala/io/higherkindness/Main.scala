@@ -16,6 +16,27 @@
 
 package io.higherkindness
 
-object Main extends App {
-  println("Hello from project catamorph")
+import cats.effect.IO
+import fs2.{Stream, StreamApp}
+import io.higherkindness.http.RootService
+import io.higherkindness.models.{CompendiumConfig, HttpConfig}
+import org.http4s.server.blaze.BlazeBuilder
+
+import scala.concurrent.ExecutionContext
+
+object Main extends StreamApp[IO] {
+
+  def server(conf: HttpConfig): Stream[IO, StreamApp.ExitCode] =
+    BlazeBuilder[IO]
+      .bindHttp(conf.port, conf.host)
+      .mountService(RootService.rootRouteService, "/")
+      .serve(IO.ioConcurrentEffect, ExecutionContext.global)
+
+  override def stream(
+      args: List[String],
+      requestShutdown: IO[Unit]): Stream[IO, StreamApp.ExitCode] =
+    for {
+      conf <- Stream.eval(IO(pureconfig.loadConfigOrThrow[CompendiumConfig]))
+      code <- server(conf.http)
+    } yield code
 }
