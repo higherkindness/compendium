@@ -43,7 +43,10 @@ object RootService {
           act.flatMap(id => Ok(s"$id").map(_.putHeaders(Location(req.uri.withPath(s"$id")))))
         }
 
-      case GET -> Root / "v0" / "domain" / domainId => NotImplemented(domainId)
+      case GET -> Root / "v0" / "domain" / IntVar(domainId) =>
+        domainService
+          .recover(domainId.toInt)
+          .flatMap(_.fold(NotFound())(StaticFile.fromFile(_).getOrElseF(NotFound())))
     }
 
 }

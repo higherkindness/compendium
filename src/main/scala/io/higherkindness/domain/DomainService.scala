@@ -20,5 +20,5 @@ import java.io.File
 
 trait DomainService[F[_]] {
   def store(id: Int, filename: String, tmp: File): F[Unit]
-  def recover(id: Int): F[File]
+  def recover(id: Int): F[Option[File]]
 }

@@ -42,11 +42,10 @@ object DomainServiceStorage {
         } yield ()
       }
 
-      override def recover(id: Int): IO[File] =
-        for {
-          files <- IO { new File(s"$path${File.separator}$id").listFiles() }
-          file <- files.headOption.fold(
-            IO.raiseError[File](new Exception("Error recovering domain")))(IO.pure)
-        } yield file
+      override def recover(id: Int): IO[Option[File]] =
+        IO {
+          Option(new File(s"$path${File.separator}$id").listFiles())
+            .fold(Option.empty[File])(_.headOption)
+        }
     }
 }

@@ -38,9 +38,18 @@ object DBServiceStorage {
 
       override def lastDomain(): IO[Option[Domain]] =
         for {
-          identifier <- IO { new File(path).list.map(_.toInt).sorted.lastOption }
+          identifier <- IO {
+            Option(new File(path).list)
+              .fold(List.empty[String])(_.toList)
+              .map(_.toInt)
+              .sorted
+              .lastOption
+          }
           filename <- IO {
-            identifier.flatMap(id => new File(s"$path${File.separator}$id").listFiles.headOption)
+            identifier.flatMap(
+              id =>
+                Option(new File(s"$path${File.separator}$id").listFiles)
+                  .fold(Option.empty[File])(_.headOption))
           }
         } yield identifier.flatMap(id => filename.map(fn => Domain(id, fn.getName)))
     }
