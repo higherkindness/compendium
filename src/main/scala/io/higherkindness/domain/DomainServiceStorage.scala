@@ -30,7 +30,6 @@ object DomainServiceStorage {
       val path = storage.path
       override def store(id: Int, filename: String, tmp: File): IO[Unit] = {
         val destPath = s"$path${File.separator}$id"
-        println(s"$destPath${File.separator}$filename")
         for {
           _ <- IO { new File(destPath).mkdir() }
           _ <- IO {
