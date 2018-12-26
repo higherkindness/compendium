@@ -16,8 +16,12 @@
 
 package io.higherkindness
 
+import java.io.File
+
 import cats.effect.IO
 import fs2.{Stream, StreamApp}
+import io.higherkindness.db.{DBService, DBServiceStorage}
+import io.higherkindness.domain.{DomainService, DomainServiceStorage}
 import io.higherkindness.http.RootService
 import io.higherkindness.models.{CompendiumConfig, HttpConfig}
 import org.http4s.server.blaze.BlazeBuilder
@@ -26,10 +30,13 @@ import scala.concurrent.ExecutionContext
 
 object Main extends StreamApp[IO] {
 
-  def server(conf: HttpConfig): Stream[IO, StreamApp.ExitCode] =
+  def server(
+      conf: HttpConfig,
+      dbService: DBService[IO],
+      domainService: DomainService[IO]): Stream[IO, StreamApp.ExitCode] =
     BlazeBuilder[IO]
       .bindHttp(conf.port, conf.host)
-      .mountService(RootService.rootRouteService, "/")
+      .mountService(RootService.rootRouteService(domainService, dbService), "/")
       .serve(IO.ioConcurrentEffect, ExecutionContext.global)
 
   override def stream(
@@ -37,6 +44,10 @@ object Main extends StreamApp[IO] {
       requestShutdown: IO[Unit]): Stream[IO, StreamApp.ExitCode] =
     for {
       conf <- Stream.eval(IO(pureconfig.loadConfigOrThrow[CompendiumConfig]))
-      code <- server(conf.http)
+      _    <- Stream.eval(IO { new File(conf.storage.path).mkdir() })
+      code <- server(
+        conf.http,
+        DBServiceStorage.impl(conf.storage),
+        DomainServiceStorage.impl(conf.storage))
     } yield code
 }

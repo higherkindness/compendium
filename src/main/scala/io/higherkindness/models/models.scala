@@ -16,6 +16,4 @@
 
 package io.higherkindness.models
 
-case class HttpConfig(host: String, port: Int)
-case class Storage(path: String)
-case class CompendiumConfig(http: HttpConfig, storage: Storage)
+case class Domain(id: Int, filename: String)

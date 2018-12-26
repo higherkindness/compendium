@@ -21,18 +21,29 @@ import org.http4s._
 import org.http4s.dsl.io._
 import org.http4s.multipart.Multipart
 import cats.effect.IO._
+import org.http4s.headers._
+import io.higherkindness.db.DBService
+import io.higherkindness.domain.DomainService
 
 object RootService {
 
-  val rootRouteService = HttpService[IO] {
-    case GET -> Root / "ping" => Ok("pong")
-    case req @ POST -> Root / "v0" / "domain" =>
-      req.decode[Multipart[IO]] { m =>
-        println(m.parts.toList.head.body.compile.toVector.unsafeRunSync())
-        Ok(Utils.storeMultipart(m).map(_.file.getCanonicalPath))
-      }
+  def rootRouteService(
+      domainService: DomainService[IO],
+      dbService: DBService[IO]): HttpService[IO] =
+    HttpService[IO] {
+      case GET -> Root / "ping" => Ok("pong")
+      case req @ POST -> Root / "v0" / "domain" =>
+        req.decode[Multipart[IO]] { m =>
+          val act = for {
+            tempFile <- Utils.storeMultipart(m)
+            id       <- dbService.lastDomain().map(_.fold(1)(_.id + 1))
+            _        <- domainService.store(id, tempFile._1, tempFile._2)
+            _        <- IO(tempFile._2.delete())
+          } yield id
+          act.flatMap(id => Ok(s"$id").map(_.putHeaders(Location(req.uri.withPath(s"$id")))))
+        }
 
-    case GET -> Root / "v0" / "domain" / domainId => NotImplemented(domainId)
-  }
+      case GET -> Root / "v0" / "domain" / domainId => NotImplemented(domainId)
+    }
 
 }

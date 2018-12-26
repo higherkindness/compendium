@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-package io.higherkindness.models
+package io.higherkindness.domain
 
-case class HttpConfig(host: String, port: Int)
-case class Storage(path: String)
-case class CompendiumConfig(http: HttpConfig, storage: Storage)
+import java.io.File
+
+trait DomainService[F[_]] {
+  def store(id: Int, filename: String, tmp: File): F[Unit]
+  def recover(id: Int): F[File]
+}

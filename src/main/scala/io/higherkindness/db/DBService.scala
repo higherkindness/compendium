@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
-package io.higherkindness.models
+package io.higherkindness.db
 
-case class HttpConfig(host: String, port: Int)
-case class Storage(path: String)
-case class CompendiumConfig(http: HttpConfig, storage: Storage)
+import io.higherkindness.models.Domain
+
+trait DBService[F[_]] {
+
+  def addDomain(filename: String): F[Domain]
+  def lastDomain(): F[Option[Domain]]
+
+}

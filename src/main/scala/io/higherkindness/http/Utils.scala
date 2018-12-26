@@ -25,15 +25,15 @@ import cats.implicits._
 
 import scala.io.Source
 
-private[http] case class FileLoc(filename: String, file: File)
 private[http] object Utils {
 
-  def storeMultipart(multipart: Multipart[IO]): IO[FileLoc] =
+  type FileLocation = (String, File)
+  def storeMultipart(multipart: Multipart[IO]): IO[FileLocation] =
     for {
       tempFile <- IO { File.createTempFile("domain", ".tmp") }
       fName    <- filename(multipart)
       file     <- toFile(multipart, tempFile)
-    } yield FileLoc(fName, file)
+    } yield (fName, file)
 
   def filename(multipart: Multipart[IO]): IO[String] =
     multipart.parts
