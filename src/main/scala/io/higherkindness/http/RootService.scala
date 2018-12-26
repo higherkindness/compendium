@@ -19,7 +19,8 @@ package io.higherkindness.http
 import cats.effect.IO
 import org.http4s._
 import org.http4s.dsl.io._
-import org.http4s.multipart.{Multipart, Part}
+import org.http4s.multipart.Multipart
+import cats.effect.IO._
 
 object RootService {
 
@@ -27,11 +28,10 @@ object RootService {
     case GET -> Root / "ping" => Ok("pong")
     case req @ POST -> Root / "v0" / "domain" =>
       req.decode[Multipart[IO]] { m =>
-        Ok(s"""Multipart Data\nParts:${m.parts.length}
-           |${m.parts
-                .map { case f: Part[IO] => { f.name + ", headers: " + f.headers.mkString(",") } }
-                .mkString("\n")}""".stripMargin)
+        println(m.parts.toList.head.body.compile.toVector.unsafeRunSync())
+        Ok(Utils.storeMultipart(m).map(_.file.getCanonicalPath))
       }
+
     case GET -> Root / "v0" / "domain" / domainId => NotImplemented(domainId)
   }
 
