@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package io.higherkindness.domain
+package higherkindness.domain
 
 import java.io.File
 import java.nio.file.Files.copy
 import java.nio.file.Paths.get
 
 import cats.effect.IO
-import io.higherkindness.models.Storage
+import higherkindness.models.Storage
 
 object DomainServiceStorage {
 

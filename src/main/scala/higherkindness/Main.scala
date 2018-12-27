@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package io.higherkindness
+package higherkindness
 
 import java.io.File
 
 import cats.effect.IO
 import fs2.{Stream, StreamApp}
-import io.higherkindness.db.{DBService, DBServiceStorage}
-import io.higherkindness.domain.{DomainService, DomainServiceStorage}
-import io.higherkindness.http.RootService
-import io.higherkindness.models.{CompendiumConfig, HttpConfig}
+import higherkindness.db.{DBService, DBServiceStorage}
+import higherkindness.domain.{DomainService, DomainServiceStorage}
+import higherkindness.http.RootService
+import higherkindness.models.{CompendiumConfig, HttpConfig}
 import org.http4s.server.blaze.BlazeBuilder
 
 import scala.concurrent.ExecutionContext

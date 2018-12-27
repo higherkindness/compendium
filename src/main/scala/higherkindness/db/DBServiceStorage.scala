@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package io.higherkindness.db
+package higherkindness.db
 
 import java.io.File
 
 import cats.effect.IO
-import io.higherkindness.models.{Domain, Storage}
+import higherkindness.models.{Domain, Storage}
 
 object DBServiceStorage {
 

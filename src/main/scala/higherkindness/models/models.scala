@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-package io.higherkindness.models
+package higherkindness.models
 
 case class Domain(id: Int, filename: String)

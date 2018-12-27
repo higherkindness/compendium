@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.higherkindness.models
+package higherkindness.models
 
 case class HttpConfig(host: String, port: Int)
 case class Storage(path: String)

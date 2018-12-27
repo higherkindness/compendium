@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.higherkindness.http
+package higherkindness.http
 
 import java.io.{File, FileWriter, PrintWriter}
 

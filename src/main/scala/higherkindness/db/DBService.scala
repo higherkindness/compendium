@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package io.higherkindness.domain
+package higherkindness.db
 
-import java.io.File
+import higherkindness.models.Domain
 
-trait DomainService[F[_]] {
-  def store(id: Int, filename: String, tmp: File): F[Unit]
-  def recover(id: Int): F[Option[File]]
+trait DBService[F[_]] {
+
+  def addDomain(filename: String): F[Domain]
+  def lastDomain(): F[Option[Domain]]
+
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.higherkindness.http
+package higherkindness.http
 
 import cats.effect.IO
 import org.http4s._
@@ -22,8 +22,8 @@ import org.http4s.dsl.io._
 import org.http4s.multipart.Multipart
 import cats.effect.IO._
 import org.http4s.headers._
-import io.higherkindness.db.DBService
-import io.higherkindness.domain.DomainService
+import higherkindness.db.DBService
+import higherkindness.domain.DomainService
 import org.apache.avro._
 import cats.implicits._
 
