@@ -30,7 +30,7 @@ private[http] object Utils {
   type FileLocation = (String, File)
   def storeMultipart(multipart: Multipart[IO]): IO[FileLocation] =
     for {
-      tempFile <- IO { File.createTempFile("domain", ".tmp") }
+      tempFile <- IO { File.createTempFile("protocol", ".tmp") }
       fName    <- filename(multipart)
       file     <- toFile(multipart, tempFile)
     } yield (fName, file)

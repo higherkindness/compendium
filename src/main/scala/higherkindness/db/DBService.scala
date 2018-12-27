@@ -16,11 +16,11 @@
 
 package higherkindness.db
 
-import higherkindness.models.Domain
+import higherkindness.models.Protocol
 
 trait DBService[F[_]] {
 
-  def addDomain(filename: String): F[Domain]
-  def lastDomain(): F[Option[Domain]]
+  def addProtocol(filename: String): F[Protocol]
+  def lastProtocol(): F[Option[Protocol]]
 
 }

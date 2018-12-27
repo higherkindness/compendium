@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package higherkindness.domain
+package higherkindness.protocol
 
 import java.io.File
 
-trait DomainService[F[_]] {
+trait ProtocolService[F[_]] {
   def store(id: Int, filename: String, tmp: File): F[Unit]
   def recover(id: Int): F[Option[File]]
 }

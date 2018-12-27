@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package higherkindness.domain
+package higherkindness.protocol
 
 import java.io.File
 import java.nio.file.Files.copy
@@ -23,10 +23,10 @@ import java.nio.file.Paths.get
 import cats.effect.IO
 import higherkindness.models.Storage
 
-object DomainServiceStorage {
+object ProtocolServiceStorage {
 
-  def impl(storage: Storage): DomainService[IO] =
-    new DomainService[IO] {
+  def impl(storage: Storage): ProtocolService[IO] =
+    new ProtocolService[IO] {
       val path = storage.path
       override def store(id: Int, filename: String, tmp: File): IO[Unit] = {
         val destPath = s"$path${File.separator}$id"

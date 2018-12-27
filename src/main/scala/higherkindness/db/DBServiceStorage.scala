@@ -19,24 +19,24 @@ package higherkindness.db
 import java.io.File
 
 import cats.effect.IO
-import higherkindness.models.{Domain, Storage}
+import higherkindness.models.{Protocol, Storage}
 
 object DBServiceStorage {
 
   def impl(storage: Storage): DBService[IO] =
     new DBService[IO] {
       val path = storage.path
-      override def addDomain(filename: String): IO[Domain] =
+      override def addProtocol(filename: String): IO[Protocol] =
         for {
-          lastDomain <- lastDomain()
+          lastProtocol <- lastProtocol()
           created <- IO {
-            new File(s"$path${File.separator}${lastDomain.fold(1)(_.id) + 1}").mkdir()
+            new File(s"$path${File.separator}${lastProtocol.fold(1)(_.id) + 1}").mkdir()
           }
-          domain <- if (created) IO.pure(Domain(lastDomain.fold(1)(_.id) + 1, filename))
+          protocol <- if (created) IO.pure(Protocol(lastProtocol.fold(1)(_.id) + 1, filename))
           else IO.raiseError(new Exception("Error creating folder"))
-        } yield domain
+        } yield protocol
 
-      override def lastDomain(): IO[Option[Domain]] =
+      override def lastProtocol(): IO[Option[Protocol]] =
         for {
           identifier <- IO {
             Option(new File(path).list)
@@ -51,6 +51,6 @@ object DBServiceStorage {
                 Option(new File(s"$path${File.separator}$id").listFiles)
                   .fold(Option.empty[File])(_.headOption))
           }
-        } yield identifier.flatMap(id => filename.map(fn => Domain(id, fn.getName)))
+        } yield identifier.flatMap(id => filename.map(fn => Protocol(id, fn.getName)))
     }
 }

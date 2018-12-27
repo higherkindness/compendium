@@ -16,4 +16,4 @@
 
 package higherkindness.models
 
-case class Domain(id: Int, filename: String)
+case class Protocol(id: Int, filename: String)

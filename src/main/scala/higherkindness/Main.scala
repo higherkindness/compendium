@@ -21,7 +21,7 @@ import java.io.File
 import cats.effect.IO
 import fs2.{Stream, StreamApp}
 import higherkindness.db.{DBService, DBServiceStorage}
-import higherkindness.domain.{DomainService, DomainServiceStorage}
+import higherkindness.protocol.{ProtocolService, ProtocolServiceStorage}
 import higherkindness.http.RootService
 import higherkindness.models.{CompendiumConfig, HttpConfig}
 import org.http4s.server.blaze.BlazeBuilder
@@ -33,10 +33,10 @@ object Main extends StreamApp[IO] {
   def server(
       conf: HttpConfig,
       dbService: DBService[IO],
-      domainService: DomainService[IO]): Stream[IO, StreamApp.ExitCode] =
+      protocolService: ProtocolService[IO]): Stream[IO, StreamApp.ExitCode] =
     BlazeBuilder[IO]
       .bindHttp(conf.port, conf.host)
-      .mountService(RootService.rootRouteService(domainService, dbService), "/")
+      .mountService(RootService.rootRouteService(protocolService, dbService), "/")
       .serve(IO.ioConcurrentEffect, ExecutionContext.global)
 
   override def stream(
@@ -48,6 +48,6 @@ object Main extends StreamApp[IO] {
       code <- server(
         conf.http,
         DBServiceStorage.impl(conf.storage),
-        DomainServiceStorage.impl(conf.storage))
+        ProtocolServiceStorage.impl(conf.storage))
     } yield code
 }
