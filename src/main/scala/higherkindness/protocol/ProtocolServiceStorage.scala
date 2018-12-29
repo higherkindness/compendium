@@ -21,13 +21,13 @@ import java.nio.file.Files.copy
 import java.nio.file.Paths.get
 
 import cats.effect.IO
-import higherkindness.models.Storage
+import higherkindness.models.StorageConfig
 
 object ProtocolServiceStorage {
 
-  def impl(storage: Storage): ProtocolService[IO] =
+  def impl(storageConfig: StorageConfig): ProtocolService[IO] =
     new ProtocolService[IO] {
-      val path = storage.path
+      val path = storageConfig.path
       override def store(id: Int, filename: String, tmp: File): IO[Unit] = {
         val destPath = s"$path${File.separator}$id"
         for {

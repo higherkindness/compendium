@@ -19,13 +19,13 @@ package higherkindness.db
 import java.io.File
 
 import cats.effect.IO
-import higherkindness.models.{Protocol, Storage}
+import higherkindness.models.{Protocol, StorageConfig}
 
 object DBServiceStorage {
 
-  def impl(storage: Storage): DBService[IO] =
+  def impl(storageConfig: StorageConfig): DBService[IO] =
     new DBService[IO] {
-      val path = storage.path
+      val path = storageConfig.path
       override def addProtocol(filename: String): IO[Protocol] =
         for {
           lastProtocol <- lastProtocol()
