@@ -24,22 +24,22 @@ lazy val root = project
   .in(file("."))
   .settings(commonSettings)
   .settings(
-    name := "catamorph"
+    name := "compendium"
   )
 
 lazy val docs = project
   .in(file("docs"))
   .dependsOn(root)
-  .settings(moduleName := "catamorph-docs")
+  .settings(moduleName := "compendium-docs")
   .settings(commonSettings)
   .settings(sbtMicrositesSettings)
   .settings(noPublishSettings)
   .settings(
-    micrositeName := "Catamorph",
+    micrositeName := "Compendium",
     micrositeDescription := "Schema catalog service",
-    micrositeBaseUrl := "/catamorph",
+    micrositeBaseUrl := "/compendium",
     micrositeGithubOwner := "higherkindness",
-    micrositeGithubRepo := "catamorph",
+    micrositeGithubRepo := "compendium",
     micrositeHighlightTheme := "tomorrow",
     micrositeOrganizationHomepage := "http://www.47deg.com",
     includeFilter in Jekyll := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.swf" | "*.md",
@@ -67,12 +67,12 @@ pgpSecretRing := file(s"$gpgFolder/secring.gpg")
 
 // General Settings
 lazy val commonSettings = Seq(
-  orgProjectName := "Catamorph",
+  orgProjectName := "Compendium",
   orgGithubSetting := GitHubSettings(
     organization = "higherkindness",
     project = (name in LocalRootProject).value,
     organizationName = "47 Degrees",
-    groupId = "higherkindness",
+    groupId = "io.higherkindness",
     organizationHomePage = url("http://47deg.com"),
     organizationEmail = "hello@47deg.com"
   ),
@@ -103,14 +103,14 @@ lazy val commonSettings = Seq(
   // format: OFF
   orgBadgeListSetting := List(
     TravisBadge.apply,
-    CodecovBadge.apply, { info => MavenCentralBadge.apply(info.copy(libName = "catamorph")) },
+    CodecovBadge.apply, { info => MavenCentralBadge.apply(info.copy(libName = "compendium")) },
     ScalaLangBadge.apply,
-    LicenseBadge.apply, { info => GitterBadge.apply(info.copy(owner = "higherkindness", repo = "catamorph")) },
+    LicenseBadge.apply, { info => GitterBadge.apply(info.copy(owner = "higherkindness", repo = "compendium")) },
     GitHubIssuesBadge.apply
   ),
   orgEnforcedFilesSetting := List(
     LicenseFileType(orgGithubSetting.value, orgLicenseSetting.value, startYear.value),
-    ContributingFileType( orgProjectName.value, orgGithubSetting.value.copy(organization = "higherkindness", project = "catamorph")),
+    ContributingFileType( orgProjectName.value, orgGithubSetting.value.copy(organization = "higherkindness", project = "compendium")),
     AuthorsFileType(name.value, orgGithubSetting.value, orgMaintainersSetting.value, orgContributorsSetting.value),
     NoticeFileType(orgProjectName.value, orgGithubSetting.value, orgLicenseSetting.value, startYear.value),
     VersionSbtFileType,
