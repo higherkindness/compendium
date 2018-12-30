@@ -14,27 +14,24 @@
  * limitations under the License.
  */
 
-package higherkindness.storage
+package higherkindness
 
-import higherkindness.models.Protocol
+import cats.effect.Effect
+import fs2.{Stream, StreamApp}
+import higherkindness.models.HttpConfig
+import org.http4s.HttpService
+import org.http4s.server.blaze.BlazeBuilder
 
-trait StorageService[F[_]] {
+import scala.concurrent.ExecutionContext
 
-  def storage: Storage[F]
-  def store[S](id: Int, protocol: Protocol): F[Unit]
-  def recover[S](id: Int): F[Option[Protocol]]
-}
+object CompendiumServerStream {
 
-object StorageService {
-  def impl[F[_]](st: Storage[F]): StorageService[F] = new StorageService[F] {
-
-    override val storage: Storage[F] = st
-
-    override def store[S](id: Int, protocol: Protocol): F[Unit] =
-      storage.store(id, protocol)
-
-    override def recover[S](id: Int): F[Option[Protocol]] =
-      storage.recover(id)
-
+  def serverStream[F[_]: Effect](httpConf: HttpConfig, service: HttpService[F])(
+      implicit ec: ExecutionContext): Stream[F, StreamApp.ExitCode] = {
+    BlazeBuilder[F]
+      .bindHttp(httpConf.port, httpConf.host)
+      .mountService(service, "/")
+      .serve
   }
+
 }

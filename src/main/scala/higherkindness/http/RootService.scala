@@ -16,41 +16,45 @@
 
 package higherkindness.http
 
-import cats.effect.IO
+import cats.MonadError
+import cats.effect.Sync
+import cats.syntax.functor._
+import cats.syntax.flatMap._
 import org.http4s._
-import org.http4s.dsl.io._
-import org.http4s.multipart.Multipart
-import cats.effect.IO._
-import org.http4s.headers._
 import higherkindness.db.DBService
-import cats.implicits._
 import higherkindness.storage.StorageService
+import org.http4s.dsl.Http4sDsl
+import org.http4s.headers.Location
+import org.http4s.multipart.Multipart
 
 object RootService {
 
-  def rootRouteService(
-      storageService: StorageService[IO],
-      dbService: DBService[IO]): HttpService[IO] = {
+  def rootRouteService[F[_]: Sync](storageService: StorageService[F], dbService: DBService[F])(
+      implicit ME: MonadError[F, Throwable]): HttpService[F] = {
 
-    HttpService[IO] {
+    object f extends Http4sDsl[F]
+    import f._
+
+    val utils = HttpUtils[F]
+    HttpService[F] {
       case GET -> Root / "ping" => Ok("pong")
 
       case req @ POST -> Root / "v0" / "protocol" =>
-        req.decode[Multipart[IO]] { m =>
+        req.decode[Multipart[F]] { m =>
           val act = for {
-            name     <- Utils.filename(m)
-            text     <- Utils.rawText(m)
-            protocol <- Utils.protocol(name, text)
+            name     <- utils.filename(m)
+            text     <- utils.rawText(m)
+            protocol <- utils.protocol(name, text)
             id       <- dbService.addProtocol(protocol)
             _        <- storageService.store(id, protocol)
           } yield id
 
-          act
-            .flatMap(id => Ok(s"$id").map(_.putHeaders(Location(req.uri.withPath(s"$id")))))
-            .recoverWith {
-              case e: org.apache.avro.SchemaParseException => BadRequest(e.getMessage)
-              case _                                       => InternalServerError()
-            }
+          ME.recoverWith(
+            act
+              .flatMap(id => Ok(s"$id").map(_.putHeaders(Location(req.uri.withPath(s"$id")))))) {
+            case e: org.apache.avro.SchemaParseException => BadRequest(e.getMessage)
+            case _                                       => InternalServerError()
+          }
         }
 
       case GET -> Root / "v0" / "protocol" / IntVar(protocolId) =>

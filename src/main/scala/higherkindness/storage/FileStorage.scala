@@ -18,43 +18,48 @@ package higherkindness.storage
 
 import java.io.{File, PrintWriter}
 
-import cats.effect.IO
+import cats.MonadError
+import cats.effect.Sync
+import cats.syntax.functor._
+import cats.syntax.flatMap._
 import higherkindness.models.{Protocol, StorageConfig}
 
 object FileStorage {
 
-  def impl[S](config: StorageConfig): Storage[IO] = new Storage[IO] {
+  def impl[F[_]: Sync](config: StorageConfig)(implicit ME: MonadError[F, Throwable]): Storage[F] =
+    new Storage[F] {
 
-    override def store(id: Int, protocol: Protocol): IO[Unit] =
-      for {
-        _ <- IO { new File(s"${config.path}${File.separator}$id").mkdirs() }
-        file <- IO {
-          new File(s"${config.path}${File.separator}$id${File.separator}${protocol.name}")
-        }
-        _ <- IO {
-          val printWriter = new PrintWriter(file)
-          printWriter.write(protocol.raw)
-          printWriter.close()
-        }
-      } yield ()
+      override def store(id: Int, protocol: Protocol): F[Unit] =
+        for {
+          _ <- ME.catchNonFatal(new File(s"${config.path}${File.separator}$id").mkdirs())
+          file <- ME.catchNonFatal(
+            new File(s"${config.path}${File.separator}$id${File.separator}${protocol.name}"))
+          _ <- ME.catchNonFatal {
+            val printWriter = new PrintWriter(file)
+            printWriter.write(protocol.raw)
+            printWriter.close()
+          }
+        } yield ()
 
-    override def recover(id: Int): IO[Option[Protocol]] =
-      for {
-        filename <- IO {
-          Option(new File(s"${config.path}${File.separator}$id").listFiles())
-            .fold(Option.empty[String])(_.headOption.map(_.getAbsolutePath))
-        }
-        source <- IO { filename.map(scala.io.Source.fromFile) }
-        protocol <- IO {
-          source.flatMap { s =>
-            filename.map { fn =>
-              Protocol(fn, s.mkString)
+      override def recover(id: Int): F[Option[Protocol]] =
+        for {
+          filename <- ME.catchNonFatal {
+            Option(new File(s"${config.path}${File.separator}$id").listFiles())
+              .fold(Option.empty[String])(_.headOption.map(_.getAbsolutePath))
+          }
+          source <- ME.catchNonFatal { filename.map(scala.io.Source.fromFile) }
+          protocol <- ME.catchNonFatal {
+            source.flatMap { s =>
+              filename.map { fn =>
+                Protocol(fn, s.mkString)
+              }
             }
           }
-        }
-      } yield protocol
+        } yield protocol
 
-    override def numberProtocol(): IO[Int] =
-      IO { Option(new File(s"${config.path}${File.separator}").list()).fold(0)(_.length) }
-  }
+      override def numberProtocol(): F[Int] =
+        ME.catchNonFatal {
+          Option(new File(s"${config.path}${File.separator}").list()).fold(0)(_.length)
+        }
+    }
 }

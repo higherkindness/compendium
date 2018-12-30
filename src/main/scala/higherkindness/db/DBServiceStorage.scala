@@ -16,22 +16,24 @@
 
 package higherkindness.db
 
-import cats.effect.IO
+import cats.effect.Sync
+import cats.syntax.functor._
+import cats.syntax.flatMap._
 import higherkindness.models.Protocol
 import higherkindness.storage.Storage
 
 object DBServiceStorage {
 
-  def impl(storage: Storage[IO]): DBService[IO] =
-    new DBService[IO] {
+  def impl[F[_]: Sync](storage: Storage[F]): DBService[F] =
+    new DBService[F] {
 
-      override def addProtocol(protocol: Protocol): IO[Int] =
+      override def addProtocol(protocol: Protocol): F[Int] =
         for {
           number <- storage.numberProtocol()
           _      <- storage.store(number + 1, protocol)
         } yield number + 1
 
-      override def lastProtocol(): IO[Option[Protocol]] =
+      override def lastProtocol(): F[Option[Protocol]] =
         for {
           number   <- storage.numberProtocol()
           protocol <- storage.recover(number)

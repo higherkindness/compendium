@@ -16,32 +16,38 @@
 
 package higherkindness.http
 
+import cats.MonadError
 import org.http4s.multipart.Multipart
 import fs2.text._
-import cats.effect.IO
-import cats.implicits._
+import cats.effect.Sync
 import higherkindness.models.Protocol
 import org.apache.avro.Schema
 import org.http4s.InvalidMessageBodyFailure
 
-private[http] object Utils {
+final class HttpUtils[F[_]: Sync](implicit ME: MonadError[F, Throwable]) {
 
   private val parser: Schema.Parser = new Schema.Parser()
 
-  def filename(multipart: Multipart[IO]): IO[String] =
+  def filename(multipart: Multipart[F]): F[String] =
     multipart.parts
       .find(_.filename.isDefined)
       .flatMap(_.filename)
-      .fold(IO.raiseError[String](new InvalidMessageBodyFailure("Missing filename from upload.")))(
-        IO.pure)
+      .fold(ME.raiseError[String](new InvalidMessageBodyFailure("Missing filename from upload.")))(
+        ME.pure)
 
-  def rawText(multipart: Multipart[IO]): IO[String] = {
-    val vector: IO[Vector[String]] =
-      multipart.parts.map(_.body.through(utf8Decode).compile.foldMonoid).sequence
+  import cats.implicits._
 
-    vector.map(_.mkString("\n"))
-  }
+  def rawText(multipart: Multipart[F]): F[String] =
+    multipart.parts
+      .map(_.body.through(utf8Decode).compile.foldMonoid)
+      .toList
+      .sequence
+      .map(_.mkString("\n"))
 
-  def protocol(name: String, text: String): IO[Protocol] =
-    IO(parser.parse(text)).map(_ => Protocol(name, text))
+  def protocol(name: String, text: String): F[Protocol] =
+    ME.catchNonFatal(parser.parse(text)).map(_ => Protocol(name, text))
+}
+
+object HttpUtils {
+  def apply[F[_]: Sync]: HttpUtils[F] = new HttpUtils
 }
