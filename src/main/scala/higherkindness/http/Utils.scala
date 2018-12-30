@@ -16,24 +16,17 @@
 
 package higherkindness.http
 
-import java.io.{File, FileWriter, PrintWriter}
-
-import cats.effect.IO
-import org.http4s.InvalidMessageBodyFailure
 import org.http4s.multipart.Multipart
+import fs2.text._
+import cats.effect.IO
 import cats.implicits._
-
-import scala.io.Source
+import higherkindness.models.Protocol
+import org.apache.avro.Schema
+import org.http4s.InvalidMessageBodyFailure
 
 private[http] object Utils {
 
-  type FileLocation = (String, File)
-  def storeMultipart(multipart: Multipart[IO]): IO[FileLocation] =
-    for {
-      tempFile <- IO { File.createTempFile("protocol", ".tmp") }
-      fName    <- filename(multipart)
-      file     <- toFile(multipart, tempFile)
-    } yield (fName, file)
+  private val parser: Schema.Parser = new Schema.Parser()
 
   def filename(multipart: Multipart[IO]): IO[String] =
     multipart.parts
@@ -42,18 +35,13 @@ private[http] object Utils {
       .fold(IO.raiseError[String](new InvalidMessageBodyFailure("Missing filename from upload.")))(
         IO.pure)
 
-  def toTemp(file: File, data: Vector[Byte]): IO[File] = IO {
-    val fileWriter  = new FileWriter(file)
-    val printWriter = new PrintWriter(fileWriter)
-    val text        = Source.fromBytes(data.toArray).getLines().mkString("\n")
-    printWriter.write(text)
-    printWriter.close()
-    fileWriter.close()
-    file
+  def rawText(multipart: Multipart[IO]): IO[String] = {
+    val vector: IO[Vector[String]] =
+      multipart.parts.map(_.body.through(utf8Decode).compile.foldMonoid).sequence
+
+    vector.map(_.mkString("\n"))
   }
 
-  def toFile(multipart: Multipart[IO], file: File): IO[File] =
-    multipart.parts.map(_.body.compile.toVector.flatMap(toTemp(file, _))).reduce { (x, y) =>
-      x.flatTap(_ => y)
-    }
+  def protocol(name: String, text: String): IO[Protocol] =
+    IO(parser.parse(text)).map(_ => Protocol(name, text))
 }

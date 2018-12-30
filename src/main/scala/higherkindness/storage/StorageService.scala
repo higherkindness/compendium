@@ -14,13 +14,28 @@
  * limitations under the License.
  */
 
-package higherkindness.db
+package higherkindness.storage
 
+import cats.effect.IO
 import higherkindness.models.Protocol
 
-trait DBService[F[_]] {
+trait StorageService[F[_]] {
 
-  def addProtocol(protocol: Protocol): F[Int]
-  def lastProtocol(): F[Option[Protocol]]
+  def storage: Storage[IO]
+  def store[S](id: Int, protocol: Protocol): F[Unit]
+  def recover[S](id: Int): F[Option[Protocol]]
+}
 
+object StorageService {
+  def impl(st: Storage[IO]): StorageService[IO] = new StorageService[IO] {
+
+    override val storage: Storage[IO] = st
+
+    override def store[S](id: Int, protocol: Protocol): IO[Unit] =
+      storage.store(id, protocol)
+
+    override def recover[S](id: Int): IO[Option[Protocol]] =
+      storage.recover(id)
+
+  }
 }

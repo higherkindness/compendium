@@ -16,4 +16,4 @@
 
 package higherkindness.models
 
-final case class Protocol(id: Int, filename: String)
+final case class Protocol(name: String, raw: String)

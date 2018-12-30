@@ -23,28 +23,26 @@ import org.http4s.multipart.Multipart
 import cats.effect.IO._
 import org.http4s.headers._
 import higherkindness.db.DBService
-import higherkindness.protocol.ProtocolService
-import org.apache.avro._
 import cats.implicits._
+import higherkindness.storage.StorageService
 
 object RootService {
 
-  private val parser: Schema.Parser = new Schema.Parser()
-
   def rootRouteService(
-      protocolService: ProtocolService[IO],
-      dbService: DBService[IO]): HttpService[IO] =
+      storageService: StorageService[IO],
+      dbService: DBService[IO]): HttpService[IO] = {
+
     HttpService[IO] {
       case GET -> Root / "ping" => Ok("pong")
 
       case req @ POST -> Root / "v0" / "protocol" =>
         req.decode[Multipart[IO]] { m =>
           val act = for {
-            tempFile <- Utils.storeMultipart(m)
-            _        <- IO { parser.parse(tempFile._2) }
-            id       <- dbService.lastProtocol().map(_.fold(1)(_.id + 1))
-            _        <- protocolService.store(id, tempFile._1, tempFile._2)
-            _        <- IO(tempFile._2.delete())
+            name     <- Utils.filename(m)
+            text     <- Utils.rawText(m)
+            protocol <- Utils.protocol(name, text)
+            id       <- dbService.addProtocol(protocol)
+            _        <- storageService.store(id, protocol)
           } yield id
 
           act
@@ -56,9 +54,10 @@ object RootService {
         }
 
       case GET -> Root / "v0" / "protocol" / IntVar(protocolId) =>
-        protocolService
-          .recover(protocolId.toInt)
-          .flatMap(_.fold(NotFound())(StaticFile.fromFile(_).getOrElseF(NotFound())))
-    }
+        storageService
+          .recover(protocolId)
+          .flatMap(_.fold(NotFound())(p => Ok(p.raw)))
 
+    }
+  }
 }

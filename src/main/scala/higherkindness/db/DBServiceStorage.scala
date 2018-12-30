@@ -16,41 +16,25 @@
 
 package higherkindness.db
 
-import java.io.File
-
 import cats.effect.IO
-import higherkindness.models.{Protocol, StorageConfig}
+import higherkindness.models.Protocol
+import higherkindness.storage.Storage
 
 object DBServiceStorage {
 
-  def impl(storageConfig: StorageConfig): DBService[IO] =
+  def impl(storage: Storage[IO]): DBService[IO] =
     new DBService[IO] {
-      val path = storageConfig.path
-      override def addProtocol(filename: String): IO[Protocol] =
+
+      override def addProtocol(protocol: Protocol): IO[Int] =
         for {
-          lastProtocol <- lastProtocol()
-          created <- IO {
-            new File(s"$path${File.separator}${lastProtocol.fold(1)(_.id) + 1}").mkdir()
-          }
-          protocol <- if (created) IO.pure(Protocol(lastProtocol.fold(1)(_.id) + 1, filename))
-          else IO.raiseError(new Exception("Error creating folder"))
-        } yield protocol
+          number <- storage.numberProtocol()
+          _      <- storage.store(number + 1, protocol)
+        } yield number + 1
 
       override def lastProtocol(): IO[Option[Protocol]] =
         for {
-          identifier <- IO {
-            Option(new File(path).list)
-              .fold(List.empty[String])(_.toList)
-              .map(_.toInt)
-              .sorted
-              .lastOption
-          }
-          filename <- IO {
-            identifier.flatMap(
-              id =>
-                Option(new File(s"$path${File.separator}$id").listFiles)
-                  .fold(Option.empty[File])(_.headOption))
-          }
-        } yield identifier.flatMap(id => filename.map(fn => Protocol(id, fn.getName)))
+          number   <- storage.numberProtocol()
+          protocol <- storage.recover(number)
+        } yield protocol
     }
 }

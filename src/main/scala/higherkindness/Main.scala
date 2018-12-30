@@ -16,14 +16,12 @@
 
 package higherkindness
 
-import java.io.File
-
 import cats.effect.IO
 import fs2.{Stream, StreamApp}
 import higherkindness.db.{DBService, DBServiceStorage}
-import higherkindness.protocol.{ProtocolService, ProtocolServiceStorage}
 import higherkindness.http.RootService
-import higherkindness.models.{CompendiumConfig, HttpConfig}
+import higherkindness.models.CompendiumConfig
+import higherkindness.storage.{FileStorage, StorageService}
 import org.http4s.server.blaze.BlazeBuilder
 
 import scala.concurrent.ExecutionContext
@@ -31,23 +29,21 @@ import scala.concurrent.ExecutionContext
 object Main extends StreamApp[IO] {
 
   def server(
-      conf: HttpConfig,
+      conf: CompendiumConfig,
       dbService: DBService[IO],
-      protocolService: ProtocolService[IO]): Stream[IO, StreamApp.ExitCode] =
+      storageService: StorageService[IO]): Stream[IO, StreamApp.ExitCode] = {
     BlazeBuilder[IO]
-      .bindHttp(conf.port, conf.host)
-      .mountService(RootService.rootRouteService(protocolService, dbService), "/")
+      .bindHttp(conf.http.port, conf.http.host)
+      .mountService(RootService.rootRouteService(storageService, dbService), "/")
       .serve(IO.ioConcurrentEffect, ExecutionContext.global)
+  }
 
   override def stream(
       args: List[String],
       requestShutdown: IO[Unit]): Stream[IO, StreamApp.ExitCode] =
     for {
       conf <- Stream.eval(IO(pureconfig.loadConfigOrThrow[CompendiumConfig]))
-      _    <- Stream.eval(IO { new File(conf.storage.path).mkdir() })
-      code <- server(
-        conf.http,
-        DBServiceStorage.impl(conf.storage),
-        ProtocolServiceStorage.impl(conf.storage))
+      storage = FileStorage.impl(conf.storage)
+      code <- server(conf, DBServiceStorage.impl(storage), StorageService.impl(storage))
     } yield code
 }

@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package higherkindness.protocol
+package higherkindness.storage
 
-import java.io.File
+import higherkindness.models.Protocol
 
-trait ProtocolService[F[_]] {
-  def store(id: Int, filename: String, tmp: File): F[Unit]
-  def recover(id: Int): F[Option[File]]
+trait Storage[F[_]] {
+
+  def store(id: Int, protocol: Protocol): F[Unit]
+  def recover(id: Int): F[Option[Protocol]]
+  def numberProtocol(): F[Int]
 }
