@@ -7,14 +7,14 @@ import sbtorgpolicies.templates.badges._
 
 lazy val V = new {
   val betterMonadicFor: String = "0.2.4"
-  val cats: String             = "1.4.0"
+  val cats: String             = "1.5.0"
   val catsScalacheck: String   = "0.1.0"
-  val circe: String            = "0.10.1"
-  val kindProjector: String    = "0.9.8"
+  val circe: String            = "0.11.0"
+  val kindProjector: String    = "0.9.9"
   val paradise: String         = "2.1.1"
   val scala: String            = "2.12.7"
   val skeumorph: String        = "0.0.1"
-  val specs2: String           = "4.3.5"
+  val specs2: String           = "4.3.6"
   val http4s: String           = "0.18.21"
   val shapeless: String        = "2.3.3"
   val pureConfig: String       = "0.9.0"

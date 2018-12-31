@@ -16,7 +16,7 @@
 
 package higherkindness
 
-import cats.effect.IO
+import cats.effect.{Effect, IO}
 import fs2.{Stream, StreamApp}
 import higherkindness.db.DBServiceStorage
 import higherkindness.http.RootService
@@ -25,16 +25,16 @@ import higherkindness.storage.{FileStorage, StorageService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-object Main extends StreamApp[IO] {
+object Main extends CompendiumStreamApp[IO]
 
-  override def stream(
-      args: List[String],
-      requestShutdown: IO[Unit]): Stream[IO, StreamApp.ExitCode] =
+abstract class CompendiumStreamApp[F[_]](implicit F: Effect[F]) extends StreamApp[F] {
+
+  override def stream(args: List[String], requestShutdown: F[Unit]): Stream[F, StreamApp.ExitCode] =
     for {
-      conf <- Stream.eval(IO(pureconfig.loadConfigOrThrow[CompendiumConfig]))
-      storage        = FileStorage.impl[IO](conf.storage)
-      storageService = StorageService.impl[IO](storage)
-      dbService      = DBServiceStorage.impl[IO](storage)
+      conf <- Stream.eval(F.delay(pureconfig.loadConfigOrThrow[CompendiumConfig]))
+      storage        = FileStorage.impl[F](conf.storage)
+      storageService = StorageService.impl[F](storage)
+      dbService      = DBServiceStorage.impl[F](storage)
       service        = RootService.rootRouteService(storageService, dbService)
       code <- CompendiumServerStream.serverStream(conf.http, service)
     } yield code
