@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2018-2019 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package higherkindness
+package higherkindness.compendium
 
 import cats.effect.Effect
 import fs2.{Stream, StreamApp}
-import higherkindness.models.HttpConfig
+import higherkindness.compendium.models.HttpConfig
 import org.http4s.HttpService
 import org.http4s.server.blaze.BlazeBuilder
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2018-2019 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package higherkindness.storage
+package higherkindness.compendium.storage
 
 import java.io.{File, PrintWriter}
 
@@ -22,7 +22,7 @@ import cats.MonadError
 import cats.effect.Sync
 import cats.syntax.functor._
 import cats.syntax.flatMap._
-import higherkindness.models.{Protocol, StorageConfig}
+import higherkindness.compendium.models.{Protocol, StorageConfig}
 
 object FileStorage {
 

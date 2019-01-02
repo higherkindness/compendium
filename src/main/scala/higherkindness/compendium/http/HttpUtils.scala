@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2018-2019 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package higherkindness.http
+package higherkindness.compendium.http
 
 import cats.MonadError
 import org.http4s.multipart.Multipart
 import fs2.text._
 import cats.effect.Sync
-import higherkindness.models.Protocol
+import higherkindness.compendium.models.Protocol
 import org.apache.avro.Schema
 import org.http4s.InvalidMessageBodyFailure
 

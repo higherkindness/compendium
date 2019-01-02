@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2018-2019 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package higherkindness.http
+package higherkindness.compendium.http
 
 import cats.MonadError
 import cats.effect.Sync
 import cats.syntax.functor._
 import cats.syntax.flatMap._
 import org.http4s._
-import higherkindness.db.DBService
-import higherkindness.storage.StorageService
+import higherkindness.compendium.db.DBService
+import higherkindness.compendium.storage.StorageService
 import org.http4s.dsl.Http4sDsl
 import org.http4s.headers.Location
 import org.http4s.multipart.Multipart

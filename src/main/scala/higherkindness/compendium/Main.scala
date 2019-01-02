@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2018-2019 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package higherkindness
+package higherkindness.compendium
 
 import cats.effect.{Effect, IO}
 import fs2.{Stream, StreamApp}
-import higherkindness.db.DBServiceStorage
-import higherkindness.http.RootService
-import higherkindness.models.CompendiumConfig
-import higherkindness.storage.{FileStorage, StorageService}
+import higherkindness.compendium.db.DBServiceStorage
+import higherkindness.compendium.http.RootService
+import higherkindness.compendium.models.CompendiumConfig
+import higherkindness.compendium.storage.{FileStorage, StorageService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

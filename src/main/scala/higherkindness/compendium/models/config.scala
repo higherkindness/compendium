@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2018-2019 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,8 @@
  * limitations under the License.
  */
 
-package higherkindness.db
+package higherkindness.compendium.models
 
-import higherkindness.models.Protocol
-
-trait DBService[F[_]] {
-
-  def addProtocol(protocol: Protocol): F[Int]
-  def lastProtocol(): F[Option[Protocol]]
-
-}
+final case class HttpConfig(host: String, port: Int)
+final case class StorageConfig(path: String)
+final case class CompendiumConfig(http: HttpConfig, storage: StorageConfig)
