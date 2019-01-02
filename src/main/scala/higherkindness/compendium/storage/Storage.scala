@@ -24,3 +24,7 @@ trait Storage[F[_]] {
   def recover(id: Int): F[Option[Protocol]]
   def numberProtocol(): F[Int]
 }
+
+object Storage {
+  def apply[F[_]](implicit S: Storage[F]): Storage[F] = S
+}

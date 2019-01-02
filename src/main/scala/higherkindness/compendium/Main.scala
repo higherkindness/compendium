@@ -21,21 +21,20 @@ import fs2.{Stream, StreamApp}
 import higherkindness.compendium.db.DBServiceStorage
 import higherkindness.compendium.http.RootService
 import higherkindness.compendium.models.CompendiumConfig
-import higherkindness.compendium.storage.{FileStorage, StorageService}
+import higherkindness.compendium.storage.FileStorage
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object Main extends CompendiumStreamApp[IO]
 
-abstract class CompendiumStreamApp[F[_]](implicit F: Effect[F]) extends StreamApp[F] {
+abstract class CompendiumStreamApp[F[_]: Effect] extends StreamApp[F] {
 
   override def stream(args: List[String], requestShutdown: F[Unit]): Stream[F, StreamApp.ExitCode] =
     for {
-      conf <- Stream.eval(F.delay(pureconfig.loadConfigOrThrow[CompendiumConfig]))
-      storage        = FileStorage.impl[F](conf.storage)
-      storageService = StorageService.impl[F](storage)
-      dbService      = DBServiceStorage.impl[F](storage)
-      service        = RootService.rootRouteService(storageService, dbService)
+      conf <- Stream.eval(Effect[F].delay(pureconfig.loadConfigOrThrow[CompendiumConfig]))
+      storage   = FileStorage.impl[F](conf.storage)
+      dbService = DBServiceStorage.impl[F](storage)
+      service   = RootService.rootRouteService(Effect[F], storage, dbService)
       code <- CompendiumServerStream.serverStream(conf.http, service)
     } yield code
 }

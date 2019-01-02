@@ -16,21 +16,19 @@
 
 package higherkindness.compendium.http
 
-import cats.MonadError
 import cats.effect.Sync
 import cats.syntax.functor._
 import cats.syntax.flatMap._
 import org.http4s._
 import higherkindness.compendium.db.DBService
-import higherkindness.compendium.storage.StorageService
+import higherkindness.compendium.storage.Storage
 import org.http4s.dsl.Http4sDsl
 import org.http4s.headers.Location
 import org.http4s.multipart.Multipart
 
 object RootService {
 
-  def rootRouteService[F[_]: Sync](storageService: StorageService[F], dbService: DBService[F])(
-      implicit ME: MonadError[F, Throwable]): HttpService[F] = {
+  def rootRouteService[F[_]: Sync: Storage: DBService]: HttpService[F] = {
 
     object f extends Http4sDsl[F]
     import f._
@@ -45,11 +43,11 @@ object RootService {
             name     <- utils.filename(m)
             text     <- utils.rawText(m)
             protocol <- utils.protocol(name, text)
-            id       <- dbService.addProtocol(protocol)
-            _        <- storageService.store(id, protocol)
+            id       <- DBService[F].addProtocol(protocol)
+            _        <- Storage[F].store(id, protocol)
           } yield id
 
-          ME.recoverWith(
+          Sync[F].recoverWith(
             act
               .flatMap(id => Ok(s"$id").map(_.putHeaders(Location(req.uri.withPath(s"$id")))))) {
             case e: org.apache.avro.SchemaParseException => BadRequest(e.getMessage)
@@ -58,7 +56,7 @@ object RootService {
         }
 
       case GET -> Root / "v0" / "protocol" / IntVar(protocolId) =>
-        storageService
+        Storage[F]
           .recover(protocolId)
           .flatMap(_.fold(NotFound())(p => Ok(p.raw)))
 

@@ -16,7 +16,6 @@
 
 package higherkindness.compendium.http
 
-import cats.MonadError
 import org.http4s.multipart.Multipart
 import fs2.text._
 import cats.effect.Sync
@@ -24,7 +23,7 @@ import higherkindness.compendium.models.Protocol
 import org.apache.avro.Schema
 import org.http4s.InvalidMessageBodyFailure
 
-final class HttpUtils[F[_]: Sync](implicit ME: MonadError[F, Throwable]) {
+final class HttpUtils[F[_]: Sync] {
 
   private val parser: Schema.Parser = new Schema.Parser()
 
@@ -32,8 +31,8 @@ final class HttpUtils[F[_]: Sync](implicit ME: MonadError[F, Throwable]) {
     multipart.parts
       .find(_.filename.isDefined)
       .flatMap(_.filename)
-      .fold(ME.raiseError[String](new InvalidMessageBodyFailure("Missing filename from upload.")))(
-        ME.pure)
+      .fold(Sync[F].raiseError[String](
+        new InvalidMessageBodyFailure("Missing filename from upload.")))(Sync[F].pure)
 
   import cats.implicits._
 
@@ -45,7 +44,7 @@ final class HttpUtils[F[_]: Sync](implicit ME: MonadError[F, Throwable]) {
       .map(_.mkString("\n"))
 
   def protocol(name: String, text: String): F[Protocol] =
-    ME.catchNonFatal(parser.parse(text)).map(_ => Protocol(name, text))
+    Sync[F].catchNonFatal(parser.parse(text)).map(_ => Protocol(name, text))
 }
 
 object HttpUtils {

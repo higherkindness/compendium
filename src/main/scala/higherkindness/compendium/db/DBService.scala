@@ -24,3 +24,7 @@ trait DBService[F[_]] {
   def lastProtocol(): F[Option[Protocol]]
 
 }
+
+object DBService {
+  def apply[F[_]](implicit F: DBService[F]): DBService[F] = F
+}
