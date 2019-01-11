@@ -49,9 +49,12 @@ object RootService {
 
           Sync[F].recoverWith(
             act
-              .flatMap(id => Ok(s"$id").map(_.putHeaders(Location(req.uri.withPath(s"$id")))))) {
+              .flatMap(id =>
+                Ok(s"$id").map(_.putHeaders(Location(req.uri.withPath(s"${req.uri.path}/$id")))))) {
             case e: org.apache.avro.SchemaParseException => BadRequest(e.getMessage)
-            case _                                       => InternalServerError()
+            case e =>
+              e.printStackTrace()
+              InternalServerError()
           }
         }
 

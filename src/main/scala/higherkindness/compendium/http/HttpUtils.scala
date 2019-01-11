@@ -44,7 +44,10 @@ final class HttpUtils[F[_]: Sync] {
       .map(_.mkString("\n"))
 
   def protocol(name: String, text: String): F[Protocol] =
-    Sync[F].catchNonFatal(parser.parse(text)).map(_ => Protocol(name, text))
+    if (text.trim.isEmpty)
+      Sync[F].raiseError(new org.apache.avro.SchemaParseException("Protocol is empty"))
+    else
+      Sync[F].catchNonFatal(parser.parse(text)).map(_ => Protocol(name, text))
 }
 
 object HttpUtils {

@@ -87,6 +87,7 @@ lazy val commonSettings = Seq(
     "io.frees" %% "skeuomorph" % V.skeumorph,
     %%("http4s-dsl", V.http4s),
     %%("http4s-blaze-server", V.http4s),
+    %%("http4s-circe", V.http4s),
     %%("circe-core", V.circe),
     %%("specs2-core", V.specs2)       % Test,
     %%("specs2-scalacheck", V.specs2) % Test,
