@@ -7,36 +7,39 @@ import sbtorgpolicies.templates.badges._
 
 lazy val V = new {
   val betterMonadicFor: String = "0.2.4"
-  val cats: String             = "1.4.0"
+  val cats: String             = "1.5.0"
   val catsScalacheck: String   = "0.1.0"
-  val circe: String            = "0.10.1"
-  val kindProjector: String    = "0.9.8"
+  val circe: String            = "0.11.0"
+  val kindProjector: String    = "0.9.9"
   val paradise: String         = "2.1.1"
   val scala: String            = "2.12.7"
   val skeumorph: String        = "0.0.1"
-  val specs2: String           = "4.3.5"
+  val specs2: String           = "4.3.6"
+  val http4s: String           = "0.18.21"
+  val shapeless: String        = "2.3.3"
+  val pureConfig: String       = "0.9.0"
 }
 
 lazy val root = project
   .in(file("."))
   .settings(commonSettings)
   .settings(
-    name := "catamorph"
+    name := "compendium"
   )
 
 lazy val docs = project
   .in(file("docs"))
   .dependsOn(root)
-  .settings(moduleName := "catamorph-docs")
+  .settings(moduleName := "compendium-docs")
   .settings(commonSettings)
   .settings(sbtMicrositesSettings)
   .settings(noPublishSettings)
   .settings(
-    micrositeName := "Catamorph",
+    micrositeName := "Compendium",
     micrositeDescription := "Schema catalog service",
-    micrositeBaseUrl := "/catamorph",
+    micrositeBaseUrl := "/compendium",
     micrositeGithubOwner := "higherkindness",
-    micrositeGithubRepo := "catamorph",
+    micrositeGithubRepo := "compendium",
     micrositeHighlightTheme := "tomorrow",
     micrositeOrganizationHomepage := "http://www.47deg.com",
     includeFilter in Jekyll := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.swf" | "*.md",
@@ -64,7 +67,7 @@ pgpSecretRing := file(s"$gpgFolder/secring.gpg")
 
 // General Settings
 lazy val commonSettings = Seq(
-  orgProjectName := "Catamorph",
+  orgProjectName := "Compendium",
   orgGithubSetting := GitHubSettings(
     organization = "higherkindness",
     project = (name in LocalRootProject).value,
@@ -79,7 +82,12 @@ lazy val commonSettings = Seq(
   ThisBuild / scalacOptions -= "-Xplugin-require:macroparadise",
   libraryDependencies ++= Seq(
     %%("cats-core", V.cats),
+    %%("shapeless", V.shapeless),
+    %%("pureconfig", V.pureConfig),
     "io.frees" %% "skeuomorph" % V.skeumorph,
+    %%("http4s-dsl", V.http4s),
+    %%("http4s-blaze-server", V.http4s),
+    %%("http4s-circe", V.http4s),
     %%("circe-core", V.circe),
     %%("specs2-core", V.specs2)       % Test,
     %%("specs2-scalacheck", V.specs2) % Test,
@@ -96,14 +104,14 @@ lazy val commonSettings = Seq(
   // format: OFF
   orgBadgeListSetting := List(
     TravisBadge.apply,
-    CodecovBadge.apply, { info => MavenCentralBadge.apply(info.copy(libName = "catamorph")) },
+    CodecovBadge.apply, { info => MavenCentralBadge.apply(info.copy(libName = "compendium")) },
     ScalaLangBadge.apply,
-    LicenseBadge.apply, { info => GitterBadge.apply(info.copy(owner = "higherkindness", repo = "catamorph")) },
+    LicenseBadge.apply, { info => GitterBadge.apply(info.copy(owner = "higherkindness", repo = "compendium")) },
     GitHubIssuesBadge.apply
   ),
   orgEnforcedFilesSetting := List(
     LicenseFileType(orgGithubSetting.value, orgLicenseSetting.value, startYear.value),
-    ContributingFileType( orgProjectName.value, orgGithubSetting.value.copy(organization = "higherkindness", project = "catamorph")),
+    ContributingFileType( orgProjectName.value, orgGithubSetting.value.copy(organization = "higherkindness", project = "compendium")),
     AuthorsFileType(name.value, orgGithubSetting.value, orgMaintainersSetting.value, orgContributorsSetting.value),
     NoticeFileType(orgProjectName.value, orgGithubSetting.value, orgLicenseSetting.value, startYear.value),
     VersionSbtFileType,

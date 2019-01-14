@@ -27,4 +27,8 @@ project/target
 /out/
 .idea_modules/
 
+# metals
+.metals/
+project/.bloop/
+
 .DS_Store
