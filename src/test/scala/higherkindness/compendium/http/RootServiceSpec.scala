@@ -16,6 +16,8 @@
 
 package higherkindness.compendium.http
 
+import java.io.InputStream
+
 import cats.effect.IO
 import cats.syntax.apply._
 import fs2.Stream
@@ -30,8 +32,6 @@ import org.http4s.{EntityEncoder, Headers, Method, Request, Response, Status, Ur
 import org.http4s.dsl.io._
 import org.http4s.headers.`Content-Disposition`
 import org.http4s.multipart.{Multipart, Part}
-
-import scala.io.Source
 
 object RootServiceSpec extends Specification with ScalaCheck {
 
@@ -126,9 +126,10 @@ object RootServiceSpec extends Specification with ScalaCheck {
     }
 
     "If protocol is valid returns OK and the location in the headers" >> prop { identifier: Int =>
-      val text     = Source.fromResource("correct.avro").getLines.mkString
-      val protocol = Protocol("correct.avro", text)
-      val id       = Math.abs(identifier)
+      val stream: InputStream = getClass.getResourceAsStream("/correct.avro")
+      val text                = scala.io.Source.fromInputStream(stream).getLines.mkString
+      val protocol            = Protocol("correct.avro", text)
+      val id                  = Math.abs(identifier)
 
       implicit val dbService = dbServiceIO(protocol, id)
       implicit val storage   = storageIO(protocol, id)

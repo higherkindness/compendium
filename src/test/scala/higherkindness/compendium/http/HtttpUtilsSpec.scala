@@ -16,6 +16,8 @@
 
 package higherkindness.compendium.http
 
+import java.io.InputStream
+
 import cats.effect.IO
 import fs2.Stream
 import fs2.text.utf8Encode
@@ -25,8 +27,6 @@ import org.http4s.headers.`Content-Disposition`
 import org.http4s.multipart.{Multipart, Part}
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
-
-import scala.io.Source
 
 object HtttpUtilsSpec extends Specification with ScalaCheck {
 
@@ -60,13 +60,15 @@ object HtttpUtilsSpec extends Specification with ScalaCheck {
 
   "Given a avro text" >> {
     "Returns a protocol if the avro text it is correct" >> {
-      val text = Source.fromResource("correct.avro").getLines.mkString
+      val stream: InputStream = getClass.getResourceAsStream("/correct.avro")
+      val text                = scala.io.Source.fromInputStream(stream).getLines.mkString
 
       utils.protocol("name", text).unsafeRunSync === Protocol("name", text)
     }
 
     "Raise an error if the protocol is incorrect" >> {
-      val text = Source.fromResource("correct.avro").getLines.mkString
+      val stream: InputStream = getClass.getResourceAsStream("/correct.avro")
+      val text                = scala.io.Source.fromInputStream(stream).getLines.mkString
 
       utils.protocol("name", text).unsafeRunSync must throwA[org.apache.avro.SchemaParseException]
     }
