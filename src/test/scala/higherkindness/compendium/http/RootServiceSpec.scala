@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package http
+package higherkindness.compendium.http
 
 import cats.effect.IO
 import cats.syntax.apply._
@@ -22,7 +22,6 @@ import fs2.Stream
 import fs2.text.utf8Encode
 import higherkindness.compendium.CompendiumArbitrary._
 import higherkindness.compendium.db.DBService
-import higherkindness.compendium.http.RootService
 import higherkindness.compendium.models.Protocol
 import higherkindness.compendium.storage.Storage
 import org.specs2.ScalaCheck

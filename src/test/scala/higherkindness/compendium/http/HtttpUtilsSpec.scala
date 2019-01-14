@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package http
+package higherkindness.compendium.http
 
 import cats.effect.IO
 import fs2.Stream
 import fs2.text.utf8Encode
-import higherkindness.compendium.http.HttpUtils
 import higherkindness.compendium.models.Protocol
 import org.http4s.Headers
 import org.http4s.headers.`Content-Disposition`
