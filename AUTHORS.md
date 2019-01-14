@@ -8,7 +8,7 @@ The maintainers of the project are:
 
 ## Contributors
 
-These are the people that have contributed to the catamorph project:
+These are the people that have contributed to the compendium project:
 
 * Juan Pedro Moreno <[juanpedromoreno](https://github.com/juanpedromoreno)>
 * Pepe García <[pepegar](https://github.com/pepegar)>
