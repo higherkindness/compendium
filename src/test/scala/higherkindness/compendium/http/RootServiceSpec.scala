@@ -30,7 +30,6 @@ import org.http4s.{EntityEncoder, Headers, Method, Request, Response, Status, Ur
 import org.http4s.dsl.io._
 import org.http4s.headers.`Content-Disposition`
 import org.http4s.multipart.{Multipart, Part}
-import org.http4s.util.CaseInsensitiveString
 
 import scala.io.Source
 
@@ -152,7 +151,7 @@ object RootServiceSpec extends Specification with ScalaCheck {
 
       response.map(_.status).unsafeRunSync === Status.Ok
       response
-        .map(_.headers.find(_.name == CaseInsensitiveString("Location")))
+        .map(_.headers.find(_.name == "Location".ci))
         .unsafeRunSync
         .map(_.value) === Some(s"/v0/protocol/$id")
     }
