@@ -16,22 +16,16 @@
 
 package higherkindness.compendium.http
 
-import cats.implicits._
-import cats.effect.Sync
 import higherkindness.compendium.models.Protocol
-import org.apache.avro.Schema
+import io.circe._
+import io.circe.generic.semiauto._
 
-final class HttpUtils[F[_]: Sync] {
+object Decoders {
 
-  private val parser: Schema.Parser = new Schema.Parser()
-
-  def parseProtocol(protocol: Protocol): F[Protocol] =
-    if (protocol.raw.trim.isEmpty)
-      Sync[F].raiseError(new org.apache.avro.SchemaParseException("Protocol is empty"))
-    else
-      Sync[F].catchNonFatal(parser.parse(protocol.raw)).map(_ => protocol)
+  implicit val protocolDecoder: Decoder[Protocol] = deriveDecoder[Protocol]
 }
 
-object HttpUtils {
-  def apply[F[_]: Sync]: HttpUtils[F] = new HttpUtils
+object Encoders {
+
+  implicit val protocolEnconder: Encoder[Protocol] = deriveEncoder[Protocol]
 }

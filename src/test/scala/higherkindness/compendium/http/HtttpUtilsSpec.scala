@@ -19,58 +19,28 @@ package higherkindness.compendium.http
 import java.io.InputStream
 
 import cats.effect.IO
-import fs2.Stream
-import fs2.text.utf8Encode
 import higherkindness.compendium.models.Protocol
-import org.http4s.Headers
-import org.http4s.headers.`Content-Disposition`
-import org.http4s.multipart.{Multipart, Part}
+import higherkindness.compendium.CompendiumArbitrary._
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
 
-object HtttpUtilsSpec extends Specification with ScalaCheck {
+object HttpUtilsSpec extends Specification with ScalaCheck {
 
   sequential
 
   val utils = HttpUtils[IO]
 
-  "Given a multipart" >> {
-    "Returns the filename" >> prop { filename: String =>
-      val part: Part[IO] = Part(
-        Headers(
-          `Content-Disposition`("form-data", Map("name" -> "text", "filename" -> filename)) :: Nil),
-        Stream.emit("").through(utf8Encode))
-
-      val multipart = Multipart[IO](Vector(part))
-
-      utils.filename(multipart).unsafeRunSync === filename
-    }
-
-    "Returns the text" >> prop { text: String =>
-      val part: Part[IO] = Part(
-        Headers(
-          `Content-Disposition`("form-data", Map("name" -> text, "filename" -> "filename")) :: Nil),
-        Stream.emit("").through(utf8Encode))
-
-      val multipart = Multipart[IO](Vector(part))
-
-      utils.rawText(multipart).unsafeRunSync === text
-    }.pendingUntilFixed("Encoding errors")
-  }
-
-  "Given a avro text" >> {
+  "Given a raw protocol text" >> {
     "Returns a protocol if the avro text it is correct" >> {
       val stream: InputStream = getClass.getResourceAsStream("/correct.avro")
       val text                = scala.io.Source.fromInputStream(stream).getLines.mkString
+      val protocol            = Protocol("name", text)
 
-      utils.protocol("name", text).unsafeRunSync === Protocol("name", text)
+      utils.parseProtocol(protocol).unsafeRunSync === protocol
     }
 
-    "Raise an error if the protocol is incorrect" >> {
-      val stream: InputStream = getClass.getResourceAsStream("/correct.avro")
-      val text                = scala.io.Source.fromInputStream(stream).getLines.mkString
-
-      utils.protocol("name", text).unsafeRunSync must throwA[org.apache.avro.SchemaParseException]
+    "Raise an error if the protocol is incorrect" >> prop { protocol: Protocol =>
+      utils.parseProtocol(protocol).unsafeRunSync must throwA[org.apache.avro.SchemaParseException]
     }
   }
 

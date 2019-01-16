@@ -19,12 +19,16 @@ package higherkindness.compendium.http
 import cats.effect.Sync
 import cats.syntax.functor._
 import cats.syntax.flatMap._
-import org.http4s._
+import org.http4s.circe.CirceEntityCodec._
+import io.circe.syntax._
 import higherkindness.compendium.db.DBService
+import higherkindness.compendium.models.Protocol
 import higherkindness.compendium.storage.Storage
 import org.http4s.dsl.Http4sDsl
+import Decoders._
+import Encoders._
+import org.http4s.HttpService
 import org.http4s.headers.Location
-import org.http4s.multipart.Multipart
 
 object RootService {
 
@@ -32,36 +36,31 @@ object RootService {
 
     object f extends Http4sDsl[F]
     import f._
-
     val utils = HttpUtils[F]
+
     HttpService[F] {
-      case GET -> Root / "ping" => Ok("pong")
+      case GET -> Root / "ping" => Ok("pong".asJson)
 
       case req @ POST -> Root / "v0" / "protocol" =>
-        req.decode[Multipart[F]] { m =>
-          val act = for {
-            name     <- utils.filename(m)
-            text     <- utils.rawText(m)
-            protocol <- utils.protocol(name, text)
-            id       <- DBService[F].addProtocol(protocol)
-            _        <- Storage[F].store(id, protocol)
-          } yield id
+        val act = for {
+          protocol <- req.as[Protocol]
+          _        <- utils.parseProtocol(protocol)
+          id       <- DBService[F].addProtocol(protocol)
+          _        <- Storage[F].store(id, protocol)
+        } yield id
 
-          Sync[F].recoverWith(
-            act
-              .flatMap(id =>
-                Ok(s"$id").map(_.putHeaders(Location(req.uri.withPath(s"${req.uri.path}/$id")))))) {
-            case e: org.apache.avro.SchemaParseException => BadRequest(e.getMessage)
-            case e =>
-              e.printStackTrace()
-              InternalServerError()
-          }
+        Sync[F].recoverWith(
+          act
+            .flatMap(id =>
+              Ok().map(_.putHeaders(Location(req.uri.withPath(s"${req.uri.path}/$id")))))) {
+          case e: org.apache.avro.SchemaParseException => BadRequest(e.getMessage.asJson)
+          case _                                       => InternalServerError()
         }
 
       case GET -> Root / "v0" / "protocol" / IntVar(protocolId) =>
         Storage[F]
           .recover(protocolId)
-          .flatMap(_.fold(NotFound())(p => Ok(p.raw)))
+          .flatMap(_.fold(NotFound())(p => Ok(p)))
 
     }
   }
