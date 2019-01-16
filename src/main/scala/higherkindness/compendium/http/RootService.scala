@@ -60,7 +60,7 @@ object RootService {
       case GET -> Root / "v0" / "protocol" / IntVar(protocolId) =>
         Storage[F]
           .recover(protocolId)
-          .flatMap(_.fold(NotFound())(p => Ok(p)))
+          .flatMap(_.fold(NotFound())(Ok(_)))
 
     }
   }
