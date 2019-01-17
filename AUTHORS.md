@@ -10,5 +10,6 @@ The maintainers of the project are:
 
 These are the people that have contributed to the compendium project:
 
+* Ignacio Navarro Martin <[pirita](https://github.com/pirita)>
 * Juan Pedro Moreno <[juanpedromoreno](https://github.com/juanpedromoreno)>
 * Pepe García <[pepegar](https://github.com/pepegar)>
