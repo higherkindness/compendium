@@ -89,6 +89,7 @@ lazy val commonSettings = Seq(
     %%("http4s-blaze-server", V.http4s),
     %%("http4s-circe", V.http4s),
     %%("circe-core", V.circe),
+    %%("circe-generic", V.circe),
     %%("specs2-core", V.specs2)       % Test,
     %%("specs2-scalacheck", V.specs2) % Test,
     "io.chrisdavenport"               %% "cats-scalacheck" % V.catsScalacheck % Test

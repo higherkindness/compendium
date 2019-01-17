@@ -20,18 +20,18 @@ import java.io.InputStream
 
 import cats.effect.IO
 import cats.syntax.apply._
-import fs2.Stream
-import fs2.text.utf8Encode
+import io.circe.syntax._
 import higherkindness.compendium.CompendiumArbitrary._
 import higherkindness.compendium.db.DBService
 import higherkindness.compendium.models.Protocol
 import higherkindness.compendium.storage.Storage
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
-import org.http4s.{EntityEncoder, Headers, Method, Request, Response, Status, Uri}
+import org.http4s.{Method, Request, Response, Status, Uri}
 import org.http4s.dsl.io._
-import org.http4s.headers.`Content-Disposition`
-import org.http4s.multipart.{Multipart, Part}
+import org.http4s.circe.CirceEntityCodec._
+import Encoders._
+import Decoders._
 
 object RootServiceSpec extends Specification with ScalaCheck {
 
@@ -56,16 +56,6 @@ object RootServiceSpec extends Specification with ScalaCheck {
     override def numberProtocol(): IO[Int] = IO(identifier)
   }
 
-  def stringToMultipart(filename: String, str: String): Multipart[IO] = {
-
-    val part: Part[IO] = Part(
-      Headers(
-        `Content-Disposition`("form-data", Map("name" -> "text", "filename" -> filename)) :: Nil),
-      Stream.emit(str).through(utf8Encode))
-
-    Multipart[IO](Vector(part))
-  }
-
   "GET /v0/protocol/id" >> {
     "If successs returns a valid protocol and status code" >> prop { protocol: Protocol =>
       implicit val dbService = dbServiceIO(protocol, 1)
@@ -80,7 +70,7 @@ object RootServiceSpec extends Specification with ScalaCheck {
       val response: IO[Response[IO]] =
         RootService.rootRouteService[IO].orNotFound(request)
 
-      response.flatMap(_.as[String]).unsafeRunSync === protocol.raw
+      response.flatMap(_.as[Protocol]).unsafeRunSync === protocol
       response.map(_.status).unsafeRunSync === Status.Ok
     }
 
@@ -106,21 +96,15 @@ object RootServiceSpec extends Specification with ScalaCheck {
       implicit val dbService = dbServiceIO(protocol, 1)
       implicit val storage   = storageIO(protocol, 1)
 
-      val multipart = stringToMultipart(protocol.name, protocol.raw)
+      val request: IO[Request[IO]] = Request[IO](
+        uri = Uri(
+          path = s"/v0/protocol"
+        ),
+        method = Method.POST
+      ).withBody(protocol.asJson)
 
-      val response: IO[Response[IO]] = for {
-        entity <- EntityEncoder[IO, Multipart[IO]].toEntity(multipart)
-        request <- IO(
-          Request[IO](
-            uri = Uri(
-              path = s"/v0/protocol"
-            ),
-            method = Method.POST,
-            body = entity.body,
-            headers = multipart.headers
-          ))
-        resp <- RootService.rootRouteService[IO].orNotFound(request)
-      } yield resp
+      val response: IO[Response[IO]] =
+        request.flatMap(RootService.rootRouteService[IO].orNotFound(_))
 
       response.map(_.status).unsafeRunSync === Status.BadRequest
     }
@@ -134,21 +118,15 @@ object RootServiceSpec extends Specification with ScalaCheck {
       implicit val dbService = dbServiceIO(protocol, id)
       implicit val storage   = storageIO(protocol, id)
 
-      val multipart = stringToMultipart(protocol.name, protocol.raw)
+      val request: IO[Request[IO]] = Request[IO](
+        uri = Uri(
+          path = s"/v0/protocol"
+        ),
+        method = Method.POST
+      ).withBody(protocol.asJson)
 
-      val response: IO[Response[IO]] = for {
-        entity <- EntityEncoder[IO, Multipart[IO]].toEntity(multipart)
-        request <- IO(
-          Request[IO](
-            uri = Uri(
-              path = s"/v0/protocol"
-            ),
-            method = Method.POST,
-            body = entity.body,
-            headers = multipart.headers
-          ))
-        resp <- RootService.rootRouteService[IO].orNotFound(request)
-      } yield resp
+      val response: IO[Response[IO]] =
+        request.flatMap(RootService.rootRouteService[IO].orNotFound(_))
 
       response.map(_.status).unsafeRunSync === Status.Ok
       response
