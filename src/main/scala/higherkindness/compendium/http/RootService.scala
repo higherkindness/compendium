@@ -44,7 +44,7 @@ object RootService {
       case req @ POST -> Root / "v0" / "protocol" =>
         val act = for {
           protocol <- req.as[Protocol]
-          _        <- utils.parseProtocol(protocol)
+          _        <- utils.validateProtocol(protocol)
           id       <- DBService[F].addProtocol(protocol)
           _        <- Storage[F].store(id, protocol)
         } yield id

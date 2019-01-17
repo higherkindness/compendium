@@ -36,11 +36,13 @@ object HttpUtilsSpec extends Specification with ScalaCheck {
       val text                = scala.io.Source.fromInputStream(stream).getLines.mkString
       val protocol            = Protocol("name", text)
 
-      utils.parseProtocol(protocol).unsafeRunSync === protocol
+      utils.validateProtocol(protocol).unsafeRunSync === protocol
     }
 
     "Raise an error if the protocol is incorrect" >> prop { protocol: Protocol =>
-      utils.parseProtocol(protocol).unsafeRunSync must throwA[org.apache.avro.SchemaParseException]
+      utils
+        .validateProtocol(protocol)
+        .unsafeRunSync must throwA[org.apache.avro.SchemaParseException]
     }
   }
 

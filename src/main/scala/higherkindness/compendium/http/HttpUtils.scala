@@ -25,7 +25,7 @@ final class HttpUtils[F[_]: Sync] {
 
   private val parser: Schema.Parser = new Schema.Parser()
 
-  def parseProtocol(protocol: Protocol): F[Protocol] =
+  def validateProtocol(protocol: Protocol): F[Protocol] =
     if (protocol.raw.trim.isEmpty)
       Sync[F].raiseError(new org.apache.avro.SchemaParseException("Protocol is empty"))
     else
