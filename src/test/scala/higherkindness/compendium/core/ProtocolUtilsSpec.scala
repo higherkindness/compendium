@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.http
+package higherkindness.compendium.core
 
 import java.io.InputStream
 
 import cats.effect.IO
-import higherkindness.compendium.models.Protocol
 import higherkindness.compendium.CompendiumArbitrary._
+import higherkindness.compendium.models.Protocol
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
 
-object HttpUtilsSpec extends Specification with ScalaCheck {
+object ProtocolUtilsSpec extends Specification with ScalaCheck {
 
   sequential
 
-  val utils = HttpUtils[IO]
+  val utils = ProtocolUtils.impl[IO]()
 
   "Given a raw protocol text" >> {
     "Returns a protocol if the avro text it is correct" >> {

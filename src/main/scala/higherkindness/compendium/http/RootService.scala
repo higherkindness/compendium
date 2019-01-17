@@ -17,40 +17,33 @@
 package higherkindness.compendium.http
 
 import cats.effect.Sync
-import cats.syntax.functor._
 import cats.syntax.flatMap._
+import cats.syntax.functor._
 import org.http4s.circe.CirceEntityCodec._
 import io.circe.syntax._
-import higherkindness.compendium.db.DBService
 import higherkindness.compendium.models.Protocol
-import higherkindness.compendium.storage.Storage
 import org.http4s.dsl.Http4sDsl
 import Decoders._
 import Encoders._
+import higherkindness.compendium.core.CompendiumService
 import org.http4s.HttpService
 import org.http4s.headers.Location
 
 object RootService {
 
-  def rootRouteService[F[_]: Sync: Storage: DBService]: HttpService[F] = {
+  def rootRouteService[F[_]: Sync: CompendiumService]: HttpService[F] = {
 
     object f extends Http4sDsl[F]
     import f._
-    val utils = HttpUtils[F]
 
     HttpService[F] {
       case GET -> Root / "ping" => Ok("pong".asJson)
 
       case req @ POST -> Root / "v0" / "protocol" =>
-        val act = for {
-          protocol <- req.as[Protocol]
-          _        <- utils.validateProtocol(protocol)
-          id       <- DBService[F].addProtocol(protocol)
-          _        <- Storage[F].store(id, protocol)
-        } yield id
-
         Sync[F].recoverWith(
-          act
+          req
+            .as[Protocol]
+            .flatMap(CompendiumService[F].storeProtocol)
             .flatMap(id =>
               Ok().map(_.putHeaders(Location(req.uri.withPath(s"${req.uri.path}/$id")))))) {
           case e: org.apache.avro.SchemaParseException => BadRequest(e.getMessage.asJson)
@@ -58,8 +51,8 @@ object RootService {
         }
 
       case GET -> Root / "v0" / "protocol" / IntVar(protocolId) =>
-        Storage[F]
-          .recover(protocolId)
+        CompendiumService[F]
+          .recoverProtocol(protocolId)
           .flatMap(_.fold(NotFound())(Ok(_)))
 
     }

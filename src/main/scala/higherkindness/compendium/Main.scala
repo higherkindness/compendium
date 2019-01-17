@@ -18,6 +18,7 @@ package higherkindness.compendium
 
 import cats.effect.{Effect, IO}
 import fs2.{Stream, StreamApp}
+import higherkindness.compendium.core.{CompendiumService, ProtocolUtils}
 import higherkindness.compendium.db.DBServiceStorage
 import higherkindness.compendium.http.RootService
 import higherkindness.compendium.models.CompendiumConfig
@@ -32,9 +33,11 @@ abstract class CompendiumStreamApp[F[_]: Effect] extends StreamApp[F] {
   override def stream(args: List[String], requestShutdown: F[Unit]): Stream[F, StreamApp.ExitCode] =
     for {
       conf <- Stream.eval(Effect[F].delay(pureconfig.loadConfigOrThrow[CompendiumConfig]))
-      storage   = FileStorage.impl[F](conf.storage)
-      dbService = DBServiceStorage.impl[F](storage)
-      service   = RootService.rootRouteService(Effect[F], storage, dbService)
+      storage           = FileStorage.impl[F](conf.storage)
+      dbService         = DBServiceStorage.impl[F](storage)
+      utils             = ProtocolUtils.impl[F]()
+      compendiumService = CompendiumService.impl[F](Effect[F], storage, dbService, utils)
+      service           = RootService.rootRouteService(Effect[F], compendiumService)
       code <- CompendiumServerStream.serverStream(conf.http, service)
     } yield code
 }
