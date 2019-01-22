@@ -17,50 +17,45 @@
 package higherkindness.compendium.http
 
 import cats.effect.Sync
-import cats.syntax.functor._
 import cats.syntax.flatMap._
+import cats.syntax.functor._
 import org.http4s.circe.CirceEntityCodec._
 import io.circe.syntax._
-import higherkindness.compendium.db.DBService
 import higherkindness.compendium.models.Protocol
-import higherkindness.compendium.storage.Storage
 import org.http4s.dsl.Http4sDsl
 import Decoders._
 import Encoders._
-import org.http4s.HttpService
+import higherkindness.compendium.core.CompendiumService
+import org.http4s.HttpRoutes
 import org.http4s.headers.Location
 
 object RootService {
 
-  def rootRouteService[F[_]: Sync: Storage: DBService]: HttpService[F] = {
+  def rootRouteService[F[_]: Sync: CompendiumService]: HttpRoutes[F] = {
 
     object f extends Http4sDsl[F]
     import f._
-    val utils = HttpUtils[F]
 
-    HttpService[F] {
+    HttpRoutes.of[F] {
       case GET -> Root / "ping" => Ok("pong".asJson)
 
       case req @ POST -> Root / "v0" / "protocol" =>
-        val act = for {
-          protocol <- req.as[Protocol]
-          _        <- utils.validateProtocol(protocol)
-          id       <- DBService[F].addProtocol(protocol)
-          _        <- Storage[F].store(id, protocol)
-        } yield id
-
         Sync[F].recoverWith(
-          act
-            .flatMap(id =>
-              Ok().map(_.putHeaders(Location(req.uri.withPath(s"${req.uri.path}/$id")))))) {
+          for {
+            protocol <- req.as[Protocol]
+            id       <- CompendiumService[F].storeProtocol(protocol)
+            resp     <- Ok().map(_.putHeaders(Location(req.uri.withPath(s"${req.uri.path}/$id"))))
+          } yield resp
+        ) {
           case e: org.apache.avro.SchemaParseException => BadRequest(e.getMessage.asJson)
           case _                                       => InternalServerError()
         }
 
       case GET -> Root / "v0" / "protocol" / IntVar(protocolId) =>
-        Storage[F]
-          .recover(protocolId)
-          .flatMap(_.fold(NotFound())(Ok(_)))
+        for {
+          protocol <- CompendiumService[F].recoverProtocol(protocolId)
+          resp     <- protocol.fold(NotFound())(Ok(_))
+        } yield resp
 
     }
   }

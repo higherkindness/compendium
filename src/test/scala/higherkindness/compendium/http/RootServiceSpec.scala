@@ -16,50 +16,33 @@
 
 package higherkindness.compendium.http
 
-import java.io.InputStream
-
 import cats.effect.IO
-import cats.syntax.apply._
-import io.circe.syntax._
-import higherkindness.compendium.CompendiumArbitrary._
-import higherkindness.compendium.db.DBService
 import higherkindness.compendium.models.Protocol
-import higherkindness.compendium.storage.Storage
-import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
 import org.http4s.{Method, Request, Response, Status, Uri}
 import org.http4s.dsl.io._
 import org.http4s.circe.CirceEntityCodec._
 import Encoders._
 import Decoders._
+import higherkindness.compendium.core.CompendiumService
+import org.specs2.ScalaCheck
 
 object RootServiceSpec extends Specification with ScalaCheck {
 
   sequential
 
-  def dbServiceIO(protocol: Protocol, identifier: Int): DBService[IO] = new DBService[IO] {
-    override def addProtocol(protocol: Protocol): IO[Int] = IO(identifier)
+  private val dummyProtocol: Protocol = Protocol("", "")
 
-    override def lastProtocol(): IO[Option[Protocol]] = IO(Some(protocol))
-  }
+  def compendiumServiceIO(protocolOpt: Option[Protocol], identifier: Int) =
+    new CompendiumService[IO] {
+      override def storeProtocol(protocol: Protocol): IO[Int] = IO(identifier)
 
-  def storageIO(proto: Protocol, identifier: Int): Storage[IO] = new Storage[IO] {
-    override def store(id: Int, protocol: Protocol): IO[Unit] =
-      IO {
-        proto === protocol
-        id === identifier
-      } *> IO.unit
-
-    override def recover(id: Int): IO[Option[Protocol]] =
-      if (id == identifier) IO(Some(proto)) else IO(None)
-
-    override def numberProtocol(): IO[Int] = IO(identifier)
-  }
+      override def recoverProtocol(protocolId: Int): IO[Option[Protocol]] = IO(protocolOpt)
+    }
 
   "GET /v0/protocol/id" >> {
-    "If successs returns a valid protocol and status code" >> prop { protocol: Protocol =>
-      implicit val dbService = dbServiceIO(protocol, 1)
-      implicit val storage   = storageIO(protocol, 1)
+    "If successs returns a valid protocol and status code" >> {
+      implicit val compendiumService = compendiumServiceIO(Some(dummyProtocol), 1)
 
       val request = Request[IO](
         uri = Uri(
@@ -70,13 +53,12 @@ object RootServiceSpec extends Specification with ScalaCheck {
       val response: IO[Response[IO]] =
         RootService.rootRouteService[IO].orNotFound(request)
 
-      response.flatMap(_.as[Protocol]).unsafeRunSync === protocol
+      response.flatMap(_.as[Protocol]).unsafeRunSync === dummyProtocol
       response.map(_.status).unsafeRunSync === Status.Ok
     }
 
-    "If protocol not found returns not found" >> prop { protocol: Protocol =>
-      implicit val dbService = dbServiceIO(protocol, 1)
-      implicit val storage   = storageIO(protocol, 1)
+    "If protocol not found returns not found" >> {
+      implicit val compendiumService = compendiumServiceIO(None, 1)
 
       val request = Request[IO](
         uri = Uri(
@@ -92,41 +74,39 @@ object RootServiceSpec extends Specification with ScalaCheck {
   }
 
   "POST /v0/protocol/" >> {
-    "If protocol is invalid returns bad request" >> prop { protocol: Protocol =>
-      implicit val dbService = dbServiceIO(protocol, 1)
-      implicit val storage   = storageIO(protocol, 1)
+    "If protocol returns an invalid avro schema returns bad request" >> {
+      implicit val compendiumService = new CompendiumService[IO] {
+        override def storeProtocol(protocol: Protocol): IO[Int] =
+          IO.raiseError[Int](new org.apache.avro.SchemaParseException(""))
+        override def recoverProtocol(protocolId: Int): IO[Option[Protocol]] = IO(None)
+      }
 
-      val request: IO[Request[IO]] = Request[IO](
+      val request: Request[IO] = Request[IO](
         uri = Uri(
           path = s"/v0/protocol"
         ),
         method = Method.POST
-      ).withBody(protocol.asJson)
+      ).withEntity(dummyProtocol)
 
       val response: IO[Response[IO]] =
-        request.flatMap(RootService.rootRouteService[IO].orNotFound(_))
+        RootService.rootRouteService[IO].orNotFound(request)
 
       response.map(_.status).unsafeRunSync === Status.BadRequest
     }
 
     "If protocol is valid returns OK and the location in the headers" >> prop { identifier: Int =>
-      val stream: InputStream = getClass.getResourceAsStream("/correct.avro")
-      val text                = scala.io.Source.fromInputStream(stream).getLines.mkString
-      val protocol            = Protocol("correct.avro", text)
-      val id                  = Math.abs(identifier)
+      val id                         = Math.abs(identifier)
+      implicit val compendiumService = compendiumServiceIO(None, id)
 
-      implicit val dbService = dbServiceIO(protocol, id)
-      implicit val storage   = storageIO(protocol, id)
-
-      val request: IO[Request[IO]] = Request[IO](
+      val request: Request[IO] = Request[IO](
         uri = Uri(
           path = s"/v0/protocol"
         ),
         method = Method.POST
-      ).withBody(protocol.asJson)
+      ).withEntity(dummyProtocol)
 
       val response: IO[Response[IO]] =
-        request.flatMap(RootService.rootRouteService[IO].orNotFound(_))
+        RootService.rootRouteService[IO].orNotFound(request)
 
       response.map(_.status).unsafeRunSync === Status.Ok
       response

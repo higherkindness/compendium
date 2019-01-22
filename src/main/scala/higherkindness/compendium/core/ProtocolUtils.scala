@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.http
+package higherkindness.compendium.core
 
-import cats.implicits._
 import cats.effect.Sync
+import cats.implicits._
 import higherkindness.compendium.models.Protocol
 import org.apache.avro.Schema
 
-final class HttpUtils[F[_]: Sync] {
+class ProtocolUtils[F[_]: Sync] {
 
   private val parser: Schema.Parser = new Schema.Parser()
 
@@ -32,6 +32,9 @@ final class HttpUtils[F[_]: Sync] {
       Sync[F].catchNonFatal(parser.parse(protocol.raw)).map(_ => protocol)
 }
 
-object HttpUtils {
-  def apply[F[_]: Sync]: HttpUtils[F] = new HttpUtils
+object ProtocolUtils {
+
+  def impl[F[_]: Sync](): ProtocolUtils[F] = new ProtocolUtils
+
+  def apply[F[_]](implicit F: ProtocolUtils[F]): ProtocolUtils[F] = F
 }
