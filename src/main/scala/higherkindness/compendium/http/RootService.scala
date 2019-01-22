@@ -41,19 +41,21 @@ object RootService {
 
       case req @ POST -> Root / "v0" / "protocol" =>
         Sync[F].recoverWith(
-          req
-            .as[Protocol]
-            .flatMap(CompendiumService[F].storeProtocol)
-            .flatMap(id =>
-              Ok().map(_.putHeaders(Location(req.uri.withPath(s"${req.uri.path}/$id")))))) {
+          for {
+            protocol <- req.as[Protocol]
+            id       <- CompendiumService[F].storeProtocol(protocol)
+            resp     <- Ok().map(_.putHeaders(Location(req.uri.withPath(s"${req.uri.path}/$id"))))
+          } yield resp
+        ) {
           case e: org.apache.avro.SchemaParseException => BadRequest(e.getMessage.asJson)
           case _                                       => InternalServerError()
         }
 
       case GET -> Root / "v0" / "protocol" / IntVar(protocolId) =>
-        CompendiumService[F]
-          .recoverProtocol(protocolId)
-          .flatMap(_.fold(NotFound())(Ok(_)))
+        for {
+          protocol <- CompendiumService[F].recoverProtocol(protocolId)
+          resp     <- protocol.fold(NotFound())(Ok(_))
+        } yield resp
 
     }
   }
