@@ -16,21 +16,24 @@
 
 package higherkindness.compendium
 
-import cats.effect.{Effect, IO}
-import fs2.{Stream, StreamApp}
+import cats.effect._
+import cats.syntax.functor._
+import fs2.Stream
 import higherkindness.compendium.core.{CompendiumService, ProtocolUtils}
 import higherkindness.compendium.db.DBServiceStorage
 import higherkindness.compendium.http.RootService
 import higherkindness.compendium.models.CompendiumConfig
 import higherkindness.compendium.storage.FileStorage
+import pureconfig.generic.auto._
 
-import scala.concurrent.ExecutionContext.Implicits.global
+object Main extends IOApp {
+  override def run(args: List[String]): IO[ExitCode] =
+    CompendiumStreamApp.stream[IO].compile.drain.as(ExitCode.Success)
+}
 
-object Main extends CompendiumStreamApp[IO]
+object CompendiumStreamApp {
 
-abstract class CompendiumStreamApp[F[_]: Effect] extends StreamApp[F] {
-
-  override def stream(args: List[String], requestShutdown: F[Unit]): Stream[F, StreamApp.ExitCode] =
+  def stream[F[_]: ConcurrentEffect]: Stream[F, ExitCode] =
     for {
       conf <- Stream.eval(Effect[F].delay(pureconfig.loadConfigOrThrow[CompendiumConfig]))
       storage           = FileStorage.impl[F](conf.storage)

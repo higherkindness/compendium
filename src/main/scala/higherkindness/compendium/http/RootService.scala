@@ -26,17 +26,17 @@ import org.http4s.dsl.Http4sDsl
 import Decoders._
 import Encoders._
 import higherkindness.compendium.core.CompendiumService
-import org.http4s.HttpService
+import org.http4s.HttpRoutes
 import org.http4s.headers.Location
 
 object RootService {
 
-  def rootRouteService[F[_]: Sync: CompendiumService]: HttpService[F] = {
+  def rootRouteService[F[_]: Sync: CompendiumService]: HttpRoutes[F] = {
 
     object f extends Http4sDsl[F]
     import f._
 
-    HttpService[F] {
+    HttpRoutes.of[F] {
       case GET -> Root / "ping" => Ok("pong".asJson)
 
       case req @ POST -> Root / "v0" / "protocol" =>
