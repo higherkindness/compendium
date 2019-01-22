@@ -17,7 +17,6 @@
 package higherkindness.compendium.http
 
 import cats.effect.IO
-import io.circe.syntax._
 import higherkindness.compendium.models.Protocol
 import org.specs2.mutable.Specification
 import org.http4s.{Method, Request, Response, Status, Uri}
@@ -82,15 +81,15 @@ object RootServiceSpec extends Specification with ScalaCheck {
         override def recoverProtocol(protocolId: Int): IO[Option[Protocol]] = IO(None)
       }
 
-      val request: IO[Request[IO]] = Request[IO](
+      val request: Request[IO] = Request[IO](
         uri = Uri(
           path = s"/v0/protocol"
         ),
         method = Method.POST
-      ).withBody(dummyProtocol.asJson)
+      ).withEntity(dummyProtocol)
 
       val response: IO[Response[IO]] =
-        request.flatMap(RootService.rootRouteService[IO].orNotFound(_))
+        RootService.rootRouteService[IO].orNotFound(request)
 
       response.map(_.status).unsafeRunSync === Status.BadRequest
     }
@@ -99,15 +98,15 @@ object RootServiceSpec extends Specification with ScalaCheck {
       val id                         = Math.abs(identifier)
       implicit val compendiumService = compendiumServiceIO(None, id)
 
-      val request: IO[Request[IO]] = Request[IO](
+      val request: Request[IO] = Request[IO](
         uri = Uri(
           path = s"/v0/protocol"
         ),
         method = Method.POST
-      ).withBody(dummyProtocol.asJson)
+      ).withEntity(dummyProtocol)
 
       val response: IO[Response[IO]] =
-        request.flatMap(RootService.rootRouteService[IO].orNotFound(_))
+        RootService.rootRouteService[IO].orNotFound(request)
 
       response.map(_.status).unsafeRunSync === Status.Ok
       response
