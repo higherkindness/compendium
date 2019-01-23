@@ -22,14 +22,22 @@ lazy val V = new {
 
 lazy val root = project
   .in(file("."))
+  .settings(name := "compendium")
+  .settings(commonSettings)
+  .settings(noPublishSettings)
+  .aggregate(server)
+  .dependsOn(server)
+
+lazy val server = project
+  .in(file("modules/server"))
   .settings(commonSettings)
   .settings(
-    name := "compendium"
+    name := "compendium-server"
   )
 
 lazy val docs = project
   .in(file("docs"))
-  .dependsOn(root)
+  .dependsOn(server)
   .settings(moduleName := "compendium-docs")
   .settings(commonSettings)
   .settings(sbtMicrositesSettings)
@@ -67,7 +75,7 @@ pgpSecretRing := file(s"$gpgFolder/secring.gpg")
 
 // General Settings
 lazy val commonSettings = Seq(
-  orgProjectName := "Compendium",
+  orgProjectName := "compendium",
   orgGithubSetting := GitHubSettings(
     organization = "higherkindness",
     project = (name in LocalRootProject).value,
@@ -77,8 +85,8 @@ lazy val commonSettings = Seq(
     organizationEmail = "hello@47deg.com"
   ),
   startYear := Some(2018),
-  scalaVersion := V.scala,
-  crossScalaVersions := Seq(scalaVersion.value, "2.11.12"),
+  scalaVersion := "2.12.8",
+  crossScalaVersions := Seq(scalaVersion.value),
   ThisBuild / scalacOptions -= "-Xplugin-require:macroparadise",
   libraryDependencies ++= Seq(
     %%("cats-core", V.cats),
@@ -101,7 +109,7 @@ lazy val commonSettings = Seq(
     "docs/tut".asRunnableItem,
   ),
   orgMaintainersSetting := List(
-    Dev("developer47deg", Some("47 Degrees (twitter: @47deg)"), Some("hello@47deg.com"))),
+    Dev("47degdev", Some("47 Degrees (twitter: @47deg)"), Some("hello@47deg.com"))),
   // format: OFF
   orgBadgeListSetting := List(
     TravisBadge.apply,
@@ -130,6 +138,13 @@ lazy val compilerPlugins = Seq(
     compilerPlugin("com.olegpy"      %% "better-monadic-for" % V.betterMonadicFor),
     compilerPlugin("org.scalamacros" % "paradise"            % V.paradise cross CrossVersion.patch)
   )
+)
+
+val noPublishSettings = Seq(
+  publish := {},
+  publishLocal := {},
+  publishArtifact := false,
+  skip in publish := true
 )
 
 // check for library updates whenever the project is [re]load
