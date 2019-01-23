@@ -78,6 +78,7 @@ lazy val commonSettings = Seq(
   ),
   startYear := Some(2018),
   scalaVersion := "2.12.8",
+  crossScalaVersions := Seq(scalaVersion.value),
   ThisBuild / scalacOptions -= "-Xplugin-require:macroparadise",
   libraryDependencies ++= Seq(
     %%("cats-core", V.cats),
@@ -118,7 +119,7 @@ lazy val commonSettings = Seq(
     ChangelogFileType,
     ReadmeFileType(orgProjectName.value, orgGithubSetting.value, startYear.value, orgLicenseSetting.value, orgCommitBranchSetting.value, sbtPlugin.value, name.value, version.value, scalaBinaryVersion.value, sbtBinaryVersion.value, orgSupportedScalaJSVersion.value, orgBadgeListSetting.value ),
     ScalafmtFileType,
-    TravisFileType(Seq(scalaVersion.value), orgScriptCICommandKey, orgAfterCISuccessCommandKey)
+    TravisFileType(crossScalaVersions.value, orgScriptCICommandKey, orgAfterCISuccessCommandKey)
     // format: ON
   )
 ) ++ compilerPlugins
