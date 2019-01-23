@@ -1,7 +1,7 @@
 # Contributing
 
-Discussion around compendium happens in the [Gitter channel](https://gitter.im/47deg/compendium) as well as on
-[GitHub issues](https://github.com/47deg/compendium/issues) and [pull requests](https://github.com/47deg/compendium/pulls).
+Discussion around compendium happens in the [Gitter channel](https://gitter.im/higherkindness/compendium) as well as on
+[GitHub issues](https://github.com/higherkindness/compendium/issues) and [pull requests](https://github.com/higherkindness/compendium/pulls).
 
 Feel free to open an issue if you notice a bug, have an idea for a feature, or have a question about
 the code. Pull requests are also welcome.
