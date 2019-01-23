@@ -20,6 +20,14 @@ lazy val V = new {
   val pureConfig: String       = "0.10.1"
 }
 
+lazy val root = project
+  .in(file("."))
+  .settings(name := "compendium")
+  .settings(commonSettings)
+  .settings(noPublishSettings)
+  .aggregate(server)
+  .dependsOn(server)
+
 lazy val server = project
   .in(file("modules/server"))
   .settings(commonSettings)
@@ -101,7 +109,7 @@ lazy val commonSettings = Seq(
     "docs/tut".asRunnableItem,
   ),
   orgMaintainersSetting := List(
-    Dev("developer47deg", Some("47 Degrees (twitter: @47deg)"), Some("hello@47deg.com"))),
+    Dev("47degdev", Some("47 Degrees (twitter: @47deg)"), Some("hello@47deg.com"))),
   // format: OFF
   orgBadgeListSetting := List(
     TravisBadge.apply,
@@ -130,6 +138,13 @@ lazy val compilerPlugins = Seq(
     compilerPlugin("com.olegpy"      %% "better-monadic-for" % V.betterMonadicFor),
     compilerPlugin("org.scalamacros" % "paradise"            % V.paradise cross CrossVersion.patch)
   )
+)
+
+val noPublishSettings = Seq(
+  publish := {},
+  publishLocal := {},
+  publishArtifact := false,
+  skip in publish := true
 )
 
 // check for library updates whenever the project is [re]load
