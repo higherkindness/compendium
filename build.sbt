@@ -20,16 +20,16 @@ lazy val V = new {
   val pureConfig: String       = "0.10.1"
 }
 
-lazy val root = project
-  .in(file("."))
+lazy val server = project
+  .in(file("modules/server"))
   .settings(commonSettings)
   .settings(
-    name := "compendium"
+    name := "compendium-server"
   )
 
 lazy val docs = project
   .in(file("docs"))
-  .dependsOn(root)
+  .dependsOn(server)
   .settings(moduleName := "compendium-docs")
   .settings(commonSettings)
   .settings(sbtMicrositesSettings)
@@ -67,7 +67,7 @@ pgpSecretRing := file(s"$gpgFolder/secring.gpg")
 
 // General Settings
 lazy val commonSettings = Seq(
-  orgProjectName := "Compendium",
+  orgProjectName := "compendium",
   orgGithubSetting := GitHubSettings(
     organization = "higherkindness",
     project = (name in LocalRootProject).value,
@@ -77,8 +77,7 @@ lazy val commonSettings = Seq(
     organizationEmail = "hello@47deg.com"
   ),
   startYear := Some(2018),
-  scalaVersion := V.scala,
-  crossScalaVersions := Seq(scalaVersion.value, "2.11.12"),
+  scalaVersion := "2.12.8",
   ThisBuild / scalacOptions -= "-Xplugin-require:macroparadise",
   libraryDependencies ++= Seq(
     %%("cats-core", V.cats),
@@ -119,7 +118,7 @@ lazy val commonSettings = Seq(
     ChangelogFileType,
     ReadmeFileType(orgProjectName.value, orgGithubSetting.value, startYear.value, orgLicenseSetting.value, orgCommitBranchSetting.value, sbtPlugin.value, name.value, version.value, scalaBinaryVersion.value, sbtBinaryVersion.value, orgSupportedScalaJSVersion.value, orgBadgeListSetting.value ),
     ScalafmtFileType,
-    TravisFileType(crossScalaVersions.value, orgScriptCICommandKey, orgAfterCISuccessCommandKey)
+    TravisFileType(Seq(scalaVersion.value), orgScriptCICommandKey, orgAfterCISuccessCommandKey)
     // format: ON
   )
 ) ++ compilerPlugins
