@@ -25,8 +25,15 @@ lazy val root = project
   .settings(name := "compendium")
   .settings(commonSettings)
   .settings(noPublishSettings)
-  .aggregate(server)
-  .dependsOn(server)
+  .aggregate(server, client)
+  .dependsOn(server, client)
+
+lazy val common = project
+  .in(file("modules/common"))
+  .settings(commonSettings)
+  .settings(
+    name := "compendium-common"
+  )
 
 lazy val server = project
   .in(file("modules/server"))
@@ -34,10 +41,19 @@ lazy val server = project
   .settings(
     name := "compendium-server"
   )
+  .dependsOn(common)
+
+lazy val client = project
+  .in(file("modules/client"))
+  .settings(commonSettings)
+  .settings(
+    name := "compendium-client"
+  )
+  .dependsOn(common)
 
 lazy val docs = project
   .in(file("docs"))
-  .dependsOn(server)
+  .dependsOn(server, client)
   .settings(moduleName := "compendium-docs")
   .settings(commonSettings)
   .settings(sbtMicrositesSettings)
