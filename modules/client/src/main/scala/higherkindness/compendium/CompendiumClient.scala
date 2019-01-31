@@ -32,5 +32,5 @@ trait CompendiumClient[F[_]] {
    * @param identifier the protocol identifier
    * @return a protocol
    */
-  def recoverProtocol(identifier: Int): F[Protocol]
+  def recoverProtocol(identifier: Int): F[Option[Protocol]]
 }
