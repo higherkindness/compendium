@@ -28,23 +28,19 @@ object CompendiumServiceSpec extends Specification with ScalaCheck {
 
   sequential
 
-  def dbServiceIO(protocol: Protocol, identifier: Int): DBService[IO] = new DBService[IO] {
-    override def addProtocol(protocol: Protocol): IO[Int] = IO(identifier)
-
-    override def lastProtocol(): IO[Option[Protocol]] = IO(Some(protocol))
+  def dbServiceIO: DBService[IO] = new DBService[IO] {
+    override def addProtocol(id: String, protocol: Protocol): IO[Unit] = IO.unit
   }
 
-  def storageIO(proto: Option[Protocol], identifier: Int): Storage[IO] = new Storage[IO] {
-    override def store(id: Int, protocol: Protocol): IO[Unit] =
+  def storageIO(proto: Option[Protocol], identifier: String): Storage[IO] = new Storage[IO] {
+    override def store(id: String, protocol: Protocol): IO[Unit] =
       IO {
         proto === Some(protocol)
         id === identifier
       } *> IO.unit
 
-    override def recover(id: Int): IO[Option[Protocol]] =
+    override def recover(id: String): IO[Option[Protocol]] =
       if (id == identifier) IO(proto) else IO(None)
-
-    override def numberProtocol(): IO[Int] = IO(identifier)
   }
 
   def protocolUtilsIO(pro: Protocol, valid: Boolean): ProtocolUtils[IO] =
@@ -57,32 +53,29 @@ object CompendiumServiceSpec extends Specification with ScalaCheck {
   private val dummyProtocol: Protocol = Protocol("")
 
   "Store protocol" >> {
-    "If it's a valid protocol we store it" >> prop { identifier: Int =>
-      val id                     = Math.abs(identifier)
-      implicit val dbService     = dbServiceIO(dummyProtocol, id)
+    "If it's a valid protocol we store it" >> prop { id: String =>
+      implicit val dbService     = dbServiceIO
       implicit val storage       = storageIO(Some(dummyProtocol), id)
       implicit val protocolUtils = protocolUtilsIO(dummyProtocol, true)
 
-      CompendiumService.impl[IO].storeProtocol(dummyProtocol).unsafeRunSync() === id
+      CompendiumService.impl[IO].storeProtocol(id, dummyProtocol).map(_ => success).unsafeRunSync()
     }
 
-    "If it's an invalid protocol we raise an error" >> prop { identifier: Int =>
-      val id                     = Math.abs(identifier)
-      implicit val dbService     = dbServiceIO(dummyProtocol, id)
+    "If it's an invalid protocol we raise an error" >> prop { id: String =>
+      implicit val dbService     = dbServiceIO
       implicit val storage       = storageIO(Some(dummyProtocol), id)
       implicit val protocolUtils = protocolUtilsIO(dummyProtocol, false)
 
       CompendiumService
         .impl[IO]
-        .storeProtocol(dummyProtocol)
+        .storeProtocol(id, dummyProtocol)
         .unsafeRunSync must throwA[org.apache.avro.SchemaParseException]
     }
   }
 
   "Recover protocol" >> {
-    "Given a identifier we recover the protocol" >> prop { identifier: Int =>
-      val id                     = Math.abs(identifier)
-      implicit val dbService     = dbServiceIO(dummyProtocol, id)
+    "Given a identifier we recover the protocol" >> prop { id: String =>
+      implicit val dbService     = dbServiceIO
       implicit val storage       = storageIO(Some(dummyProtocol), id)
       implicit val protocolUtils = protocolUtilsIO(dummyProtocol, true)
 

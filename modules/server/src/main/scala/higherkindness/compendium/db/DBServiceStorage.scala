@@ -17,8 +17,7 @@
 package higherkindness.compendium.db
 
 import cats.effect.Sync
-import cats.syntax.functor._
-import cats.syntax.flatMap._
+import cats.implicits._
 import higherkindness.compendium.models.Protocol
 import higherkindness.compendium.storage.Storage
 
@@ -27,16 +26,8 @@ object DBServiceStorage {
   def impl[F[_]: Sync](storage: Storage[F]): DBService[F] =
     new DBService[F] {
 
-      override def addProtocol(protocol: Protocol): F[Int] =
-        for {
-          number <- storage.numberProtocol()
-          _      <- storage.store(number + 1, protocol)
-        } yield number + 1
-
-      override def lastProtocol(): F[Option[Protocol]] =
-        for {
-          number   <- storage.numberProtocol()
-          protocol <- storage.recover(number)
-        } yield protocol
+      // TODO Check id does not exists
+      override def addProtocol(id: String, protocol: Protocol): F[Unit] =
+        storage.store(id, protocol) *> Sync[F].unit
     }
 }

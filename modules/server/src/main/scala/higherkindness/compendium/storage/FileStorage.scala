@@ -28,11 +28,10 @@ object FileStorage {
   def impl[F[_]: Sync](config: StorageConfig): Storage[F] =
     new Storage[F] {
 
-      override def store(id: Int, protocol: Protocol): F[Unit] =
+      override def store(id: String, protocol: Protocol): F[Unit] =
         for {
-          _ <- Sync[F].catchNonFatal(new File(s"${config.path}${File.separator}$id").mkdirs())
-          file <- Sync[F].catchNonFatal(
-            new File(s"${config.path}${File.separator}$id${File.separator}${protocol.name}"))
+          _    <- Sync[F].catchNonFatal(new File(s"${config.path}${File.separator}$id").mkdirs())
+          file <- Sync[F].catchNonFatal(new File(s"${config.path}${File.separator}${id}"))
           _ <- Sync[F].catchNonFatal {
             val printWriter = new PrintWriter(file)
             printWriter.write(protocol.raw)
@@ -40,25 +39,20 @@ object FileStorage {
           }
         } yield ()
 
-      override def recover(id: Int): F[Option[Protocol]] =
+      override def recover(id: String): F[Option[Protocol]] =
         for {
           filename <- Sync[F].catchNonFatal {
-            Option(new File(s"${config.path}${File.separator}$id").listFiles())
+            Option(new File(s"${config.path}${File.separator}${id}").listFiles())
               .fold(Option.empty[String])(_.headOption.map(_.getAbsolutePath))
           }
           source <- Sync[F].catchNonFatal { filename.map(scala.io.Source.fromFile) }
           protocol <- Sync[F].catchNonFatal {
             source.flatMap { s =>
-              filename.map { fn =>
-                Protocol(fn, s.mkString)
+              filename.map { _ =>
+                Protocol(s.mkString)
               }
             }
           }
         } yield protocol
-
-      override def numberProtocol(): F[Int] =
-        Sync[F].catchNonFatal {
-          Option(new File(s"${config.path}${File.separator}").list()).fold(0)(_.length)
-        }
     }
 }
