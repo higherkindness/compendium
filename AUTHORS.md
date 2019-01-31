@@ -12,5 +12,6 @@ These are the people that have contributed to the compendium project:
 
 * [developer47deg](https://github.com/developer47deg)
 * Ignacio Navarro Martin <[pirita](https://github.com/pirita)>
+* Jesús Martínez <[JesusMtnez](https://github.com/JesusMtnez)>
 * Juan Pedro Moreno <[juanpedromoreno](https://github.com/juanpedromoreno)>
 * Pepe García <[pepegar](https://github.com/pepegar)>
