@@ -18,13 +18,11 @@ package higherkindness.compendium
 
 import higherkindness.compendium.models.Protocol
 import org.scalacheck.{Arbitrary, Gen}
-import org.scalacheck.cats.implicits._
-import cats.syntax.apply._
 
 trait CompendiumArbitrary {
 
   implicit val protocolArbitrary: Arbitrary[Protocol] = Arbitrary {
-    (Gen.alphaNumStr, Gen.alphaNumStr).mapN(Protocol.apply)
+    (Gen.alphaNumStr).map(Protocol(_))
   }
 
 }

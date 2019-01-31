@@ -54,7 +54,7 @@ object CompendiumServiceSpec extends Specification with ScalaCheck {
         else IO.raiseError(new org.apache.avro.SchemaParseException("Error"))
     }
 
-  private val dummyProtocol: Protocol = Protocol("", "")
+  private val dummyProtocol: Protocol = Protocol("")
 
   "Store protocol" >> {
     "If it's a valid protocol we store it" >> prop { identifier: Int =>

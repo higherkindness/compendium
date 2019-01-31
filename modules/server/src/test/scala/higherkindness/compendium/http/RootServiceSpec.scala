@@ -31,7 +31,7 @@ object RootServiceSpec extends Specification with ScalaCheck {
 
   sequential
 
-  private val dummyProtocol: Protocol = Protocol("", "")
+  private val dummyProtocol: Protocol = Protocol("")
 
   def compendiumServiceIO(protocolOpt: Option[Protocol], identifier: Int) =
     new CompendiumService[IO] {

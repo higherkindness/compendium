@@ -34,7 +34,7 @@ object ProtocolUtilsSpec extends Specification with ScalaCheck {
     "Returns a protocol if the avro text it is correct" >> {
       val stream: InputStream = getClass.getResourceAsStream("/correct.avro")
       val text                = scala.io.Source.fromInputStream(stream).getLines.mkString
-      val protocol            = Protocol("name", text)
+      val protocol            = Protocol(text)
 
       utils.validateProtocol(protocol).unsafeRunSync === protocol
     }

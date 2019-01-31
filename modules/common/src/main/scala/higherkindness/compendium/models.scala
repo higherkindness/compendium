@@ -16,4 +16,4 @@
 
 package higherkindness.compendium.models
 
-final case class Protocol(name: String, raw: String)
+final case class Protocol(raw: String, version: Option[String] = None)
