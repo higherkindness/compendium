@@ -18,7 +18,9 @@ package higherkindness.compendium.db
 
 import cats.effect.Sync
 import cats.implicits._
+import mouse.all._
 import higherkindness.compendium.models.Protocol
+import higherkindness.compendium.models.ProtocolAlreadyExists
 import higherkindness.compendium.storage.Storage
 
 object DBServiceStorage {
@@ -26,8 +28,12 @@ object DBServiceStorage {
   def impl[F[_]: Sync](storage: Storage[F]): DBService[F] =
     new DBService[F] {
 
-      // TODO Check id does not exists
       override def addProtocol(id: String, protocol: Protocol): F[Unit] =
-        storage.store(id, protocol) *> Sync[F].unit
+        for {
+          exists <- storage.checkIfExists(id)
+          _ <- exists.fold(
+            Sync[F].raiseError(new ProtocolAlreadyExists(s"Protocol with id ${id} already exists")),
+            storage.store(id, protocol))
+        } yield ()
     }
 }

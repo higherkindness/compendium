@@ -21,7 +21,7 @@ import cats.syntax.flatMap._
 import cats.syntax.functor._
 import org.http4s.circe.CirceEntityCodec._
 import io.circe.syntax._
-import higherkindness.compendium.models.Protocol
+import higherkindness.compendium.models._
 import org.http4s.dsl.Http4sDsl
 import Decoders._
 import Encoders._
@@ -49,6 +49,7 @@ object RootService {
         ) {
           // TODO Handle id already exists error
           case e: org.apache.avro.SchemaParseException => BadRequest(e.getMessage.asJson)
+          case t: ProtocolAlreadyExists                => Conflict(t.getMessage.asJson)
           case _                                       => InternalServerError()
         }
 

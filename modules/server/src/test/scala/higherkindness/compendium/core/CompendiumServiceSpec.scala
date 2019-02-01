@@ -41,6 +41,9 @@ object CompendiumServiceSpec extends Specification with ScalaCheck {
 
     override def recover(id: String): IO[Option[Protocol]] =
       if (id == identifier) IO(proto) else IO(None)
+
+    override def checkIfExists(id: String): IO[Boolean] =
+      if (id == identifier) IO(false) else IO(true)
   }
 
   def protocolUtilsIO(pro: Protocol, valid: Boolean): ProtocolUtils[IO] =
