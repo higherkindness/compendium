@@ -22,6 +22,7 @@ trait Storage[F[_]] {
 
   def store(id: String, protocol: Protocol): F[Unit]
   def recover(id: String): F[Option[Protocol]]
+  def checkIfExists(id: String): F[Boolean]
 }
 
 object Storage {

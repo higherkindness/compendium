@@ -54,5 +54,8 @@ object FileStorage {
             }
           }
         } yield protocol
+
+      override def checkIfExists(id: String): F[Boolean] =
+        Sync[F].catchNonFatal(new File(s"${config.path}${File.separator}${id}")).map(_.exists)
     }
 }
