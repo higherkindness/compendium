@@ -24,7 +24,7 @@ import org.http4s.dsl.io._
 import org.http4s.circe.CirceEntityCodec._
 import Encoders._
 import Decoders._
-import higherkindness.compendium.core.CompendiumService
+import higherkindness.compendium.core.{CompendiumService, CompendiumServiceStub}
 import org.specs2.ScalaCheck
 import org.scalacheck.Gen
 
@@ -34,16 +34,9 @@ object RootServiceSpec extends Specification with ScalaCheck {
 
   private val dummyProtocol: Protocol = Protocol("")
 
-  def compendiumServiceIO(protocolOpt: Option[Protocol]) =
-    new CompendiumService[IO] {
-      override def storeProtocol(id: String, protocol: Protocol): IO[Unit] = IO.unit
-
-      override def recoverProtocol(id: String): IO[Option[Protocol]] = IO(protocolOpt)
-    }
-
   "GET /v0/protocol/id" >> {
     "If successs returns a valid protocol and status code" >> {
-      implicit val compendiumService = compendiumServiceIO(Some(dummyProtocol))
+      implicit val compendiumService = new CompendiumServiceStub(Some(dummyProtocol))
 
       val request = Request[IO](
         uri = Uri(
@@ -59,7 +52,7 @@ object RootServiceSpec extends Specification with ScalaCheck {
     }
 
     "If protocol not found returns not found" >> {
-      implicit val compendiumService = compendiumServiceIO(None)
+      implicit val compendiumService = new CompendiumServiceStub(None)
 
       val request = Request[IO](
         uri = Uri(
@@ -96,7 +89,7 @@ object RootServiceSpec extends Specification with ScalaCheck {
     }
 
     "If protocol is valid returns OK and the location in the headers" >> prop { id: String =>
-      implicit val compendiumService = compendiumServiceIO(None)
+      implicit val compendiumService = new CompendiumServiceStub(None)
 
       val request: Request[IO] = Request[IO](
         uri = Uri(

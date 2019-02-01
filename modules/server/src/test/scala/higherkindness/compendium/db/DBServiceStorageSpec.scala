@@ -14,35 +14,22 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.core
+/*
+package higherkindness.compendium.db
 
 import cats.effect.IO
-import higherkindness.compendium.db.DBServiceStub
-import higherkindness.compendium.models.Protocol
-import higherkindness.compendium.storage.StorageStub
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
 
-object CompendiumServiceSpec extends Specification with ScalaCheck {
+object DBServiceStorageSpec extends Specification with ScalaCheck {
 
   sequential
 
-  def protocolUtilsIO(pro: Protocol, valid: Boolean): ProtocolUtils[IO] =
-    new ProtocolUtils[IO] {
-      override def validateProtocol(protocol: Protocol): IO[Protocol] =
-        if (valid) IO(pro)
-        else IO.raiseError(new org.apache.avro.SchemaParseException("Error"))
-    }
-
-  private val dummyProtocol: Protocol = Protocol("")
-
   "Store protocol" >> {
     "If it's a valid protocol we store it" >> prop { id: String =>
-      implicit val dbService     = new DBServiceStub()
       implicit val storage       = new StorageStub(Some(dummyProtocol), id)
-      implicit val protocolUtils = protocolUtilsIO(dummyProtocol, true)
 
-      CompendiumService.impl[IO].storeProtocol(id, dummyProtocol).map(_ => success).unsafeRunSync()
+      DBServiceStorage.impl[IO].storeProtocol(id, dummyProtocol).map(_ => success).unsafeRunSync()
     }
 
     "If it's an invalid protocol we raise an error" >> prop { id: String =>
@@ -56,15 +43,5 @@ object CompendiumServiceSpec extends Specification with ScalaCheck {
         .unsafeRunSync must throwA[org.apache.avro.SchemaParseException]
     }
   }
-
-  "Recover protocol" >> {
-    "Given a identifier we recover the protocol" >> prop { id: String =>
-      implicit val dbService     = new DBServiceStub()
-      implicit val storage       = new StorageStub(Some(dummyProtocol), id)
-      implicit val protocolUtils = protocolUtilsIO(dummyProtocol, true)
-
-      CompendiumService.impl[IO].recoverProtocol(id).unsafeRunSync() === Some(dummyProtocol)
-    }
-  }
-
 }
+ */

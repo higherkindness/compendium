@@ -37,7 +37,7 @@ object CompendiumStreamApp {
     for {
       conf <- Stream.eval(Effect[F].delay(pureconfig.loadConfigOrThrow[CompendiumConfig]))
       storage           = FileStorage.impl[F](conf.storage)
-      dbService         = DBServiceStorage.impl[F](storage)
+      dbService         = DBServiceStorage.impl[F](Effect[F], storage)
       utils             = ProtocolUtils.impl[F]()
       compendiumService = CompendiumService.impl[F](Effect[F], storage, dbService, utils)
       service           = RootService.rootRouteService(Effect[F], compendiumService)
