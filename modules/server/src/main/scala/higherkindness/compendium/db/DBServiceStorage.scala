@@ -25,15 +25,15 @@ import higherkindness.compendium.storage.Storage
 
 object DBServiceStorage {
 
-  def impl[F[_]: Sync](storage: Storage[F]): DBService[F] =
+  def impl[F[_]: Sync: Storage]: DBService[F] =
     new DBService[F] {
 
       override def addProtocol(id: String, protocol: Protocol): F[Unit] =
         for {
-          exists <- storage.checkIfExists(id)
+          exists <- Storage[F].checkIfExists(id)
           _ <- exists.fold(
             Sync[F].raiseError(new ProtocolAlreadyExists(s"Protocol with id ${id} already exists")),
-            storage.store(id, protocol))
+            Storage[F].store(id, protocol))
         } yield ()
     }
 }

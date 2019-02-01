@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-/*
 package higherkindness.compendium.db
 
 import cats.effect.IO
+import higherkindness.compendium.models.{Protocol, ProtocolAlreadyExists}
+import higherkindness.compendium.storage.StorageStub
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
 
@@ -25,23 +26,22 @@ object DBServiceStorageSpec extends Specification with ScalaCheck {
 
   sequential
 
-  "Store protocol" >> {
-    "If it's a valid protocol we store it" >> prop { id: String =>
-      implicit val storage       = new StorageStub(Some(dummyProtocol), id)
+  private val dummyProtocol: Protocol = Protocol("")
 
-      DBServiceStorage.impl[IO].storeProtocol(id, dummyProtocol).map(_ => success).unsafeRunSync()
+  "Store protocol" >> {
+    "If the protocol doesn't exists we store it" >> prop { id: String =>
+      implicit val storage = new StorageStub(Some(dummyProtocol), id)
+
+      DBServiceStorage.impl[IO].addProtocol(id, dummyProtocol).map(_ => success).unsafeRunSync()
     }
 
-    "If it's an invalid protocol we raise an error" >> prop { id: String =>
-      implicit val dbService     = new DBServiceStub()
-      implicit val storage       = new StorageStub(Some(dummyProtocol), id)
-      implicit val protocolUtils = protocolUtilsIO(dummyProtocol, false)
+    "If the protocol exists we raised an error" >> prop { id: String =>
+      implicit val storage = new StorageStub(Some(dummyProtocol), id) {
+        override def checkIfExists(id: String): IO[Boolean] = IO(true)
+      }
 
-      CompendiumService
-        .impl[IO]
-        .storeProtocol(id, dummyProtocol)
-        .unsafeRunSync must throwA[org.apache.avro.SchemaParseException]
+      DBServiceStorage.impl[IO].addProtocol(id, dummyProtocol).unsafeRunSync must
+        throwA[ProtocolAlreadyExists]
     }
   }
 }
- */
