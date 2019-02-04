@@ -17,16 +17,15 @@
 package higherkindness.compendium.core
 
 import cats.effect.Sync
-import cats.syntax.flatMap._
-import cats.syntax.functor._
+import cats.implicits._
 import higherkindness.compendium.db.DBService
 import higherkindness.compendium.models.Protocol
 import higherkindness.compendium.storage.Storage
 
 trait CompendiumService[F[_]] {
 
-  def storeProtocol(protocol: Protocol): F[Int]
-  def recoverProtocol(protocolId: Int): F[Option[Protocol]]
+  def storeProtocol(id: String, protocol: Protocol): F[Unit]
+  def recoverProtocol(id: String): F[Option[Protocol]]
 }
 
 object CompendiumService {
@@ -35,14 +34,12 @@ object CompendiumService {
 
     val utils = ProtocolUtils[F]
 
-    override def storeProtocol(protocol: Protocol): F[Int] =
-      for {
-        _  <- ProtocolUtils[F].validateProtocol(protocol)
-        id <- DBService[F].addProtocol(protocol)
-        _  <- Storage[F].store(id, protocol)
-      } yield id
+    override def storeProtocol(id: String, protocol: Protocol): F[Unit] =
+      ProtocolUtils[F].validateProtocol(protocol) >>
+        DBService[F].addProtocol(id, protocol) >>
+        Storage[F].store(id, protocol)
 
-    override def recoverProtocol(protocolId: Int): F[Option[Protocol]] =
+    override def recoverProtocol(protocolId: String): F[Option[Protocol]] =
       Storage[F].recover(protocolId)
   }
 

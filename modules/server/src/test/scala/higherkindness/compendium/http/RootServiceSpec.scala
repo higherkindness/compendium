@@ -17,54 +17,42 @@
 package higherkindness.compendium.http
 
 import cats.effect.IO
-import higherkindness.compendium.models.Protocol
+import higherkindness.compendium.models._
 import org.specs2.mutable.Specification
 import org.http4s.{Method, Request, Response, Status, Uri}
 import org.http4s.dsl.io._
 import org.http4s.circe.CirceEntityCodec._
 import Encoders._
 import Decoders._
-import higherkindness.compendium.core.CompendiumService
+import higherkindness.compendium.core.CompendiumServiceStub
 import org.specs2.ScalaCheck
+import org.scalacheck.Gen
 
 object RootServiceSpec extends Specification with ScalaCheck {
 
   sequential
 
-  private val dummyProtocol: Protocol = Protocol("", "")
-
-  def compendiumServiceIO(protocolOpt: Option[Protocol], identifier: Int) =
-    new CompendiumService[IO] {
-      override def storeProtocol(protocol: Protocol): IO[Int] = IO(identifier)
-
-      override def recoverProtocol(protocolId: Int): IO[Option[Protocol]] = IO(protocolOpt)
-    }
+  private val dummyProtocol: Protocol = Protocol("")
 
   "GET /v0/protocol/id" >> {
     "If successs returns a valid protocol and status code" >> {
-      implicit val compendiumService = compendiumServiceIO(Some(dummyProtocol), 1)
+      implicit val compendiumService = new CompendiumServiceStub(Some(dummyProtocol))
 
-      val request = Request[IO](
-        uri = Uri(
-          path = s"/v0/protocol/1"
-        )
-      )
+      val request: Request[IO] =
+        Request[IO](method = Method.GET, uri = Uri(path = s"/v0/protocol/my.proto"))
 
       val response: IO[Response[IO]] =
         RootService.rootRouteService[IO].orNotFound(request)
 
-      response.flatMap(_.as[Protocol]).unsafeRunSync === dummyProtocol
       response.map(_.status).unsafeRunSync === Status.Ok
+      response.flatMap(_.as[Protocol]).unsafeRunSync === dummyProtocol
     }
 
     "If protocol not found returns not found" >> {
-      implicit val compendiumService = compendiumServiceIO(None, 1)
+      implicit val compendiumService = new CompendiumServiceStub(None)
 
-      val request = Request[IO](
-        uri = Uri(
-          path = s"/v0/protocol/12"
-        )
-      )
+      val request: Request[IO] =
+        Request[IO](method = Method.GET, uri = Uri(path = s"/v0/protocol/my.proto"))
 
       val response: IO[Response[IO]] =
         RootService.rootRouteService[IO].orNotFound(request)
@@ -74,19 +62,15 @@ object RootServiceSpec extends Specification with ScalaCheck {
   }
 
   "POST /v0/protocol/" >> {
-    "If protocol returns an invalid avro schema returns bad request" >> {
-      implicit val compendiumService = new CompendiumService[IO] {
-        override def storeProtocol(protocol: Protocol): IO[Int] =
-          IO.raiseError[Int](new org.apache.avro.SchemaParseException(""))
-        override def recoverProtocol(protocolId: Int): IO[Option[Protocol]] = IO(None)
+    "If protocol returns an invalid avro schema returns BadRequest" >> {
+      implicit val compendiumService = new CompendiumServiceStub(None) {
+        override def storeProtocol(id: String, protocol: Protocol): IO[Unit] =
+          IO.raiseError[Unit](new org.apache.avro.SchemaParseException(""))
       }
 
-      val request: Request[IO] = Request[IO](
-        uri = Uri(
-          path = s"/v0/protocol"
-        ),
-        method = Method.POST
-      ).withEntity(dummyProtocol)
+      val request: Request[IO] =
+        Request[IO](method = Method.POST, uri = Uri(path = s"/v0/protocol/test"))
+          .withEntity(dummyProtocol)
 
       val response: IO[Response[IO]] =
         RootService.rootRouteService[IO].orNotFound(request)
@@ -94,25 +78,37 @@ object RootServiceSpec extends Specification with ScalaCheck {
       response.map(_.status).unsafeRunSync === Status.BadRequest
     }
 
-    "If protocol is valid returns OK and the location in the headers" >> prop { identifier: Int =>
-      val id                         = Math.abs(identifier)
-      implicit val compendiumService = compendiumServiceIO(None, id)
+    "If protocol already exists returns Conflict" >> {
+      implicit val compendiumService = new CompendiumServiceStub(None) {
+        override def storeProtocol(id: String, protocol: Protocol): IO[Unit] =
+          IO.raiseError[Unit](new ProtocolAlreadyExists(s"Protocol with id $id already exists"))
+      }
 
-      val request: Request[IO] = Request[IO](
-        uri = Uri(
-          path = s"/v0/protocol"
-        ),
-        method = Method.POST
-      ).withEntity(dummyProtocol)
+      val request: Request[IO] =
+        Request[IO](method = Method.POST, uri = Uri(path = s"/v0/protocol/my.proto"))
+          .withEntity(dummyProtocol)
 
       val response: IO[Response[IO]] =
         RootService.rootRouteService[IO].orNotFound(request)
 
-      response.map(_.status).unsafeRunSync === Status.Ok
+      response.map(_.status).unsafeRunSync === Status.Conflict
+    }
+
+    "If protocol is valid returns Created and the location in the headers" >> prop { id: String =>
+      implicit val compendiumService = new CompendiumServiceStub(None)
+
+      val request: Request[IO] =
+        Request[IO](method = Method.POST, uri = Uri(path = s"/v0/protocol/$id"))
+          .withEntity(dummyProtocol)
+
+      val response: IO[Response[IO]] =
+        RootService.rootRouteService[IO].orNotFound(request)
+
+      response.map(_.status).unsafeRunSync === Status.Created
       response
         .map(_.headers.find(_.name == "Location".ci))
         .unsafeRunSync
-        .map(_.value) === Some(s"/v0/protocol/$id")
-    }
+        .map(_.value) === Some(s"/v0/protocol/${id}")
+    }.setGen(Gen.alphaNumStr suchThat (!_.isEmpty))
   }
 }

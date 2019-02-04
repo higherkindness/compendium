@@ -14,17 +14,25 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium
+package higherkindness.compendium.storage
 
+import cats.effect.IO
+import cats.syntax.apply._
 import higherkindness.compendium.models.Protocol
-import org.scalacheck.{Arbitrary, Gen}
+import org.specs2.matcher.Matchers
 
-trait CompendiumArbitrary {
+class StorageStub(val proto: Option[Protocol], val identifier: String)
+    extends Storage[IO]
+    with Matchers {
+  override def store(id: String, protocol: Protocol): IO[Unit] =
+    IO {
+      proto === Some(protocol)
+      id === identifier
+    } *> IO.unit
 
-  implicit val protocolArbitrary: Arbitrary[Protocol] = Arbitrary {
-    (Gen.alphaNumStr).map(Protocol(_))
-  }
+  override def recover(id: String): IO[Option[Protocol]] =
+    if (id == identifier) IO(proto) else IO(None)
 
+  override def checkIfExists(id: String): IO[Boolean] =
+    if (id == identifier) IO(false) else IO(true)
 }
-
-object CompendiumArbitrary extends CompendiumArbitrary

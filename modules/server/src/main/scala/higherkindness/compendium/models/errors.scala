@@ -14,17 +14,6 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium
+package higherkindness.compendium.models
 
-import higherkindness.compendium.models.Protocol
-import org.scalacheck.{Arbitrary, Gen}
-
-trait CompendiumArbitrary {
-
-  implicit val protocolArbitrary: Arbitrary[Protocol] = Arbitrary {
-    (Gen.alphaNumStr).map(Protocol(_))
-  }
-
-}
-
-object CompendiumArbitrary extends CompendiumArbitrary
+class ProtocolAlreadyExists(message: String) extends Exception(message)

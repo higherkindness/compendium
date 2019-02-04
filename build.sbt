@@ -6,9 +6,10 @@ import sbtorgpolicies.templates._
 import sbtorgpolicies.templates.badges._
 
 lazy val V = new {
-  val betterMonadicFor: String = "0.2.4"
+  val betterMonadicFor: String = "0.3.0-M4"
   val cats: String             = "1.5.0"
   val catsScalacheck: String   = "0.1.0"
+  val mouse: String            = "0.20"
   val circe: String            = "0.11.1"
   val kindProjector: String    = "0.9.9"
   val paradise: String         = "2.1.1"
@@ -106,6 +107,7 @@ lazy val commonSettings = Seq(
   ThisBuild / scalacOptions -= "-Xplugin-require:macroparadise",
   libraryDependencies ++= Seq(
     %%("cats-core", V.cats),
+    "org.typelevel" %% "mouse" % V.mouse,
     %%("shapeless", V.shapeless),
     %%("pureconfig", V.pureConfig),
     "io.frees" %% "skeuomorph" % V.skeumorph,

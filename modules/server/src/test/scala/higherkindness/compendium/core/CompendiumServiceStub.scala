@@ -14,17 +14,12 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium
+package higherkindness.compendium.core
 
+import cats.effect.IO
 import higherkindness.compendium.models.Protocol
-import org.scalacheck.{Arbitrary, Gen}
 
-trait CompendiumArbitrary {
-
-  implicit val protocolArbitrary: Arbitrary[Protocol] = Arbitrary {
-    (Gen.alphaNumStr).map(Protocol(_))
-  }
-
+class CompendiumServiceStub(val protocolOpt: Option[Protocol]) extends CompendiumService[IO] {
+  override def storeProtocol(id: String, protocol: Protocol): IO[Unit] = IO.unit
+  override def recoverProtocol(id: String): IO[Option[Protocol]]       = IO(protocolOpt)
 }
-
-object CompendiumArbitrary extends CompendiumArbitrary

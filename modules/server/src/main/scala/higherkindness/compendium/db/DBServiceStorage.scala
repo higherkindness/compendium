@@ -17,26 +17,23 @@
 package higherkindness.compendium.db
 
 import cats.effect.Sync
-import cats.syntax.functor._
-import cats.syntax.flatMap._
+import cats.implicits._
+import mouse.all._
 import higherkindness.compendium.models.Protocol
+import higherkindness.compendium.models.ProtocolAlreadyExists
 import higherkindness.compendium.storage.Storage
 
 object DBServiceStorage {
 
-  def impl[F[_]: Sync](storage: Storage[F]): DBService[F] =
+  def impl[F[_]: Sync: Storage]: DBService[F] =
     new DBService[F] {
 
-      override def addProtocol(protocol: Protocol): F[Int] =
+      override def addProtocol(id: String, protocol: Protocol): F[Unit] =
         for {
-          number <- storage.numberProtocol()
-          _      <- storage.store(number + 1, protocol)
-        } yield number + 1
-
-      override def lastProtocol(): F[Option[Protocol]] =
-        for {
-          number   <- storage.numberProtocol()
-          protocol <- storage.recover(number)
-        } yield protocol
+          exists <- Storage[F].checkIfExists(id)
+          _ <- exists.fold(
+            Sync[F].raiseError(new ProtocolAlreadyExists(s"Protocol with id ${id} already exists")),
+            Storage[F].store(id, protocol))
+        } yield ()
     }
 }

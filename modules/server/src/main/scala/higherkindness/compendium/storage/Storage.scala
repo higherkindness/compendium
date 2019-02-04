@@ -20,9 +20,9 @@ import higherkindness.compendium.models.Protocol
 
 trait Storage[F[_]] {
 
-  def store(id: Int, protocol: Protocol): F[Unit]
-  def recover(id: Int): F[Option[Protocol]]
-  def numberProtocol(): F[Int]
+  def store(id: String, protocol: Protocol): F[Unit]
+  def recover(id: String): F[Option[Protocol]]
+  def checkIfExists(id: String): F[Boolean]
 }
 
 object Storage {

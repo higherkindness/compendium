@@ -21,7 +21,7 @@ import cats.syntax.flatMap._
 import cats.syntax.functor._
 import org.http4s.circe.CirceEntityCodec._
 import io.circe.syntax._
-import higherkindness.compendium.models.Protocol
+import higherkindness.compendium.models._
 import org.http4s.dsl.Http4sDsl
 import Decoders._
 import Encoders._
@@ -39,21 +39,22 @@ object RootService {
     HttpRoutes.of[F] {
       case GET -> Root / "ping" => Ok("pong".asJson)
 
-      case req @ POST -> Root / "v0" / "protocol" =>
+      case req @ POST -> Root / "v0" / "protocol" / id =>
         Sync[F].recoverWith(
           for {
             protocol <- req.as[Protocol]
-            id       <- CompendiumService[F].storeProtocol(protocol)
-            resp     <- Ok().map(_.putHeaders(Location(req.uri.withPath(s"${req.uri.path}/$id"))))
+            _        <- CompendiumService[F].storeProtocol(id, protocol)
+            resp     <- Created().map(_.putHeaders(Location(req.uri.withPath(s"${req.uri.path}"))))
           } yield resp
         ) {
           case e: org.apache.avro.SchemaParseException => BadRequest(e.getMessage.asJson)
+          case t: ProtocolAlreadyExists                => Conflict(t.getMessage.asJson)
           case _                                       => InternalServerError()
         }
 
-      case GET -> Root / "v0" / "protocol" / IntVar(protocolId) =>
+      case GET -> Root / "v0" / "protocol" / id =>
         for {
-          protocol <- CompendiumService[F].recoverProtocol(protocolId)
+          protocol <- CompendiumService[F].recoverProtocol(id)
           resp     <- protocol.fold(NotFound())(Ok(_))
         } yield resp
 

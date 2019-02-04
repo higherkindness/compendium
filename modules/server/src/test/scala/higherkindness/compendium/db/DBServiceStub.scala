@@ -14,17 +14,11 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium
+package higherkindness.compendium.db
 
+import cats.effect.IO
 import higherkindness.compendium.models.Protocol
-import org.scalacheck.{Arbitrary, Gen}
 
-trait CompendiumArbitrary {
-
-  implicit val protocolArbitrary: Arbitrary[Protocol] = Arbitrary {
-    (Gen.alphaNumStr).map(Protocol(_))
-  }
-
+class DBServiceStub extends DBService[IO] {
+  override def addProtocol(id: String, protocol: Protocol): IO[Unit] = IO.unit
 }
-
-object CompendiumArbitrary extends CompendiumArbitrary

@@ -19,10 +19,7 @@ package higherkindness.compendium.db
 import higherkindness.compendium.models.Protocol
 
 trait DBService[F[_]] {
-
-  def addProtocol(protocol: Protocol): F[Int]
-  def lastProtocol(): F[Option[Protocol]]
-
+  def addProtocol(id: String, protocol: Protocol): F[Unit]
 }
 
 object DBService {
