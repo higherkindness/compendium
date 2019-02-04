@@ -47,7 +47,6 @@ object RootService {
             resp     <- Created().map(_.putHeaders(Location(req.uri.withPath(s"${req.uri.path}"))))
           } yield resp
         ) {
-          // TODO Handle id already exists error
           case e: org.apache.avro.SchemaParseException => BadRequest(e.getMessage.asJson)
           case t: ProtocolAlreadyExists                => Conflict(t.getMessage.asJson)
           case _                                       => InternalServerError()
