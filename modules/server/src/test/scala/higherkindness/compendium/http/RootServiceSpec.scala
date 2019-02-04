@@ -78,6 +78,22 @@ object RootServiceSpec extends Specification with ScalaCheck {
       response.map(_.status).unsafeRunSync === Status.BadRequest
     }
 
+    "If protocol already exists returns Conflict" >> {
+      implicit val compendiumService = new CompendiumServiceStub(None) {
+        override def storeProtocol(id: String, protocol: Protocol): IO[Unit] =
+          IO.raiseError[Unit](new ProtocolAlreadyExists(s"Protocol with id $id already exists"))
+      }
+
+      val request: Request[IO] =
+        Request[IO](method = Method.POST, uri = Uri(path = s"/v0/protocol/my.proto"))
+          .withEntity(dummyProtocol)
+
+      val response: IO[Response[IO]] =
+        RootService.rootRouteService[IO].orNotFound(request)
+
+      response.map(_.status).unsafeRunSync === Status.Conflict
+    }
+
     "If protocol is valid returns Created and the location in the headers" >> prop { id: String =>
       implicit val compendiumService = new CompendiumServiceStub(None)
 
