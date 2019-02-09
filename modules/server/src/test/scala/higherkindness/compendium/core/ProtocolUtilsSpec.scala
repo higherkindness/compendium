@@ -44,6 +44,16 @@ object ProtocolUtilsSpec extends Specification with ScalaCheck {
         .validateProtocol(protocol)
         .unsafeRunSync must throwA[org.apache.avro.SchemaParseException]
     }
+
+    "It is possible to parse multiple protocols" >> {
+      val stream: InputStream = getClass.getResourceAsStream("/correct.avro")
+      val text: String        = scala.io.Source.fromInputStream(stream).getLines.mkString
+      val protocol: Protocol  = Protocol(text)
+
+      utils.validateProtocol(protocol).unsafeRunSync
+      utils.validateProtocol(protocol).unsafeRunSync should not(
+        throwA[org.apache.avro.SchemaParseException])
+    }
   }
 
 }
