@@ -19,6 +19,7 @@ lazy val V = new {
   val http4s: String           = "0.19.0"
   val shapeless: String        = "2.3.3"
   val pureConfig: String       = "0.10.2"
+  val hammock: String          = "0.9.0"
 }
 
 lazy val root = project
@@ -39,6 +40,7 @@ lazy val common = project
 lazy val server = project
   .in(file("modules/server"))
   .settings(commonSettings)
+  .settings(serverSettings)
   .settings(
     name := "compendium-server"
   )
@@ -47,6 +49,7 @@ lazy val server = project
 lazy val client = project
   .in(file("modules/client"))
   .settings(commonSettings)
+  .settings(clientSettings)
   .settings(
     name := "compendium-client"
   )
@@ -90,7 +93,7 @@ pgpPassphrase := Some(getEnvVar("PGP_PASSPHRASE").getOrElse("").toCharArray)
 pgpPublicRing := file(s"$gpgFolder/pubring.gpg")
 pgpSecretRing := file(s"$gpgFolder/secring.gpg")
 
-// General Settings
+//General Settings
 lazy val commonSettings = Seq(
   orgProjectName := "compendium",
   orgGithubSetting := GitHubSettings(
@@ -149,6 +152,21 @@ lazy val commonSettings = Seq(
     // format: ON
   )
 ) ++ compilerPlugins
+
+//Settings
+lazy val clientSettings = Seq(
+  libraryDependencies ++= Seq(
+    "com.pepegar" %% "hammock-core" % V.hammock,
+    "com.pepegar" %% "hammock-apache-http" % V.hammock,
+    "com.pepegar" %% "hammock-circe" % V.hammock
+  )
+)
+
+lazy val serverSettings = Seq(
+  libraryDependencies ++= Seq(
+    "io.chrisdavenport" %% "cats-scalacheck" % V.catsScalacheck % Test
+  )
+)
 
 lazy val compilerPlugins = Seq(
   libraryDependencies ++= Seq(

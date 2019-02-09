@@ -16,6 +16,10 @@
 
 package higherkindness.compendium
 
+//import hammock._
+//import hammock.marshalling._
+//import hammock.apache.ApacheInterpreter
+//import hammock.circe.implicits._
 import higherkindness.compendium.models.Protocol
 
 trait CompendiumClient[F[_]] {
@@ -33,4 +37,23 @@ trait CompendiumClient[F[_]] {
    * @return a protocol
    */
   def recoverProtocol(identifier: Int): F[Option[Protocol]]
+}
+
+object CompendiumClient {
+
+  def impl[F[_]]: CompendiumClient[F] = {
+//    implicit val interpreter = ApacheInterpreter[F]
+    new CompendiumClient[F] {
+
+      override def storeProtocol(protocol: Protocol): F[Int] = ???
+      /*{
+        val response = Hammock
+          .request(Method.GET, uri"https://localhost:8080/protocol", Map())
+          .as[Int]
+          .exec[F]
+      }*/
+
+      override def recoverProtocol(identifier: Int): F[Option[Protocol]] = ???
+    }
+  }
 }
