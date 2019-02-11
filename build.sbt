@@ -18,7 +18,7 @@ lazy val V = new {
   val specs2: String           = "4.4.1"
   val http4s: String           = "0.19.0"
   val shapeless: String        = "2.3.3"
-  val pureConfig: String       = "0.10.1"
+  val pureConfig: String       = "0.10.2"
 }
 
 lazy val root = project
