@@ -19,6 +19,7 @@ package higherkindness.compendium.core
 import java.io.InputStream
 
 import cats.effect.IO
+import cats.syntax.apply._
 import higherkindness.compendium.CompendiumArbitrary._
 import higherkindness.compendium.models.Protocol
 import org.specs2.ScalaCheck
@@ -43,6 +44,15 @@ object ProtocolUtilsSpec extends Specification with ScalaCheck {
       utils
         .validateProtocol(protocol)
         .unsafeRunSync must throwA[org.apache.avro.SchemaParseException]
+    }
+
+    "It is possible to parse multiple protocols" >> {
+      val stream: InputStream = getClass.getResourceAsStream("/correct.avro")
+      val text: String        = scala.io.Source.fromInputStream(stream).getLines.mkString
+      val protocol: Protocol  = Protocol(text)
+
+      (utils.validateProtocol(protocol) *> utils.validateProtocol(protocol)).unsafeRunSync should not(
+        throwA[org.apache.avro.SchemaParseException])
     }
   }
 

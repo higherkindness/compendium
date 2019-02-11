@@ -23,7 +23,7 @@ import org.apache.avro.Schema
 
 class ProtocolUtils[F[_]: Sync] {
 
-  private val parser: Schema.Parser = new Schema.Parser()
+  private def parser: Schema.Parser = new Schema.Parser()
 
   def validateProtocol(protocol: Protocol): F[Protocol] =
     if (protocol.raw.trim.isEmpty)
