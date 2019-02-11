@@ -19,6 +19,7 @@ package higherkindness.compendium.core
 import java.io.InputStream
 
 import cats.effect.IO
+import cats.syntax.apply._
 import higherkindness.compendium.CompendiumArbitrary._
 import higherkindness.compendium.models.Protocol
 import org.specs2.ScalaCheck
@@ -50,8 +51,7 @@ object ProtocolUtilsSpec extends Specification with ScalaCheck {
       val text: String        = scala.io.Source.fromInputStream(stream).getLines.mkString
       val protocol: Protocol  = Protocol(text)
 
-      utils.validateProtocol(protocol).unsafeRunSync
-      utils.validateProtocol(protocol).unsafeRunSync should not(
+      (utils.validateProtocol(protocol) *> utils.validateProtocol(protocol)).unsafeRunSync should not(
         throwA[org.apache.avro.SchemaParseException])
     }
   }
