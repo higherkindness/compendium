@@ -22,7 +22,7 @@ import fs2.Stream
 import higherkindness.compendium.core.{CompendiumService, ProtocolUtils}
 import higherkindness.compendium.db.{DBService, FileDBService}
 import higherkindness.compendium.http.RootService
-import higherkindness.compendium.models.CompendiumConfig
+import higherkindness.compendium.models.ServerConfig
 import higherkindness.compendium.storage.{FileStorage, Storage}
 import pureconfig.generic.auto._
 
@@ -35,7 +35,7 @@ object CompendiumStreamApp {
 
   def stream[F[_]: ConcurrentEffect]: Stream[F, ExitCode] =
     for {
-      conf <- Stream.eval(Effect[F].delay(pureconfig.loadConfigOrThrow[CompendiumConfig]))
+      conf <- Stream.eval(Effect[F].delay(pureconfig.loadConfigOrThrow[ServerConfig]))
       implicit0(storage: Storage[F])                     = FileStorage.impl[F](conf.storage)
       implicit0(dbService: DBService[F])                 = FileDBService.impl[F]
       implicit0(utils: ProtocolUtils[F])                 = ProtocolUtils.impl[F]()
