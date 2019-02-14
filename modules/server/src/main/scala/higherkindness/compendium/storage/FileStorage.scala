@@ -30,8 +30,9 @@ object FileStorage {
 
       override def store(id: String, protocol: Protocol): F[Unit] =
         for {
-          _    <- Sync[F].catchNonFatal(new File(s"${config.path}${File.separator}$id").mkdirs())
-          file <- Sync[F].catchNonFatal(new File(s"${config.path}${File.separator}${id}"))
+          _ <- Sync[F].catchNonFatal(new File(s"${config.path}${File.separator}$id").mkdirs())
+          file <- Sync[F].catchNonFatal(
+            new File(s"${config.path}${File.separator}${id}${File.separator}protocol"))
           _ <- Sync[F].catchNonFatal {
             val printWriter = new PrintWriter(file)
             printWriter.write(protocol.raw)
