@@ -20,7 +20,7 @@ import cats.effect._
 import cats.syntax.functor._
 import fs2.Stream
 import higherkindness.compendium.core.{CompendiumService, ProtocolUtils}
-import higherkindness.compendium.db.{DBService, DBServiceStorage}
+import higherkindness.compendium.db.{DBService, FileDBService}
 import higherkindness.compendium.http.RootService
 import higherkindness.compendium.models.CompendiumConfig
 import higherkindness.compendium.storage.{FileStorage, Storage}
@@ -37,7 +37,7 @@ object CompendiumStreamApp {
     for {
       conf <- Stream.eval(Effect[F].delay(pureconfig.loadConfigOrThrow[CompendiumConfig]))
       implicit0(storage: Storage[F])                     = FileStorage.impl[F](conf.storage)
-      implicit0(dbService: DBService[F])                 = DBServiceStorage.impl[F]
+      implicit0(dbService: DBService[F])                 = FileDBService.impl[F]
       implicit0(utils: ProtocolUtils[F])                 = ProtocolUtils.impl[F]()
       implicit0(compendiumService: CompendiumService[F]) = CompendiumService.impl[F]
       service                                            = RootService.rootRouteService
