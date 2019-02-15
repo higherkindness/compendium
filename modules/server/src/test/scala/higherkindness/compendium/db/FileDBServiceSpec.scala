@@ -22,7 +22,7 @@ import higherkindness.compendium.storage.StorageStub
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
 
-object DBServiceStorageSpec extends Specification with ScalaCheck {
+object FileDBServiceSPec extends Specification with ScalaCheck {
 
   sequential
 
@@ -32,7 +32,7 @@ object DBServiceStorageSpec extends Specification with ScalaCheck {
     "If the protocol doesn't exists we store it" >> prop { id: String =>
       implicit val storage = new StorageStub(Some(dummyProtocol), id)
 
-      DBServiceStorage.impl[IO].addProtocol(id, dummyProtocol).map(_ => success).unsafeRunSync()
+      FileDBService.impl[IO].addProtocol(id, dummyProtocol).map(_ => success).unsafeRunSync()
     }
 
     "If the protocol exists we raised an error" >> prop { id: String =>
@@ -40,7 +40,7 @@ object DBServiceStorageSpec extends Specification with ScalaCheck {
         override def checkIfExists(id: String): IO[Boolean] = IO(true)
       }
 
-      DBServiceStorage.impl[IO].addProtocol(id, dummyProtocol).unsafeRunSync must
+      FileDBService.impl[IO].addProtocol(id, dummyProtocol).unsafeRunSync must
         throwA[ProtocolAlreadyExists]
     }
   }

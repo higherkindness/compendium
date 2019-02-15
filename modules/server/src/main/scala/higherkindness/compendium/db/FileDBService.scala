@@ -23,17 +23,16 @@ import higherkindness.compendium.models.Protocol
 import higherkindness.compendium.models.ProtocolAlreadyExists
 import higherkindness.compendium.storage.Storage
 
-object DBServiceStorage {
+object FileDBService {
 
   def impl[F[_]: Sync: Storage]: DBService[F] =
     new DBService[F] {
-
       override def addProtocol(id: String, protocol: Protocol): F[Unit] =
         for {
           exists <- Storage[F].checkIfExists(id)
           _ <- exists.fold(
             Sync[F].raiseError(new ProtocolAlreadyExists(s"Protocol with id ${id} already exists")),
-            Storage[F].store(id, protocol))
+            Sync[F].unit)
         } yield ()
     }
 }
