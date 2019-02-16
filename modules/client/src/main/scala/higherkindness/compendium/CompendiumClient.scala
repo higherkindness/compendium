@@ -16,12 +16,13 @@
 
 package higherkindness.compendium
 
-import cats.effect.IO
+import cats.effect.Sync
 import hammock._
 import hammock.apache.ApacheInterpreter
 import hammock.circe.implicits._
-import hammock.marshalling._
-import higherkindness.compendium.models.Protocol
+import higherkindness.compendium.http.Encoders._
+import higherkindness.compendium.http.Decoders._
+import higherkindness.compendium.models.{ClientConfig, Protocol}
 
 trait CompendiumClient[F[_]] {
 
@@ -30,38 +31,35 @@ trait CompendiumClient[F[_]] {
    * @param protocol a protocol
    * @return the identifier of the protocol
    */
-  def storeProtocol(protocol: Protocol): F[Int]
+  def storeProtocol(protocol: Protocol): F[String]
 
   /** Retrieve a Protocol by its id
    *
    * @param identifier the protocol identifier
    * @return a protocol
    */
-  def recoverProtocol(identifier: Int): F[Option[Protocol]]
+  def recoverProtocol(identifier: String): F[Option[Protocol]]
 }
 
 object CompendiumClient {
 
-  private[this] implicit val interpTrans = ApacheInterpreter[IO]
+  def impl[F[_]: Sync: ApacheInterpreter](clientConfig: ClientConfig): CompendiumClient[F] = {
 
-  val response = Hammock
-    .request(Method.GET, uri"https://localhost:8080/protocol", Map())
-    .as[List[String]]
-    .exec[IO]
-
-  def impl[F[_]]: CompendiumClient[F] = {
+    val baseUrl: String = s"https://${clientConfig.http.host}:${clientConfig.http.port}"
 
     new CompendiumClient[F] {
 
-      override def storeProtocol(protocol: Protocol): F[Int] = ???
-      /*{
-        val response = Hammock
-          .request(Method.GET, uri"https://localhost:8080/protocol", Map())
-          .as[Int]
+      override def storeProtocol(protocol: Protocol): F[String] =
+        Hammock
+          .request(Method.POST, uri"$baseUrl/protocol/", Map(), Some(protocol))
+          .as[String]
           .exec[F]
-      }*/
 
-      override def recoverProtocol(identifier: Int): F[Option[Protocol]] = ???
+      override def recoverProtocol(identifier: String): F[Option[Protocol]] =
+        Hammock
+          .request(Method.GET, uri"$baseUrl/protocol/", Map())
+          .as[Option[Protocol]]
+          .exec[F]
     }
   }
 }

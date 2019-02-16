@@ -17,8 +17,8 @@
 package higherkindness.compendium.http
 
 import higherkindness.compendium.models.Protocol
-import io.circe._
-import io.circe.generic.semiauto._
+import io.circe.{Decoder, Encoder}
+import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
 object Decoders {
 
