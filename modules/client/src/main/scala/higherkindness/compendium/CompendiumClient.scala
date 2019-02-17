@@ -18,7 +18,7 @@ package higherkindness.compendium
 
 import cats.effect.Sync
 import hammock._
-import hammock.apache.ApacheInterpreter
+import hammock.asynchttpclient.AsyncHttpClientInterpreter
 import hammock.circe.implicits._
 import higherkindness.compendium.http.Encoders._
 import higherkindness.compendium.http.Decoders._
@@ -43,7 +43,8 @@ trait CompendiumClient[F[_]] {
 
 object CompendiumClient {
 
-  def impl[F[_]: Sync: ApacheInterpreter](clientConfig: ClientConfig): CompendiumClient[F] = {
+  def impl[F[_]: Sync: AsyncHttpClientInterpreter](
+      clientConfig: ClientConfig): CompendiumClient[F] = {
 
     val baseUrl: String = s"https://${clientConfig.http.host}:${clientConfig.http.port}"
 

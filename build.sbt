@@ -157,7 +157,7 @@ lazy val commonSettings = Seq(
 lazy val clientSettings = Seq(
   libraryDependencies ++= Seq(
     "com.pepegar" %% "hammock-core" % V.hammock,
-    "com.pepegar" %% "hammock-apache-http" % V.hammock,
+    "com.pepegar" %% "hammock-asynchttpclient" % V.hammock,
     "com.pepegar" %% "hammock-circe" % V.hammock
   )
 )
