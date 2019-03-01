@@ -57,7 +57,6 @@ lazy val docs = project
   .dependsOn(server, client)
   .settings(moduleName := "compendium-docs")
   .settings(commonSettings)
-  .settings(sbtMicrositesSettings)
   .settings(noPublishSettings)
   .settings(
     micrositeName := "Compendium",
@@ -68,6 +67,7 @@ lazy val docs = project
     micrositeHighlightTheme := "tomorrow",
     micrositeOrganizationHomepage := "http://www.47deg.com",
     includeFilter in Jekyll := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.swf" | "*.md",
+    micrositeGithubToken := getEnvVar(orgGithubTokenSetting.value),
     micrositePushSiteWith := GitHub4s,
     micrositeExtraMdFiles := Map(
       file("README.md") -> ExtraMdFileConfig(
@@ -118,7 +118,7 @@ lazy val commonSettings = Seq(
     %%("circe-generic", V.circe),
     %%("specs2-core", V.specs2)       % Test,
     %%("specs2-scalacheck", V.specs2) % Test,
-    "io.chrisdavenport"               %% "cats-scalacheck" % V.catsScalacheck % Test
+    "io.chrisdavenport" %% "cats-scalacheck" % V.catsScalacheck % Test
   ),
   orgScriptTaskListSetting := List(
     (clean in Global).asRunnableItemFull,
