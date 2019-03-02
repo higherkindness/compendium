@@ -28,7 +28,6 @@ lazy val root = project
   .settings(commonSettings)
   .settings(noPublishSettings)
   .aggregate(server, client)
-  .dependsOn(server, client)
 
 lazy val common = project
   .in(file("modules/common"))
@@ -53,7 +52,7 @@ lazy val client = project
   .settings(
     name := "compendium-client"
   )
-  .dependsOn(common)
+  .dependsOn(common, server % "test->test")
 
 lazy val docs = project
   .in(file("docs"))

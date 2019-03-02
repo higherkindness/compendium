@@ -66,10 +66,8 @@ object CompendiumClient {
         for {
           status <- request.map(_.status).exec[F]
           out <- status match {
-            case Status.OK         => request.as[Protocol].map(Some(_)).exec[F]
-            case Status.NotFound   => Sync[F].pure(None)
-            case Status.BadRequest => asError(request, new SchemaError(_))
-            case Status.Conflict   => asError(request, new ProtocolAlreadyExists(_))
+            case Status.OK       => request.as[Protocol].map(Some(_)).exec[F]
+            case Status.NotFound => Sync[F].pure(None)
             case Status.InternalServerError =>
               Sync[F].raiseError(new UnknownError(s"Error in compendium server"))
             case _ =>
@@ -77,15 +75,6 @@ object CompendiumClient {
           }
         } yield out
       }
-
-      private def asError(
-          request: Free[HttpF, HttpResponse],
-          error: String => Exception): F[Option[Protocol]] =
-        request
-          .as[String]
-          .exec[F]
-          .flatMap(str => Sync[F].raiseError(error(str)))
-
     }
   }
 }
