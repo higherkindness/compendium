@@ -16,4 +16,4 @@
 
 package higherkindness.compendium.models
 
-final case class ClientConfig(http: HttpConfig)
+final case class CompendiumConfig(http: HttpConfig)

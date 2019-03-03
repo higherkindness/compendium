@@ -17,4 +17,4 @@
 package higherkindness.compendium.models
 
 final case class StorageConfig(path: String)
-final case class ServerConfig(http: HttpConfig, storage: StorageConfig)
+final case class CompendiumConfig(http: HttpConfig, storage: StorageConfig)

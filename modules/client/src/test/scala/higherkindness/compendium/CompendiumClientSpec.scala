@@ -20,7 +20,7 @@ import cats.effect.{IO, Sync}
 import cats.~>
 import cats.effect._
 import hammock.{HttpF, HttpRequest, InterpTrans, Post}
-import higherkindness.compendium.models.{ClientConfig, ErrorResponse, Protocol}
+import higherkindness.compendium.models.{CompendiumConfig, ErrorResponse, Protocol}
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
 import pureconfig.generic.auto._
@@ -35,7 +35,8 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
 
   private[this] val dummyProtocol: Protocol = Protocol("rawProtocol")
 
-  implicit val clientConfig: ClientConfig = pureconfig.loadConfigOrThrow[ClientConfig]
+  implicit val clientConfig: CompendiumConfig =
+    pureconfig.loadConfigOrThrow[CompendiumConfig]("compendium")
 
   private[this] def asEntityJson[T: io.circe.Encoder](t: T): Entity =
     Entity.StringEntity(t.asJson.toString, ContentType.`application/json`)

@@ -52,7 +52,7 @@ lazy val client = project
   .settings(
     name := "compendium-client"
   )
-  .dependsOn(common, server % "test->test")
+  .dependsOn(common)
 
 lazy val docs = project
   .in(file("docs"))
