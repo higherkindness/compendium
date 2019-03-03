@@ -52,9 +52,14 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
             response(asEntityJson(dummyProtocol))
           }
 
+        case Get(HttpRequest(uri, _, _)) if uri.path.equalsIgnoreCase(s"/v0/protocol/error") =>
+          S.catchNonFatal {
+            response(Entity.EmptyEntity).copy(status = Status.InternalServerError)
+          }
+
         case Get(_) =>
           S.catchNonFatal {
-            response(Entity.StringEntity("")).copy(status = Status.NotFound)
+            response(Entity.EmptyEntity).copy(status = Status.NotFound)
           }
 
         case Post(HttpRequest(uri, _, _)) =>
@@ -73,18 +78,23 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
 
       implicit val terp = interp("proto1")
 
-      val protocol = CompendiumClient[IO].recoverProtocol("proto1").unsafeRunSync()
-
-      protocol should beSome(dummyProtocol)
+      CompendiumClient[IO].recoverProtocol("proto1").unsafeRunSync() should beSome(dummyProtocol)
     }
 
-    "Given a valid identifier returns a protocol" >> {
+    "Given an invalid identifier returns no protocol" >> {
 
       implicit val terp = interp("proto1")
 
-      val protocol = CompendiumClient[IO].recoverProtocol("proto2").unsafeRunSync()
+      CompendiumClient[IO].recoverProtocol("proto2").unsafeRunSync() should beNone
+    }
 
-      protocol should beNone
+    "Given an identifier returns a internal server error" >> {
+
+      implicit val terp = interp("proto1")
+
+      CompendiumClient[IO]
+        .recoverProtocol("error")
+        .unsafeRunSync() must throwA[higherkindness.compendium.models.UnknownError]
     }
   }
 }
