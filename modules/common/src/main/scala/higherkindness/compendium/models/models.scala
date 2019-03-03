@@ -17,3 +17,4 @@
 package higherkindness.compendium.models
 
 final case class Protocol(raw: String)
+final case class ErrorResponse(message: String)

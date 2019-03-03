@@ -16,16 +16,18 @@
 
 package higherkindness.compendium.http
 
-import higherkindness.compendium.models.Protocol
+import higherkindness.compendium.models.{ErrorResponse, Protocol}
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
 object Decoders {
 
-  implicit val protocolDecoder: Decoder[Protocol] = deriveDecoder[Protocol]
+  implicit val protocolDecoder: Decoder[Protocol]           = deriveDecoder[Protocol]
+  implicit val errorResponseDecoder: Decoder[ErrorResponse] = deriveDecoder[ErrorResponse]
 }
 
 object Encoders {
 
-  implicit val protocolEnconder: Encoder[Protocol] = deriveEncoder[Protocol]
+  implicit val protocolEnconder: Encoder[Protocol]          = deriveEncoder[Protocol]
+  implicit val errorResponseEncoder: Encoder[ErrorResponse] = deriveEncoder[ErrorResponse]
 }

@@ -20,7 +20,7 @@ import cats.effect.{IO, Sync}
 import cats.~>
 import cats.effect._
 import hammock.{HttpF, HttpRequest, InterpTrans, Post}
-import higherkindness.compendium.models.{ClientConfig, Protocol}
+import higherkindness.compendium.models.{ClientConfig, ErrorResponse, Protocol}
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
 import pureconfig.generic.auto._
@@ -62,6 +62,24 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
             response(Entity.EmptyEntity).copy(status = Status.NotFound)
           }
 
+        case Post(HttpRequest(uri, _, _))
+            if uri.path.equalsIgnoreCase(s"/v0/protocol/schemaerror") =>
+          S.catchNonFatal {
+            response(asEntityJson(ErrorResponse("Schema error"))).copy(status = Status.BadRequest)
+          }
+
+        case Post(HttpRequest(uri, _, _))
+            if uri.path.equalsIgnoreCase(s"/v0/protocol/alreadyexists") =>
+          S.catchNonFatal {
+            response(asEntityJson(ErrorResponse("Protocol already exists")))
+              .copy(status = Status.Conflict)
+          }
+
+        case Post(HttpRequest(uri, _, _)) if uri.path.equalsIgnoreCase(s"/v0/protocol/internal") =>
+          S.catchNonFatal {
+            response(Entity.EmptyEntity).copy(status = Status.InternalServerError)
+          }
+
         case Post(HttpRequest(uri, _, _)) =>
           S.catchNonFatal {
             response(Entity.StringEntity(uri.path))
@@ -94,6 +112,43 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
 
       CompendiumClient[IO]
         .recoverProtocol("error")
+        .unsafeRunSync() must throwA[higherkindness.compendium.models.UnknownError]
+    }
+  }
+
+  "Store protocol" >> {
+    "Given a valid identifier and a correct protocol returns no error" >> {
+
+      implicit val terp = interp("proto1")
+
+      CompendiumClient[IO].storeProtocol("proto1", dummyProtocol).unsafeRunSync() must not(
+        throwA[Exception])
+    }
+
+    "Given a valid identifier and an incorrect protocol returns a SchemaError" >> {
+
+      implicit val terp = interp("proto1")
+
+      CompendiumClient[IO]
+        .storeProtocol("schemaerror", dummyProtocol)
+        .unsafeRunSync() must throwA[higherkindness.compendium.models.SchemaError]
+    }
+
+    "Given a valid identifier and a protocol that already exists returns a ProtocolAlreadyExists" >> {
+
+      implicit val terp = interp("proto1")
+
+      CompendiumClient[IO]
+        .storeProtocol("alreadyexists", dummyProtocol)
+        .unsafeRunSync() must throwA[higherkindness.compendium.models.ProtocolAlreadyExists]
+    }
+
+    "Given a valid identifier and a protocol that returs a InternalServerError returns a UnknownError" >> {
+
+      implicit val terp = interp("proto1")
+
+      CompendiumClient[IO]
+        .storeProtocol("internal", dummyProtocol)
         .unsafeRunSync() must throwA[higherkindness.compendium.models.UnknownError]
     }
   }

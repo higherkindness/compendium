@@ -29,10 +29,11 @@ trait CompendiumClient[F[_]] {
 
   /** Stores a protocol
    *
+   * @param identifier the protocol identifier
    * @param protocol a protocol
    * @return the identifier of the protocol
    */
-  def storeProtocol(protocol: Protocol, identifier: String): F[Unit]
+  def storeProtocol(identifier: String, protocol: Protocol): F[Int]
 
   /** Retrieve a Protocol by its id
    *
@@ -53,11 +54,24 @@ object CompendiumClient {
 
     new CompendiumClient[F] {
 
-      override def storeProtocol(protocol: Protocol, identifier: String): F[Unit] =
-        Hammock
-          .request(Method.POST, uri"$baseUrl/v0/protocol/$identifier", Map(), Some(protocol))
-          .as[Unit]
-          .exec[F]
+      override def storeProtocol(identifier: String, protocol: Protocol): F[Int] = {
+        val request =
+          Hammock.request(Method.POST, uri"$baseUrl/v0/protocol/$identifier", Map(), Some(protocol))
+
+        for {
+          status <- request.map(_.status).exec[F]
+          _ <- status match {
+            case Status.OK => Sync[F].unit
+            case Status.BadRequest =>
+              asError(request, new SchemaError(_))
+            case Status.Conflict => asError(request, new ProtocolAlreadyExists(_))
+            case Status.InternalServerError =>
+              Sync[F].raiseError(new UnknownError(s"Error in compendium server"))
+            case _ =>
+              Sync[F].raiseError(new UnknownError(s"Unknown error with status code $status"))
+          }
+        } yield status.code
+      }
 
       override def recoverProtocol(identifier: String): F[Option[Protocol]] = {
         val request: Free[HttpF, HttpResponse] = Hammock
@@ -75,6 +89,12 @@ object CompendiumClient {
           }
         } yield out
       }
+
+      private def asError(request: Free[HttpF, HttpResponse], error: String => Exception): F[Unit] =
+        request
+          .as[ErrorResponse]
+          .exec[F]
+          .flatMap(rsp => Sync[F].raiseError(error(rsp.message)))
     }
   }
 }
