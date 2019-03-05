@@ -50,7 +50,7 @@ object CompendiumClient {
   implicit def impl[F[_]: Sync: InterpTrans](
       implicit clientConfig: CompendiumConfig): CompendiumClient[F] = {
 
-    val baseUrl: String = s"https://${clientConfig.http.host}:${clientConfig.http.port}"
+    val baseUrl: String = s"${clientConfig.http.host}:${clientConfig.http.port}"
 
     new CompendiumClient[F] {
 
