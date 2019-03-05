@@ -83,6 +83,8 @@ lazy val docs = project
         Map("title" -> "changelog", "section" -> "changelog", "position" -> "99")
       )
     ),
+    scalacOptions in console ~= filterConsoleScalacOptions,
+    scalacOptions in doc ~= filterConsoleScalacOptions,
     scalacOptions in Tut ~= filterConsoleScalacOptions,
     scalacOptions in Tut += "-language:postfixOps"
   )
@@ -163,6 +165,7 @@ lazy val clientSettings = Seq(
 
 lazy val serverSettings = Seq(
   libraryDependencies ++= Seq(
+    "org.slf4j" % "slf4j-simple" % "1.7.26",
     "io.chrisdavenport" %% "cats-scalacheck" % V.catsScalacheck % Test
   )
 )
