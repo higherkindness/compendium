@@ -83,7 +83,7 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
 
         case Post(HttpRequest(uri, _, _)) =>
           S.catchNonFatal {
-            response(Entity.StringEntity(uri.path))
+            response(Entity.StringEntity(uri.path)).copy(status = Status.Created)
           }
 
         case _ =>

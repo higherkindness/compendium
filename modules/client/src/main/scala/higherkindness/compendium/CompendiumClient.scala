@@ -50,8 +50,7 @@ object CompendiumClient {
   implicit def impl[F[_]: Sync: InterpTrans](
       implicit clientConfig: CompendiumConfig): CompendiumClient[F] = {
 
-    val baseUrl: String = s"${clientConfig.http.host}:${clientConfig.http.port}"
-
+    val baseUrl: String = s"http://${clientConfig.http.host}:${clientConfig.http.port}"
     new CompendiumClient[F] {
 
       override def storeProtocol(identifier: String, protocol: Protocol): F[Int] = {
@@ -61,7 +60,7 @@ object CompendiumClient {
         for {
           status <- request.map(_.status).exec[F]
           _ <- status match {
-            case Status.OK => Sync[F].unit
+            case Status.Created => Sync[F].unit
             case Status.BadRequest =>
               asError(request, new SchemaError(_))
             case Status.Conflict => asError(request, new ProtocolAlreadyExists(_))
