@@ -14,18 +14,6 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.http
+package higherkindness.compendium.models
 
-import higherkindness.compendium.models.Protocol
-import io.circe._
-import io.circe.generic.semiauto._
-
-object Decoders {
-
-  implicit val protocolDecoder: Decoder[Protocol] = deriveDecoder[Protocol]
-}
-
-object Encoders {
-
-  implicit val protocolEnconder: Encoder[Protocol] = deriveEncoder[Protocol]
-}
+final case class CompendiumConfig(http: HttpConfig)

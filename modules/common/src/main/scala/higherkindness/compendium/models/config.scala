@@ -16,4 +16,4 @@
 
 package higherkindness.compendium.models
 
-class ProtocolAlreadyExists(message: String) extends Exception(message)
+final case class HttpConfig(host: String, port: Int)

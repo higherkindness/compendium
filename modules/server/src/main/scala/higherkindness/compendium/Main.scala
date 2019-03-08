@@ -35,7 +35,8 @@ object CompendiumStreamApp {
 
   def stream[F[_]: ConcurrentEffect]: Stream[F, ExitCode] =
     for {
-      conf <- Stream.eval(Effect[F].delay(pureconfig.loadConfigOrThrow[CompendiumConfig]))
+      conf <- Stream.eval(
+        Effect[F].delay(pureconfig.loadConfigOrThrow[CompendiumConfig]("compendium")))
       implicit0(storage: Storage[F])                     = FileStorage.impl[F](conf.storage)
       implicit0(dbService: DBService[F])                 = FileDBService.impl[F]
       implicit0(utils: ProtocolUtils[F])                 = ProtocolUtils.impl[F]()

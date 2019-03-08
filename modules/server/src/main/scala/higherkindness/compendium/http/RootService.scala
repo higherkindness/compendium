@@ -47,8 +47,8 @@ object RootService {
             resp     <- Created().map(_.putHeaders(Location(req.uri.withPath(s"${req.uri.path}"))))
           } yield resp
         ) {
-          case e: org.apache.avro.SchemaParseException => BadRequest(e.getMessage.asJson)
-          case t: ProtocolAlreadyExists                => Conflict(t.getMessage.asJson)
+          case e: org.apache.avro.SchemaParseException => BadRequest(ErrorResponse(e.getMessage))
+          case t: ProtocolAlreadyExists                => Conflict(ErrorResponse(t.getMessage))
           case _                                       => InternalServerError()
         }
 
