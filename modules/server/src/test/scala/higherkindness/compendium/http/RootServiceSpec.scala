@@ -36,7 +36,7 @@ object RootServiceSpec extends Specification with ScalaCheck {
 
   "GET /v0/protocol/id" >> {
     "If successs returns a valid protocol and status code" >> {
-      implicit val compendiumService = new CompendiumServiceStub(Some(dummyProtocol))
+      implicit val compendiumService = new CompendiumServiceStub(Some(dummyProtocol), true)
 
       val request: Request[IO] =
         Request[IO](method = Method.GET, uri = Uri(path = s"/v0/protocol/my.proto"))
@@ -49,7 +49,7 @@ object RootServiceSpec extends Specification with ScalaCheck {
     }
 
     "If protocol not found returns not found" >> {
-      implicit val compendiumService = new CompendiumServiceStub(None)
+      implicit val compendiumService = new CompendiumServiceStub(None, true)
 
       val request: Request[IO] =
         Request[IO](method = Method.GET, uri = Uri(path = s"/v0/protocol/my.proto"))
@@ -63,7 +63,7 @@ object RootServiceSpec extends Specification with ScalaCheck {
 
   "POST /v0/protocol/" >> {
     "If protocol returns an invalid avro schema returns BadRequest" >> {
-      implicit val compendiumService = new CompendiumServiceStub(None) {
+      implicit val compendiumService = new CompendiumServiceStub(None, false) {
         override def storeProtocol(id: String, protocol: Protocol): IO[Unit] =
           IO.raiseError[Unit](new org.apache.avro.SchemaParseException(""))
       }
@@ -78,24 +78,8 @@ object RootServiceSpec extends Specification with ScalaCheck {
       response.map(_.status).unsafeRunSync === Status.BadRequest
     }
 
-    "If protocol already exists returns Conflict" >> {
-      implicit val compendiumService = new CompendiumServiceStub(None) {
-        override def storeProtocol(id: String, protocol: Protocol): IO[Unit] =
-          IO.raiseError[Unit](new ProtocolAlreadyExists(s"Protocol with id $id already exists"))
-      }
-
-      val request: Request[IO] =
-        Request[IO](method = Method.POST, uri = Uri(path = s"/v0/protocol/my.proto"))
-          .withEntity(dummyProtocol)
-
-      val response: IO[Response[IO]] =
-        RootService.rootRouteService[IO].orNotFound(request)
-
-      response.map(_.status).unsafeRunSync === Status.Conflict
-    }
-
     "If protocol is valid returns Created and the location in the headers" >> prop { id: String =>
-      implicit val compendiumService = new CompendiumServiceStub(None)
+      implicit val compendiumService = new CompendiumServiceStub(None, false)
 
       val request: Request[IO] =
         Request[IO](method = Method.POST, uri = Uri(path = s"/v0/protocol/$id"))
@@ -108,7 +92,25 @@ object RootServiceSpec extends Specification with ScalaCheck {
       response
         .map(_.headers.find(_.name == "Location".ci))
         .unsafeRunSync
-        .map(_.value) === Some(s"/v0/protocol/${id}")
+        .map(_.value) === Some(s"/v0/protocol/$id")
+    }.setGen(Gen.alphaNumStr suchThat (!_.isEmpty))
+
+    "If protocol is valid and it was already in compendium returns Ok and the location in the headers" >> prop {
+      id: String =>
+        implicit val compendiumService = new CompendiumServiceStub(None, true)
+
+        val request: Request[IO] =
+          Request[IO](method = Method.POST, uri = Uri(path = s"/v0/protocol/$id"))
+            .withEntity(dummyProtocol)
+
+        val response: IO[Response[IO]] =
+          RootService.rootRouteService[IO].orNotFound(request)
+
+        response.map(_.status).unsafeRunSync === Status.Ok
+        response
+          .map(_.headers.find(_.name == "Location".ci))
+          .unsafeRunSync
+          .map(_.value) === Some(s"/v0/protocol/$id")
     }.setGen(Gen.alphaNumStr suchThat (!_.isEmpty))
   }
 }

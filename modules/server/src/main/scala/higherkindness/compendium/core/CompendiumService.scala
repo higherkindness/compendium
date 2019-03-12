@@ -25,23 +25,28 @@ import higherkindness.compendium.storage.Storage
 trait CompendiumService[F[_]] {
 
   def storeProtocol(id: String, protocol: Protocol): F[Unit]
-  def recoverProtocol(id: String): F[Option[Protocol]]
+  def recoverProtocol(protocolId: String): F[Option[Protocol]]
+  def existsProtocol(protocolId: String): F[Boolean]
 }
 
 object CompendiumService {
 
-  def impl[F[_]: Sync: Storage: DBService: ProtocolUtils] = new CompendiumService[F] {
+  implicit def impl[F[_]: Sync: Storage: DBService: ProtocolUtils](): CompendiumService[F] =
+    new CompendiumService[F] {
 
-    val utils = ProtocolUtils[F]
+      override def storeProtocol(id: String, protocol: Protocol): F[Unit] =
+        ProtocolUtils[F].validateProtocol(protocol) >>
+          DBService[F].upsertProtocol(id, protocol) >>
+          Storage[F].store(id, protocol)
 
-    override def storeProtocol(id: String, protocol: Protocol): F[Unit] =
-      ProtocolUtils[F].validateProtocol(protocol) >>
-        DBService[F].addProtocol(id, protocol) >>
-        Storage[F].store(id, protocol)
+      override def recoverProtocol(protocolId: String): F[Option[Protocol]] =
+        DBService[F]
+          .existsProtocol(protocolId)
+          .ifM(Storage[F].recover(protocolId), none[Protocol].pure[F])
 
-    override def recoverProtocol(protocolId: String): F[Option[Protocol]] =
-      Storage[F].recover(protocolId)
-  }
+      override def existsProtocol(protocolId: String): F[Boolean] =
+        DBService[F].existsProtocol(protocolId)
+    }
 
   def apply[F[_]](implicit F: CompendiumService[F]): CompendiumService[F] = F
 }

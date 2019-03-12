@@ -23,19 +23,11 @@ import higherkindness.compendium.CompendiumArbitrary._
 import higherkindness.compendium.models.{Protocol, StorageConfig}
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
-import org.specs2.mutable.After
-import org.specs2.specification.{AfterAll, BeforeAll}
+import org.specs2.specification.{AfterEach, BeforeAfterAll}
 
 import scala.reflect.io.Directory
 
-object FileStorageSpec
-    extends Specification
-    with ScalaCheck
-    with BeforeAll
-    with AfterAll
-    with After {
-
-  sequential
+object FileStorageSpec extends Specification with ScalaCheck with BeforeAfterAll with AfterEach {
 
   private[this] lazy val basePath: String             = "/tmp/filespec"
   private[this] lazy val storageConfig: StorageConfig = StorageConfig(s"$basePath/files")
@@ -60,6 +52,8 @@ object FileStorageSpec
     val _ = baseDirectory.createDirectory()
   }
 
+  sequential
+
   "Store a file" >> {
     "Successfully stores a file" >> prop { protocol: Protocol =>
       val storageProtocolFile = storageProtocol("id")
@@ -78,5 +72,24 @@ object FileStorageSpec
 
       file.unsafeRunSync() should beSome(protocol)
     }
+
+    "Returns true if there is a file" >> prop { protocol: Protocol =>
+      val file = for {
+        _      <- fileStorage.store("id", protocol)
+        exists <- fileStorage.exists("id")
+      } yield exists
+
+      file.unsafeRunSync() should beTrue
+    }
+
+    "Returns false if there is no file" >> {
+      val out = for {
+        exists <- fileStorage.exists("id")
+      } yield exists
+
+      out.unsafeRunSync() should beFalse
+    }
+
   }
+
 }

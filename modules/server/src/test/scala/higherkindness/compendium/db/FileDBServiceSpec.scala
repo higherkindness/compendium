@@ -17,31 +17,41 @@
 package higherkindness.compendium.db
 
 import cats.effect.IO
-import higherkindness.compendium.models.{Protocol, ProtocolAlreadyExists}
-import higherkindness.compendium.storage.StorageStub
+import higherkindness.compendium.CompendiumArbitrary._
+import higherkindness.compendium.DifferentIdentifiers
+import higherkindness.compendium.models.Protocol
+import higherkindness.compendium.storage.{Storage, StorageStub}
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
 
-object FileDBServiceSPec extends Specification with ScalaCheck {
+object FileDBServiceSpec extends Specification with ScalaCheck {
 
   sequential
 
   private val dummyProtocol: Protocol = Protocol("")
 
-  "Store protocol" >> {
-    "If the protocol doesn't exists we store it" >> prop { id: String =>
-      implicit val storage = new StorageStub(Some(dummyProtocol), id)
+  "File DBService upsert" >> {
+    "Returns always unit" >> prop { id: String =>
+      implicit val storage: Storage[IO] = new StorageStub(Some(dummyProtocol), id)
+      val dbService: DBService[IO]      = FileDBService.impl[IO]
 
-      FileDBService.impl[IO].addProtocol(id, dummyProtocol).map(_ => success).unsafeRunSync()
+      dbService.upsertProtocol(id, dummyProtocol).unsafeRunSync() must not(throwA[Exception])
+    }
+  }
+
+  "File DBService exists" >> {
+    "If the protocol exists returns true" >> prop { id: String =>
+      implicit val storage: Storage[IO] = new StorageStub(Some(dummyProtocol), id)
+      val dbService: DBService[IO]      = FileDBService.impl[IO]
+
+      dbService.existsProtocol(id).unsafeRunSync() should beTrue
     }
 
-    "If the protocol exists we raised an error" >> prop { id: String =>
-      implicit val storage = new StorageStub(Some(dummyProtocol), id) {
-        override def checkIfExists(id: String): IO[Boolean] = IO(true)
-      }
+    "If the protocol doesn't exist returns false" >> prop { ids: DifferentIdentifiers =>
+      implicit val storage: Storage[IO] = new StorageStub(Some(dummyProtocol), ids.identifier1)
+      val dbService: DBService[IO]      = FileDBService.impl[IO]
 
-      FileDBService.impl[IO].addProtocol(id, dummyProtocol).unsafeRunSync must
-        throwA[ProtocolAlreadyExists]
+      dbService.existsProtocol(ids.identifier2).unsafeRunSync() should beFalse
     }
   }
 }

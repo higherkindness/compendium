@@ -19,7 +19,8 @@ package higherkindness.compendium.db
 import higherkindness.compendium.models.Protocol
 
 trait DBService[F[_]] {
-  def addProtocol(id: String, protocol: Protocol): F[Unit]
+  def upsertProtocol(id: String, protocol: Protocol): F[Unit]
+  def existsProtocol(id: String): F[Boolean]
 }
 
 object DBService {

@@ -28,6 +28,7 @@ import Encoders._
 import higherkindness.compendium.core.CompendiumService
 import org.http4s.HttpRoutes
 import org.http4s.headers.Location
+import mouse.all._
 
 object RootService {
 
@@ -43,12 +44,12 @@ object RootService {
         Sync[F].recoverWith(
           for {
             protocol <- req.as[Protocol]
+            exists   <- CompendiumService[F].existsProtocol(id)
             _        <- CompendiumService[F].storeProtocol(id, protocol)
-            resp     <- Created().map(_.putHeaders(Location(req.uri.withPath(s"${req.uri.path}"))))
-          } yield resp
+            resp     <- exists.fold(Ok(), Created())
+          } yield resp.putHeaders(Location(req.uri.withPath(s"${req.uri.path}")))
         ) {
           case e: org.apache.avro.SchemaParseException => BadRequest(ErrorResponse(e.getMessage))
-          case t: ProtocolAlreadyExists                => Conflict(ErrorResponse(t.getMessage))
           case _                                       => InternalServerError()
         }
 

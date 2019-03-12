@@ -61,9 +61,9 @@ object CompendiumClient {
           status <- request.map(_.status).exec[F]
           _ <- status match {
             case Status.Created => Sync[F].unit
+            case Status.OK      => Sync[F].unit
             case Status.BadRequest =>
               asError(request, new SchemaError(_))
-            case Status.Conflict => asError(request, new ProtocolAlreadyExists(_))
             case Status.InternalServerError =>
               Sync[F].raiseError(new UnknownError(s"Error in compendium server"))
             case _ =>

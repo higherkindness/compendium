@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.models
+package higherkindness.compendium.core
 
-class SchemaError(message: String)  extends Exception(message)
-class UnknownError(message: String) extends Exception(message)
+import cats.effect.IO
+import higherkindness.compendium.models.Protocol
+
+class ProtocolUtilsStub(val pro: Protocol, val valid: Boolean) extends ProtocolUtils[IO] {
+  def validateProtocol(protocol: Protocol): IO[Protocol] =
+    if (valid) IO(pro)
+    else IO.raiseError(new org.apache.avro.SchemaParseException("Error"))
+}
