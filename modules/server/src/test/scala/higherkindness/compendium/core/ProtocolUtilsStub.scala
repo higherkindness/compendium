@@ -18,9 +18,9 @@ package higherkindness.compendium.core
 
 import cats.effect.IO
 import higherkindness.compendium.models.Protocol
+import mouse.all._
 
 class ProtocolUtilsStub(val pro: Protocol, val valid: Boolean) extends ProtocolUtils[IO] {
   def validateProtocol(protocol: Protocol): IO[Protocol] =
-    if (valid) IO(pro)
-    else IO.raiseError(new org.apache.avro.SchemaParseException("Error"))
+     valid.fold(IO(pro), IO.raiseError(new org.apache.avro.SchemaParseException("Error")))
 }
