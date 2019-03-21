@@ -34,5 +34,5 @@ class StorageStub(val proto: Option[Protocol], val identifier: String)
     if (id == identifier) IO(proto) else IO(None)
 
   override def exists(id: String): IO[Boolean] =
-    if (id == identifier) IO(true) else IO(false)
+    IO(id == identifier)
 }
