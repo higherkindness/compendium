@@ -25,14 +25,14 @@ import higherkindness.compendium.models.{Protocol, StorageConfig}
 
 object FileStorage {
 
-  def impl[F[_]: Sync](config: StorageConfig): Storage[F] =
+  implicit def impl[F[_]: Sync](config: StorageConfig): Storage[F] =
     new Storage[F] {
 
       override def store(id: String, protocol: Protocol): F[Unit] =
         for {
           _ <- Sync[F].catchNonFatal(new File(s"${config.path}${File.separator}$id").mkdirs())
           file <- Sync[F].catchNonFatal(
-            new File(s"${config.path}${File.separator}${id}${File.separator}protocol"))
+            new File(s"${config.path}${File.separator}$id${File.separator}protocol"))
           _ <- Sync[F].catchNonFatal {
             val printWriter = new PrintWriter(file)
             printWriter.write(protocol.raw)
@@ -43,7 +43,7 @@ object FileStorage {
       override def recover(id: String): F[Option[Protocol]] =
         for {
           filename <- Sync[F].catchNonFatal {
-            Option(new File(s"${config.path}${File.separator}${id}").listFiles())
+            Option(new File(s"${config.path}${File.separator}$id").listFiles())
               .fold(Option.empty[String])(_.headOption.map(_.getAbsolutePath))
           }
           source <- Sync[F].catchNonFatal { filename.map(scala.io.Source.fromFile) }
@@ -56,7 +56,8 @@ object FileStorage {
           }
         } yield protocol
 
-      override def checkIfExists(id: String): F[Boolean] =
-        Sync[F].catchNonFatal(new File(s"${config.path}${File.separator}${id}")).map(_.exists)
+      override def exists(id: String): F[Boolean] =
+        Sync[F].catchNonFatal(new File(s"${config.path}${File.separator}$id")).map(_.exists)
     }
+
 }

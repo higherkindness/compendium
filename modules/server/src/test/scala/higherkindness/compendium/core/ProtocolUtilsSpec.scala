@@ -29,19 +29,18 @@ object ProtocolUtilsSpec extends Specification with ScalaCheck {
 
   sequential
 
-  val utils = ProtocolUtils.impl[IO]()
-
   "Given a raw protocol text" >> {
     "Returns a protocol if the avro text it is correct" >> {
       val stream: InputStream = getClass.getResourceAsStream("/correct.avro")
       val text: String        = scala.io.Source.fromInputStream(stream).getLines.mkString
       val protocol: Protocol  = Protocol(text)
 
-      utils.validateProtocol(protocol).unsafeRunSync === protocol
+      ProtocolUtils.impl[IO].validateProtocol(protocol).unsafeRunSync === protocol
     }
 
     "Raise an error if the protocol is incorrect" >> prop { protocol: Protocol =>
-      utils
+      ProtocolUtils
+        .impl[IO]
         .validateProtocol(protocol)
         .unsafeRunSync must throwA[org.apache.avro.SchemaParseException]
     }
@@ -51,7 +50,9 @@ object ProtocolUtilsSpec extends Specification with ScalaCheck {
       val text: String        = scala.io.Source.fromInputStream(stream).getLines.mkString
       val protocol: Protocol  = Protocol(text)
 
-      (utils.validateProtocol(protocol) *> utils.validateProtocol(protocol)).unsafeRunSync should not(
+      (ProtocolUtils.impl[IO].validateProtocol(protocol) *> ProtocolUtils
+        .impl[IO]
+        .validateProtocol(protocol)).unsafeRunSync should not(
         throwA[org.apache.avro.SchemaParseException])
     }
   }

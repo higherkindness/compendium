@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.models
+package higherkindness.compendium
 
-class SchemaError(message: String)  extends Exception(message)
-class UnknownError(message: String) extends Exception(message)
+final case class DifferentIdentifiers(identifier1: String, identifier2: String)

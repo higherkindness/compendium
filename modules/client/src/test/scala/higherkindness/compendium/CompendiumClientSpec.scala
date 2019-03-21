@@ -72,8 +72,7 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
         case Post(HttpRequest(uri, _, _))
             if uri.path.equalsIgnoreCase(s"/v0/protocol/alreadyexists") =>
           S.catchNonFatal {
-            response(asEntityJson(ErrorResponse("Protocol already exists")))
-              .copy(status = Status.Conflict)
+            response(Entity.StringEntity(uri.path)).copy(status = Status.OK)
           }
 
         case Post(HttpRequest(uri, _, _)) if uri.path.equalsIgnoreCase(s"/v0/protocol/internal") =>
@@ -83,7 +82,7 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
 
         case Post(HttpRequest(uri, _, _)) =>
           S.catchNonFatal {
-            response(Entity.StringEntity(uri.path))
+            response(Entity.StringEntity(uri.path)).copy(status = Status.Created)
           }
 
         case _ =>
@@ -135,13 +134,13 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
         .unsafeRunSync() must throwA[higherkindness.compendium.models.SchemaError]
     }
 
-    "Given a valid identifier and a protocol that already exists returns a ProtocolAlreadyExists" >> {
+    "Given a valid identifier and a protocol that already exists returns no error" >> {
 
       implicit val terp = interp("proto1")
 
       CompendiumClient[IO]
         .storeProtocol("alreadyexists", dummyProtocol)
-        .unsafeRunSync() must throwA[higherkindness.compendium.models.ProtocolAlreadyExists]
+        .unsafeRunSync() must not(throwA[Exception])
     }
 
     "Given a valid identifier and a protocol that returs a InternalServerError returns a UnknownError" >> {

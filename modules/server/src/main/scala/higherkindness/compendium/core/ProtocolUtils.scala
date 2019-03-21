@@ -21,20 +21,21 @@ import cats.implicits._
 import higherkindness.compendium.models.Protocol
 import org.apache.avro.Schema
 
-class ProtocolUtils[F[_]: Sync] {
-
-  private def parser: Schema.Parser = new Schema.Parser()
-
-  def validateProtocol(protocol: Protocol): F[Protocol] =
-    if (protocol.raw.trim.isEmpty)
-      Sync[F].raiseError(new org.apache.avro.SchemaParseException("Protocol is empty"))
-    else
-      Sync[F].catchNonFatal(parser.parse(protocol.raw)).map(_ => protocol)
+trait ProtocolUtils[F[_]] {
+  def validateProtocol(protocol: Protocol): F[Protocol]
 }
 
 object ProtocolUtils {
 
-  def impl[F[_]: Sync](): ProtocolUtils[F] = new ProtocolUtils
+  private def parser: Schema.Parser = new Schema.Parser()
+
+  def impl[F[_]: Sync](): ProtocolUtils[F] = new ProtocolUtils[F] {
+    override def validateProtocol(protocol: Protocol): F[Protocol] =
+      if (protocol.raw.trim.isEmpty)
+        Sync[F].raiseError(new org.apache.avro.SchemaParseException("Protocol is empty"))
+      else
+        Sync[F].catchNonFatal(parser.parse(protocol.raw)).map(_ => protocol)
+  }
 
   def apply[F[_]](implicit F: ProtocolUtils[F]): ProtocolUtils[F] = F
 }

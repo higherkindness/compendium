@@ -22,7 +22,14 @@ import org.scalacheck.{Arbitrary, Gen}
 trait CompendiumArbitrary {
 
   implicit val protocolArbitrary: Arbitrary[Protocol] = Arbitrary {
-    (Gen.alphaNumStr).map(Protocol(_))
+    Gen.alphaNumStr.map(Protocol)
+  }
+
+  implicit val differentIdentifiersArb: Arbitrary[DifferentIdentifiers] = Arbitrary {
+    for {
+      id1 <- Gen.alphaStr
+      id2 <- Gen.alphaStr.suchThat(id => !id.equalsIgnoreCase(id1))
+    } yield DifferentIdentifiers(id1, id2)
   }
 
 }
