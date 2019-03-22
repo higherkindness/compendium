@@ -16,6 +16,8 @@ lazy val V = new {
   val scala: String            = "2.12.8"
   val skeumorph: String        = "0.0.1"
   val specs2: String           = "4.4.1"
+  val enumeratum: String       = "1.5.13"
+  val enumeratumCirce: String  = "1.5.20"
   val http4s: String           = "0.19.0"
   val shapeless: String        = "2.3.3"
   val pureConfig: String       = "0.10.2"
@@ -122,6 +124,8 @@ lazy val commonSettings = Seq(
     %%("circe-generic", V.circe),
     %%("specs2-core", V.specs2)       % Test,
     %%("specs2-scalacheck", V.specs2) % Test,
+    "com.beachape" %% "enumeratum" % V.enumeratum,
+    "com.beachape" %% "enumeratum-circe" % V.enumeratumCirce,
     "io.chrisdavenport" %% "cats-scalacheck" % V.catsScalacheck % Test
   ),
   orgScriptTaskListSetting := List(

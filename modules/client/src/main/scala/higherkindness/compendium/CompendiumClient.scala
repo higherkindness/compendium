@@ -41,6 +41,14 @@ trait CompendiumClient[F[_]] {
    * @return a protocol
    */
   def recoverProtocol(identifier: String): F[Option[Protocol]]
+
+  /** Generates a client for a target and a protocol by its identifier
+   *
+   * @param target target for the protocol
+   * @param identifier the protocol identifier
+   * @return a client for that protocol and target
+   */
+  def generateClient(target: Target, identifier: String): F[String]
 }
 
 object CompendiumClient {
@@ -88,6 +96,9 @@ object CompendiumClient {
           }
         } yield out
       }
+
+      override def generateClient(target: Target, identifier: String): F[String] =
+        Sync[F].pure("")
 
       private def asError(request: Free[HttpF, HttpResponse], error: String => Exception): F[Unit] =
         request
