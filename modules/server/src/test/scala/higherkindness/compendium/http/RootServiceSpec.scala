@@ -114,7 +114,7 @@ object RootServiceSpec extends Specification with ScalaCheck {
     }.setGen(Gen.alphaNumStr suchThat (!_.isEmpty))
   }
 
-  "GET /v0/protocol/id/client?target={target}" >> {
+  "GET /v0/protocol/id/generate?target={target}" >> {
     "If identifier and target is valid returns Ok and the client" >> {
       failure
     }.pendingUntilFixed

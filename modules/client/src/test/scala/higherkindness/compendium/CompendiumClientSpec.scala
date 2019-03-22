@@ -61,7 +61,7 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
 
         case Get(HttpRequest(uri, _, _))
             if uri.path.equalsIgnoreCase(
-              s"/v0/protocol/$identifier/client/?target=${target.toString}") =>
+              s"/v0/protocol/$identifier/generate/?target=${target.toString}") =>
           S.catchNonFatal {
             response(Entity.StringEntity(uri.path)).copy(status = Status.NotImplemented)
           }

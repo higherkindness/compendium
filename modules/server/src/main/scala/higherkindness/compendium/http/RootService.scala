@@ -60,7 +60,7 @@ object RootService {
           resp     <- protocol.fold(NotFound())(Ok(_))
         } yield resp
 
-      case GET -> Root / "v0" / "protocol" / _ / "client" :? TargetQueryParam(_) =>
+      case GET -> Root / "v0" / "protocol" / _ / "generate" :? TargetQueryParam(_) =>
         NotImplemented()
 
     }
