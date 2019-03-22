@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.core
+package higherkindness.compendium.http
 
-import cats.effect.IO
-import higherkindness.compendium.models.Protocol
-import mouse.all._
+import higherkindness.compendium.models.Target
+import org.http4s.QueryParamDecoder
+import org.http4s.dsl.impl.QueryParamDecoderMatcher
 
-class ProtocolUtilsStub(val pro: Protocol, val valid: Boolean) extends ProtocolUtils[IO] {
-  def validateProtocol(protocol: Protocol): IO[Protocol] =
-    valid.fold(IO(pro), IO.raiseError(new org.apache.avro.SchemaParseException("Error")))
+object QueryParams {
+
+  implicit val queryTargetDecoderQueryParam: QueryParamDecoder[Target] =
+    QueryParamDecoder[String].map(_ => Target.Scala)
+
+  object TargetQueryParam extends QueryParamDecoderMatcher[Target]("target")
+
 }

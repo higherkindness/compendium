@@ -26,6 +26,7 @@ import org.http4s.dsl.Http4sDsl
 import Decoders._
 import Encoders._
 import higherkindness.compendium.core.CompendiumService
+import higherkindness.compendium.http.QueryParams.TargetQueryParam
 import org.http4s.HttpRoutes
 import org.http4s.headers.Location
 import mouse.all._
@@ -58,6 +59,9 @@ object RootService {
           protocol <- CompendiumService[F].recoverProtocol(id)
           resp     <- protocol.fold(NotFound())(Ok(_))
         } yield resp
+
+      case GET -> Root / "v0" / "protocol" / _ / "client" :? TargetQueryParam(_) =>
+        NotImplemented()
 
     }
   }

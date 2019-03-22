@@ -113,4 +113,18 @@ object RootServiceSpec extends Specification with ScalaCheck {
           .map(_.value) === Some(s"/v0/protocol/$id")
     }.setGen(Gen.alphaNumStr suchThat (!_.isEmpty))
   }
+
+  "GET /v0/protocol/id/client?target={target}" >> {
+    "If identifier and target is valid returns Ok and the client" >> {
+      failure
+    }.pendingUntilFixed
+
+    "If identifier is valid but target is invalid returns NotFound" >> {
+      failure
+    }.pendingUntilFixed
+
+    "If target is valid but identifier is invalid returns NotFound" >> {
+      failure
+    }.pendingUntilFixed
+  }
 }
