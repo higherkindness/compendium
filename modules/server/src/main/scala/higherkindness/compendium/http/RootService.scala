@@ -60,8 +60,11 @@ object RootService {
           resp     <- protocol.fold(NotFound())(Ok(_))
         } yield resp
 
-      case GET -> Root / "v0" / "protocol" / protocolName / "generate" :? TargetQueryParam(target) =>
-        CompendiumService[F].parseProtocol(protocolName, target.toString).flatMap(_ => NotImplemented()) // delete toString
+      case GET -> Root / "v0" / "protocol" / protocolName / "generate" :? TargetQueryParam(
+            target) =>
+        CompendiumService[F]
+          .parseProtocol(protocolName, target.toString)
+          .flatMap(_ => NotImplemented()) // delete toString
 
     }
   }
