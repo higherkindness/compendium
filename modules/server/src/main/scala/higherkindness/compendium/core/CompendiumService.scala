@@ -20,6 +20,8 @@ import cats.effect.Sync
 import cats.implicits._
 import higherkindness.compendium.db.DBService
 import higherkindness.compendium.models.Protocol
+import higherkindness.compendium.models.types.ParserResult
+import higherkindness.compendium.parser.ProtocolParserService
 import higherkindness.compendium.storage.Storage
 
 trait CompendiumService[F[_]] {
@@ -27,11 +29,13 @@ trait CompendiumService[F[_]] {
   def storeProtocol(id: String, protocol: Protocol): F[Unit]
   def recoverProtocol(protocolId: String): F[Option[Protocol]]
   def existsProtocol(protocolId: String): F[Boolean]
+  def parseProtocol(protocolName: String, target: String): F[ParserResult]
 }
 
 object CompendiumService {
 
-  implicit def impl[F[_]: Sync: Storage: DBService: ProtocolUtils](): CompendiumService[F] =
+  implicit def impl[F[_]: Sync: Storage: DBService: ProtocolUtils: ProtocolParserService](): CompendiumService[
+    F] =
     new CompendiumService[F] {
 
       override def storeProtocol(id: String, protocol: Protocol): F[Unit] =
@@ -46,6 +50,12 @@ object CompendiumService {
 
       override def existsProtocol(protocolId: String): F[Boolean] =
         DBService[F].existsProtocol(protocolId)
+
+      override def parseProtocol(protocolName: String, target: String): F[ParserResult] =
+        for {
+          protocol       <- recoverProtocol(protocolName)
+          parsedProtocol <- ProtocolParserService[F].parse(protocol, target)
+        } yield parsedProtocol
     }
 
   def apply[F[_]](implicit F: CompendiumService[F]): CompendiumService[F] = F
