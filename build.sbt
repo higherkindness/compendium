@@ -21,7 +21,7 @@ lazy val V = new {
   val http4s: String           = "0.19.0"
   val shapeless: String        = "2.3.3"
   val pureConfig: String       = "0.10.2"
-  val hammock: String          = "0.9.0"
+  val hammock: String          = "0.9.1"
 }
 
 lazy val root = project

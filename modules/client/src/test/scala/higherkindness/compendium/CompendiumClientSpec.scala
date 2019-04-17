@@ -41,9 +41,9 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
   private[this] def asEntityJson[T: io.circe.Encoder](t: T): Entity =
     Entity.StringEntity(t.asJson.toString, ContentType.`application/json`)
 
-  def interp(identifier: String, target: Target) = new InterpTrans[IO] {
+  def interp(identifier: String, target: Target)(implicit S: Sync[IO]) = new InterpTrans[IO] {
 
-    def trans(implicit S: Sync[IO]): HttpF ~> IO = new (HttpF ~> IO) {
+    val trans: HttpF ~> IO = new (HttpF ~> IO) {
       private def response(entity: Entity): HttpResponse =
         HttpResponse(Status.OK, Map(), entity)
 
