@@ -11,7 +11,7 @@ lazy val V = new {
   val catsScalacheck: String   = "0.1.1"
   val mouse: String            = "0.20"
   val circe: String            = "0.11.1"
-  val kindProjector: String    = "0.9.9"
+  val kindProjector: String    = "0.10.0"
   val paradise: String         = "2.1.1"
   val scala: String            = "2.12.8"
   val skeumorph: String        = "0.0.1"
@@ -176,7 +176,7 @@ lazy val serverSettings = Seq(
 
 lazy val compilerPlugins = Seq(
   libraryDependencies ++= Seq(
-    compilerPlugin("org.spire-math"  % "kind-projector"      % V.kindProjector cross CrossVersion.binary),
+    compilerPlugin("org.typelevel"   % "kind-projector"      % V.kindProjector cross CrossVersion.binary),
     compilerPlugin("com.olegpy"      %% "better-monadic-for" % V.betterMonadicFor),
     compilerPlugin("org.scalamacros" % "paradise"            % V.paradise cross CrossVersion.patch)
   )
