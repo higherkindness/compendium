@@ -22,6 +22,7 @@ lazy val V = new {
   val shapeless: String        = "2.3.3"
   val pureConfig: String       = "0.10.2"
   val hammock: String          = "0.9.1"
+  val doobie: String           = "0.7.0-M3"
 }
 
 lazy val root = project
@@ -122,6 +123,7 @@ lazy val commonSettings = Seq(
     %%("http4s-circe", V.http4s),
     %%("circe-core", V.circe),
     %%("circe-generic", V.circe),
+    %%("doobie-core", V.doobie),
     %%("specs2-core", V.specs2)       % Test,
     %%("specs2-scalacheck", V.specs2) % Test,
     "com.beachape" %% "enumeratum" % V.enumeratum,
