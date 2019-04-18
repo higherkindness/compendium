@@ -6,22 +6,22 @@ import sbtorgpolicies.templates._
 import sbtorgpolicies.templates.badges._
 
 lazy val V = new {
-  val betterMonadicFor: String = "0.3.0-M4"
+  val betterMonadicFor: String = "0.3.0"
   val cats: String             = "1.6.0"
-  val catsScalacheck: String   = "0.1.0"
+  val catsScalacheck: String   = "0.1.1"
   val mouse: String            = "0.20"
   val circe: String            = "0.11.1"
-  val kindProjector: String    = "0.9.9"
+  val kindProjector: String    = "0.10.0"
   val paradise: String         = "2.1.1"
   val scala: String            = "2.12.8"
   val skeumorph: String        = "0.0.1"
-  val specs2: String           = "4.4.1"
+  val specs2: String           = "4.5.1"
   val enumeratum: String       = "1.5.13"
-  val enumeratumCirce: String  = "1.5.20"
+  val enumeratumCirce: String  = "1.5.21"
   val http4s: String           = "0.19.0"
   val shapeless: String        = "2.3.3"
   val pureConfig: String       = "0.10.2"
-  val hammock: String          = "0.9.0"
+  val hammock: String          = "0.9.1"
 }
 
 lazy val root = project
@@ -176,7 +176,7 @@ lazy val serverSettings = Seq(
 
 lazy val compilerPlugins = Seq(
   libraryDependencies ++= Seq(
-    compilerPlugin("org.spire-math"  % "kind-projector"      % V.kindProjector cross CrossVersion.binary),
+    compilerPlugin("org.typelevel"   % "kind-projector"      % V.kindProjector cross CrossVersion.binary),
     compilerPlugin("com.olegpy"      %% "better-monadic-for" % V.betterMonadicFor),
     compilerPlugin("org.scalamacros" % "paradise"            % V.paradise cross CrossVersion.patch)
   )
