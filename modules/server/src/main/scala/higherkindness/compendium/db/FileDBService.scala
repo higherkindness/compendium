@@ -17,7 +17,6 @@
 package higherkindness.compendium.db
 
 import cats.effect.Sync
-import higherkindness.compendium.models.Protocol
 import higherkindness.compendium.storage.Storage
 
 object FileDBService {
@@ -26,7 +25,7 @@ object FileDBService {
 
   implicit def impl[F[_]: Sync: Storage](): DBService[F] =
     new DBService[F] {
-      override def upsertProtocol(id: String, protocol: Protocol): F[Unit] = Sync[F].unit
+      override def upsertProtocol(id: String): F[Unit] = Sync[F].unit
 
       override def existsProtocol(id: String): F[Boolean] = Storage[F].exists(id)
     }

@@ -35,7 +35,7 @@ object FileDBServiceSpec extends Specification with ScalaCheck {
       implicit val storage: Storage[IO] = new StorageStub(Some(dummyProtocol), id)
       val dbService: DBService[IO]      = FileDBService.impl[IO]
 
-      dbService.upsertProtocol(id, dummyProtocol).unsafeRunSync() must not(throwA[Exception])
+      dbService.upsertProtocol(id).unsafeRunSync() must not(throwA[Exception])
     }
   }
 

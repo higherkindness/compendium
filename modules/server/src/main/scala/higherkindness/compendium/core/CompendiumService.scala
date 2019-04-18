@@ -36,7 +36,7 @@ object CompendiumService {
 
       override def storeProtocol(id: String, protocol: Protocol): F[Unit] =
         ProtocolUtils[F].validateProtocol(protocol) >>
-          DBService[F].upsertProtocol(id, protocol) >>
+          DBService[F].upsertProtocol(id) >>
           Storage[F].store(id, protocol)
 
       override def recoverProtocol(protocolId: String): F[Option[Protocol]] =
