@@ -23,6 +23,7 @@ lazy val V = new {
   val pureConfig: String       = "0.10.2"
   val hammock: String          = "0.9.1"
   val doobie: String           = "0.7.0-M3"
+  val flyway: String           = "5.2.4"
 }
 
 lazy val root = project
@@ -124,10 +125,11 @@ lazy val commonSettings = Seq(
     %%("circe-core", V.circe),
     %%("circe-generic", V.circe),
     %%("doobie-core", V.doobie),
-    %%("specs2-core", V.specs2)       % Test,
-    %%("specs2-scalacheck", V.specs2) % Test,
     "com.beachape" %% "enumeratum" % V.enumeratum,
     "com.beachape" %% "enumeratum-circe" % V.enumeratumCirce,
+    "org.flywaydb" % "flyway-core" % V.flyway,
+    %%("specs2-core", V.specs2)       % Test,
+    %%("specs2-scalacheck", V.specs2) % Test,
     "io.chrisdavenport" %% "cats-scalacheck" % V.catsScalacheck % Test
   ),
   orgScriptTaskListSetting := List(
