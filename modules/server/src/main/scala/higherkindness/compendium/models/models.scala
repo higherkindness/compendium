@@ -17,4 +17,16 @@
 package higherkindness.compendium.models
 
 final case class StorageConfig(path: String)
-final case class CompendiumConfig(http: HttpConfig, storage: StorageConfig)
+
+final case class PostgresConfig(
+    jdbcUrl: String,
+    username: String,
+    password: String,
+    driver: String
+)
+
+final case class CompendiumConfig(
+    http: HttpConfig,
+    storage: StorageConfig,
+    postgres: PostgresConfig
+)
