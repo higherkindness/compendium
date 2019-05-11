@@ -16,7 +16,6 @@
 
 package higherkindness.compendium
 
-import cats.effect.IO
 import hammock.asynchttpclient.AsyncHttpClientInterpreter._
 import higherkindness.compendium.models.{CompendiumConfig, Protocol}
 import pureconfig.generic.auto._
@@ -26,7 +25,7 @@ object Test extends App {
   implicit val clientConfig: CompendiumConfig =
     pureconfig.loadConfigOrThrow[CompendiumConfig]("compendium")
 
-  val client = CompendiumClient[IO]
+  val client = CompendiumClient.apply
 
   val raw      = """{"namespace": "correct.avro",
      "type": "record",
