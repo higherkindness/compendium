@@ -28,7 +28,7 @@ object Queries {
 
   def upsertProtocolIdQ(id: String): Update0 =
     sql"""
-          INSERT INTO protocol
+          INSERT INTO protocols
           VALUES ($id)
           ON CONFLICT DO NOTHING
        """.update

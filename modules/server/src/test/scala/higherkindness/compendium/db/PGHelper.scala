@@ -25,7 +25,7 @@ import org.specs2.mutable.Specification
 
 import scala.concurrent.ExecutionContext.global
 
-trait PGHelper extends Specification with ForAllTestContainer {
+abstract class PGHelper extends Specification with ForAllTestContainer {
 
   override lazy val container: PostgreSQLContainer =
     PostgreSQLContainer("postgres:11-alpine")
