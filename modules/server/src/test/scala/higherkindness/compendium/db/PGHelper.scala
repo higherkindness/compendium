@@ -17,7 +17,7 @@
 package higherkindness.compendium.db
 
 import cats.effect._
-import com.dimafeng.testcontainers._
+import com.dimafeng.testcontainers.PostgreSQLContainer
 import doobie.util.transactor.Transactor
 import higherkindness.compendium.migrations.Migrations
 import io.chrisdavenport.testcontainersspecs2.ForAllTestContainer
@@ -26,8 +26,9 @@ import org.specs2.mutable.Specification
 import scala.concurrent.ExecutionContext.global
 
 trait PGHelper extends Specification with ForAllTestContainer {
+
   override lazy val container: PostgreSQLContainer =
-    PostgreSQLContainer()
+    PostgreSQLContainer("postgres:11-alpine")
 
   implicit lazy val CS: ContextShift[IO] = IO.contextShift(global)
 
