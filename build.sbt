@@ -130,7 +130,10 @@ lazy val commonSettings = Seq(
     "org.flywaydb" % "flyway-core" % V.flyway,
     %%("specs2-core", V.specs2)       % Test,
     %%("specs2-scalacheck", V.specs2) % Test,
-    "io.chrisdavenport" %% "cats-scalacheck" % V.catsScalacheck % Test
+    %%("doobie-specs2", V.doobie)     % Test,
+    "io.chrisdavenport"  %% "cats-scalacheck" % V.catsScalacheck % Test,
+    "io.chrisdavenport"  %% "testcontainers-specs2" % "0.1.0"  % Test,
+    "org.testcontainers" % "postgresql"             % "1.11.2" % Test
   ),
   orgScriptTaskListSetting := List(
     (clean in Global).asRunnableItemFull,
