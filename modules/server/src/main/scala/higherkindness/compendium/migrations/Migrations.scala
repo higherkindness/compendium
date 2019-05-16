@@ -27,7 +27,7 @@ object Migrations {
       user: String,
       password: String,
       location: Option[String] = None
-  ): F[Unit] =
+  ): F[Int] =
     Sync[F]
       .delay {
         location
@@ -38,5 +38,8 @@ object Migrations {
           .migrate()
       }
       .attempt
-      .void
+      .flatMap {
+        case Right(count) => Sync[F].delay(count)
+        case Left(error) => Sync[F].raiseError(error)
+      }
 }

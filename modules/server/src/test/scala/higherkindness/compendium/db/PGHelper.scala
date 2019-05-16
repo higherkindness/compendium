@@ -48,5 +48,6 @@ abstract class PGHelper extends Specification with ForAllTestContainer {
         container.password
       )
       .unsafeRunSync()
+    ()
   }
 }
