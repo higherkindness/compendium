@@ -40,6 +40,6 @@ object Migrations {
       .attempt
       .flatMap {
         case Right(count) => Sync[F].delay(count)
-        case Left(error) => Sync[F].raiseError(error)
+        case Left(error)  => Sync[F].raiseError(error)
       }
 }
