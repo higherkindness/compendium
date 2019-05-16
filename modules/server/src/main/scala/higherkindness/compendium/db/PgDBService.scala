@@ -16,11 +16,21 @@
 
 package higherkindness.compendium.db
 
-trait DBService[F[_]] {
-  def upsertProtocol(id: String): F[Unit]
-  def existsProtocol(id: String): F[Boolean]
-}
+import cats.effect.Sync
+import cats.implicits._
+import doobie.util.transactor.Transactor
+import doobie.implicits._
+import higherkindness.compendium.db.queries.Queries
 
-object DBService {
-  def apply[F[_]](implicit F: DBService[F]): DBService[F] = F
+object PgDBService {
+
+  def impl[F[_]: Sync](xa: Transactor[F]): DBService[F] =
+    new DBService[F] {
+
+      override def upsertProtocol(id: String): F[Unit] =
+        Queries.upsertProtocolIdQ(id).run.void.transact(xa)
+
+      override def existsProtocol(id: String): F[Boolean] =
+        Queries.checkIfExistsQ(id).unique.transact(xa)
+    }
 }

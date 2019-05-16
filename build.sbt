@@ -22,6 +22,8 @@ lazy val V = new {
   val shapeless: String        = "2.3.3"
   val pureConfig: String       = "0.10.2"
   val hammock: String          = "0.9.1"
+  val doobie: String           = "0.7.0-M5"
+  val flyway: String           = "5.2.4"
 }
 
 lazy val root = project
@@ -122,11 +124,17 @@ lazy val commonSettings = Seq(
     %%("http4s-circe", V.http4s),
     %%("circe-core", V.circe),
     %%("circe-generic", V.circe),
-    %%("specs2-core", V.specs2)       % Test,
-    %%("specs2-scalacheck", V.specs2) % Test,
+    %%("doobie-core", V.doobie),
+    %%("doobie-postgres", V.doobie),
     "com.beachape" %% "enumeratum" % V.enumeratum,
     "com.beachape" %% "enumeratum-circe" % V.enumeratumCirce,
-    "io.chrisdavenport" %% "cats-scalacheck" % V.catsScalacheck % Test
+    "org.flywaydb" % "flyway-core" % V.flyway,
+    %%("specs2-core", V.specs2)       % Test,
+    %%("specs2-scalacheck", V.specs2) % Test,
+    %%("doobie-specs2", V.doobie)     % Test,
+    "io.chrisdavenport"  %% "cats-scalacheck" % V.catsScalacheck % Test,
+    "io.chrisdavenport"  %% "testcontainers-specs2" % "0.1.0"  % Test,
+    "org.testcontainers" % "postgresql"             % "1.11.2" % Test
   ),
   orgScriptTaskListSetting := List(
     (clean in Global).asRunnableItemFull,

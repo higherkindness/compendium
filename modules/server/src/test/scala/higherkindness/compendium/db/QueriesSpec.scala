@@ -16,11 +16,21 @@
 
 package higherkindness.compendium.db
 
-trait DBService[F[_]] {
-  def upsertProtocol(id: String): F[Unit]
-  def existsProtocol(id: String): F[Boolean]
-}
+import doobie.specs2._
+import higherkindness.compendium.db.queries.Queries
+import org.specs2.specification.Scope
 
-object DBService {
-  def apply[F[_]](implicit F: DBService[F]): DBService[F] = F
+class QueriesSpec extends PGHelper with IOChecker {
+
+  "Queries" should {
+    "match db model" in new context {
+      check(Queries.checkIfExistsQ(protocolId))
+      check(Queries.upsertProtocolIdQ(protocolId))
+    }
+  }
+
+  trait context extends Scope {
+    val protocolId: String = "my.test.protocol.id"
+  }
+
 }

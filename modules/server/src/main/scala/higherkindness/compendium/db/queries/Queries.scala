@@ -14,13 +14,22 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.db
+package higherkindness.compendium.db.queries
 
-trait DBService[F[_]] {
-  def upsertProtocol(id: String): F[Unit]
-  def existsProtocol(id: String): F[Boolean]
-}
+import doobie._
+import doobie.implicits.toSqlInterpolator
 
-object DBService {
-  def apply[F[_]](implicit F: DBService[F]): DBService[F] = F
+object Queries {
+
+  def checkIfExistsQ(id: String): Query0[Boolean] =
+    sql"""
+          SELECT exists (SELECT true FROM protocols WHERE id=$id)
+       """.query[Boolean]
+
+  def upsertProtocolIdQ(id: String): Update0 =
+    sql"""
+          INSERT INTO protocols
+          VALUES ($id)
+          ON CONFLICT DO NOTHING
+       """.update
 }
