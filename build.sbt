@@ -113,7 +113,6 @@ lazy val commonSettings = Seq(
   scalaVersion := "2.12.8",
   crossScalaVersions := Seq(scalaVersion.value),
   ThisBuild / scalacOptions -= "-Xplugin-require:macroparadise",
-  //parallelExecution in Test := false,
   libraryDependencies ++= Seq(
     %%("cats-core", V.cats),
     "org.typelevel" %% "mouse" % V.mouse,
