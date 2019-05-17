@@ -16,20 +16,21 @@
 
 package higherkindness.compendium
 
-import cats.effect.{ConcurrentEffect, ExitCode}
+import cats.effect._
 import fs2.Stream
 import higherkindness.compendium.models.HttpConfig
-import org.http4s.HttpRoutes
-import org.http4s.server.blaze.BlazeBuilder
+import org.http4s._
+import org.http4s.implicits._
+import org.http4s.server.blaze.BlazeServerBuilder
 
 object CompendiumServerStream {
 
-  def serverStream[F[_]: ConcurrentEffect](
+  def serverStream[F[_]: ConcurrentEffect: Timer](
       httpConf: HttpConfig,
       service: HttpRoutes[F]): Stream[F, ExitCode] = {
-    BlazeBuilder[F]
+    BlazeServerBuilder[F]
       .bindHttp(httpConf.port, httpConf.host)
-      .mountService(service, "/")
+      .withHttpApp(service.orNotFound)
       .serve
   }
 

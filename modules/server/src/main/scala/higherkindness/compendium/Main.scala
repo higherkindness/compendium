@@ -33,7 +33,7 @@ object Main extends IOApp {
 
 object CompendiumStreamApp {
 
-  def stream[F[_]: ConcurrentEffect]: Stream[F, ExitCode] =
+  def stream[F[_]: ConcurrentEffect: Timer]: Stream[F, ExitCode] =
     for {
       conf <- Stream.eval(
         Effect[F].delay(pureconfig.loadConfigOrThrow[CompendiumConfig]("compendium")))
