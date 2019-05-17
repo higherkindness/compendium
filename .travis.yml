@@ -1,6 +1,6 @@
 jobs:
   include:
-    - stage: test
+    - stage: build
       sudo: false
       language: scala
       jdk:
@@ -29,11 +29,12 @@ jobs:
         - sbt ++$TRAVIS_SCALA_VERSION orgScriptCI
       after_success:
         - sbt ++$TRAVIS_SCALA_VERSION orgAfterCISuccess
-    - stage: deploy
-      if: branch = master
-      sudo: false
+    - stage: publish-docker
+      if: (branch = master) AND (NOT (type IN (pull_request)))
+      sudo: required
       services:
         - docker
       script:
         - docker build --build-arg PROJECT=server --build-arg VERSION=0.0.1-SNAPSHOT -t compendium/server:0.0.1 .
-        - docker push compendium/server:0.0.1
+        - docker login -u DOCKER_USER -p DOCKER_PASSWORD
+        - docker push -f compendium/server:0.0.1
