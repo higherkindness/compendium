@@ -14,22 +14,31 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.db
+package higherkindness.compendium.http
 
 import cats.effect.Sync
-import higherkindness.compendium.storage.Storage
+import cats.syntax.flatMap._
+import cats.syntax.functor._
+import io.circe.syntax._
+import org.http4s.circe.CirceEntityCodec._
+import mouse.all._
+import higherkindness.compendium.db.DBService
+import org.http4s.HttpRoutes
+import org.http4s.dsl.Http4sDsl
 
-object FileDBService {
+object HealthService {
 
-  def apply[F[_]](implicit S: Storage[F]): Storage[F] = S
+  def healthRouteService[F[_]: Sync: DBService]: HttpRoutes[F] = {
 
-  implicit def impl[F[_]: Sync: Storage](): DBService[F] =
-    new DBService[F] {
-      override def upsertProtocol(id: String): F[Unit] = Sync[F].unit
+    object f extends Http4sDsl[F]
+    import f._
 
-      override def existsProtocol(id: String): F[Boolean] = Storage[F].exists(id)
-
-      override def ping(): F[Boolean] = Sync[F].pure(true)
+    HttpRoutes.of[F] {
+      case GET -> Root / "health" =>
+        for {
+          exists <- DBService[F].ping()
+          resp   <- exists.fold(Ok("Ok".asJson), InternalServerError())
+        } yield resp
     }
-
+  }
 }

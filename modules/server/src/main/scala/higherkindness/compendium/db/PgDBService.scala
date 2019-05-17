@@ -32,5 +32,7 @@ object PgDBService {
 
       override def existsProtocol(id: String): F[Boolean] =
         Queries.checkIfExistsQ(id).unique.transact(xa)
+
+      override def ping(): F[Boolean] = Queries.checkConnection().unique.transact(xa)
     }
 }

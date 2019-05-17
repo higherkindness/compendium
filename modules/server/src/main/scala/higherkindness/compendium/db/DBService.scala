@@ -19,6 +19,7 @@ package higherkindness.compendium.db
 trait DBService[F[_]] {
   def upsertProtocol(id: String): F[Unit]
   def existsProtocol(id: String): F[Boolean]
+  def ping(): F[Boolean]
 }
 
 object DBService {

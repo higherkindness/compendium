@@ -18,7 +18,7 @@ lazy val V = new {
   val specs2: String           = "4.5.1"
   val enumeratum: String       = "1.5.13"
   val enumeratumCirce: String  = "1.5.21"
-  val http4s: String           = "0.19.0"
+  val http4s: String           = "0.20.1"
   val shapeless: String        = "2.3.3"
   val pureConfig: String       = "0.10.2"
   val hammock: String          = "0.9.1"
@@ -127,6 +127,7 @@ lazy val commonSettings = Seq(
     %%("circe-generic", V.circe),
     %%("doobie-core", V.doobie),
     %%("doobie-postgres", V.doobie),
+    %%("doobie-hikari", V.doobie),
     "com.beachape" %% "enumeratum" % V.enumeratum,
     "com.beachape" %% "enumeratum-circe" % V.enumeratumCirce,
     "org.flywaydb" % "flyway-core" % V.flyway,
