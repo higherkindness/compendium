@@ -36,7 +36,7 @@ jobs:
 #      before_install:
 #        - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
       script:
-        - export VERSION=cut -d'=' -f2  version.sbt | sed -e 's/^[ \t]*//;s/"//g'
+        - export VERSION=$(cut -d'=' -f2  version.sbt | sed -e 's/^[ \t]*//;s/"//g')
         - docker build --build-arg PROJECT=server --build-arg VERSION=$VERSION -t compendium/server:latest .
       deploy:
         provider: script
