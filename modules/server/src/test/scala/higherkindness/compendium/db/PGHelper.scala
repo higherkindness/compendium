@@ -20,6 +20,7 @@ import cats.effect._
 import com.dimafeng.testcontainers.PostgreSQLContainer
 import doobie.util.transactor.Transactor
 import higherkindness.compendium.migrations.Migrations
+import higherkindness.compendium.models.PostgresConfig
 import io.chrisdavenport.testcontainersspecs2.ForAllTestContainer
 import org.specs2.mutable.Specification
 
@@ -29,6 +30,13 @@ abstract class PGHelper extends Specification with ForAllTestContainer {
 
   override lazy val container: PostgreSQLContainer =
     PostgreSQLContainer("postgres:11-alpine")
+
+  private lazy val conf: PostgresConfig = PostgresConfig(
+    container.jdbcUrl,
+    container.username,
+    container.password,
+    container.driverClassName
+  )
 
   implicit lazy val CS: ContextShift[IO] = IO.contextShift(global)
 
@@ -42,11 +50,7 @@ abstract class PGHelper extends Specification with ForAllTestContainer {
 
   override def afterStart(): Unit = {
     Migrations
-      .makeMigrations[IO](
-        container.jdbcUrl,
-        container.username,
-        container.password
-      )
+      .makeMigrations[IO](conf)
       .unsafeRunSync()
     ()
   }
