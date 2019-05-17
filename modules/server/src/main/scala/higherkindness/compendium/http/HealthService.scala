@@ -16,6 +16,7 @@
 
 package higherkindness.compendium.http
 
+import buildinfo.BuildInfo
 import cats.effect.Sync
 import cats.syntax.flatMap._
 import cats.syntax.functor._
@@ -23,6 +24,8 @@ import io.circe.syntax._
 import org.http4s.circe.CirceEntityCodec._
 import mouse.all._
 import higherkindness.compendium.db.DBService
+import higherkindness.compendium.models.HealthResponse
+import higherkindness.compendium.models.Encoders._
 import org.http4s.HttpRoutes
 import org.http4s.dsl.Http4sDsl
 
@@ -37,7 +40,10 @@ object HealthService {
       case GET -> Root / "health" =>
         for {
           exists <- DBService[F].ping()
-          resp   <- exists.fold(Ok("Ok".asJson), InternalServerError())
+          resp <- exists.fold(
+            Ok(HealthResponse("pass", BuildInfo.version, BuildInfo.name).asJson),
+            InternalServerError()
+          )
         } yield resp
     }
   }

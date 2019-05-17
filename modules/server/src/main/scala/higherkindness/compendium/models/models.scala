@@ -16,6 +16,19 @@
 
 package higherkindness.compendium.models
 
+import io.circe.{Decoder, Encoder}
+import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+
+object Decoders {
+  implicit val healthResponseDecoder: Decoder[HealthResponse] = deriveDecoder[HealthResponse]
+}
+
+object Encoders {
+  implicit val healthResponseEncoder: Encoder[HealthResponse] = deriveEncoder[HealthResponse]
+}
+
+final case class HealthResponse(status: String, version: String, serviceID: String)
+
 final case class StorageConfig(path: String)
 
 final case class PostgresConfig(
