@@ -41,44 +41,45 @@ object CompendiumStreamApp {
   def program[F[_]: ContextShift: ConcurrentEffect: Timer]: F[ExitCode] = {
 
     Effect[F].delay(pureconfig.loadConfigOrThrow[CompendiumConfig]("compendium")).flatMap {
-      config => {
-        val transactor: Resource[F, HikariTransactor[F]] =
-          for {
-            ce <- ExecutionContexts.fixedThreadPool[F](32)
-            te <- ExecutionContexts.cachedThreadPool[F]
-            xa <- HikariTransactor.newHikariTransactor[F](
-              config.postgres.driver,
-              config.postgres.jdbcUrl,
-              config.postgres.username,
-              config.postgres.password,
-              ce,
-              te
-            )
-          } yield xa
+      config =>
+        {
+          val transactor: Resource[F, HikariTransactor[F]] =
+            for {
+              ce <- ExecutionContexts.fixedThreadPool[F](32)
+              te <- ExecutionContexts.cachedThreadPool[F]
+              xa <- HikariTransactor.newHikariTransactor[F](
+                config.postgres.driver,
+                config.postgres.jdbcUrl,
+                config.postgres.username,
+                config.postgres.password,
+                ce,
+                te
+              )
+            } yield xa
 
-        transactor.use(xa => {
-          implicit val db = PgDBService.impl[F](xa)
-          implicit val storage = FileStorage.impl[F](config.storage)
-          implicit val utils = ProtocolUtils.impl[F]
-          implicit val compendiumService = CompendiumService.impl[F]
-          val rootService = RootService.rootRouteService
-          val healthService = HealthService.healthRouteService
-          val app = Router("/" -> healthService, "/v0" -> rootService).orNotFound
+          transactor.use(xa => {
+            implicit val db                = PgDBService.impl[F](xa)
+            implicit val storage           = FileStorage.impl[F](config.storage)
+            implicit val utils             = ProtocolUtils.impl[F]
+            implicit val compendiumService = CompendiumService.impl[F]
+            val rootService                = RootService.rootRouteService
+            val healthService              = HealthService.healthRouteService
+            val app                        = Router("/" -> healthService, "/v0" -> rootService).orNotFound
 
-          for {
-            _ <- Migrations.makeMigrations(
-              config.postgres.jdbcUrl,
-              config.postgres.username,
-              config.postgres.password
-            )
-            code <- CompendiumServerStream
-              .serverStream(config.http, app)
-              .compile
-              .drain
-              .as(ExitCode.Success)
-          } yield code
-        })
-      }
+            for {
+              _ <- Migrations.makeMigrations(
+                config.postgres.jdbcUrl,
+                config.postgres.username,
+                config.postgres.password
+              )
+              code <- CompendiumServerStream
+                .serverStream(config.http, app)
+                .compile
+                .drain
+                .as(ExitCode.Success)
+            } yield code
+          })
+        }
     }
   }
 

@@ -20,11 +20,12 @@ import cats.effect.IO
 import higherkindness.compendium.models._
 import org.specs2.mutable.Specification
 import org.http4s.{Method, Request, Response, Status, Uri}
-import org.http4s.dsl.io._
 import org.http4s.circe.CirceEntityCodec._
 import Encoders._
 import Decoders._
 import higherkindness.compendium.core.CompendiumServiceStub
+import org.http4s.syntax.string._
+import org.http4s.syntax.kleisli._
 import org.specs2.ScalaCheck
 import org.scalacheck.Gen
 
@@ -34,12 +35,12 @@ object RootServiceSpec extends Specification with ScalaCheck {
 
   private val dummyProtocol: Protocol = Protocol("")
 
-  "GET /v0/protocol/id" >> {
+  "GET /protocol/id" >> {
     "If successs returns a valid protocol and status code" >> {
       implicit val compendiumService = new CompendiumServiceStub(Some(dummyProtocol), true)
 
       val request: Request[IO] =
-        Request[IO](method = Method.GET, uri = Uri(path = s"/v0/protocol/my.proto"))
+        Request[IO](method = Method.GET, uri = Uri(path = s"/protocol/my.proto"))
 
       val response: IO[Response[IO]] =
         RootService.rootRouteService[IO].orNotFound(request)
@@ -52,7 +53,7 @@ object RootServiceSpec extends Specification with ScalaCheck {
       implicit val compendiumService = new CompendiumServiceStub(None, true)
 
       val request: Request[IO] =
-        Request[IO](method = Method.GET, uri = Uri(path = s"/v0/protocol/my.proto"))
+        Request[IO](method = Method.GET, uri = Uri(path = s"/protocol/my.proto"))
 
       val response: IO[Response[IO]] =
         RootService.rootRouteService[IO].orNotFound(request)
@@ -61,7 +62,7 @@ object RootServiceSpec extends Specification with ScalaCheck {
     }
   }
 
-  "POST /v0/protocol/" >> {
+  "POST /protocol/" >> {
     "If protocol returns an invalid avro schema returns BadRequest" >> {
       implicit val compendiumService = new CompendiumServiceStub(None, false) {
         override def storeProtocol(id: String, protocol: Protocol): IO[Unit] =
@@ -69,7 +70,7 @@ object RootServiceSpec extends Specification with ScalaCheck {
       }
 
       val request: Request[IO] =
-        Request[IO](method = Method.POST, uri = Uri(path = s"/v0/protocol/test"))
+        Request[IO](method = Method.POST, uri = Uri(path = s"/protocol/test"))
           .withEntity(dummyProtocol)
 
       val response: IO[Response[IO]] =
@@ -82,7 +83,7 @@ object RootServiceSpec extends Specification with ScalaCheck {
       implicit val compendiumService = new CompendiumServiceStub(None, false)
 
       val request: Request[IO] =
-        Request[IO](method = Method.POST, uri = Uri(path = s"/v0/protocol/$id"))
+        Request[IO](method = Method.POST, uri = Uri(path = s"/protocol/$id"))
           .withEntity(dummyProtocol)
 
       val response: IO[Response[IO]] =
@@ -92,7 +93,7 @@ object RootServiceSpec extends Specification with ScalaCheck {
       response
         .map(_.headers.find(_.name == "Location".ci))
         .unsafeRunSync
-        .map(_.value) === Some(s"/v0/protocol/$id")
+        .map(_.value) === Some(s"/protocol/$id")
     }.setGen(Gen.alphaNumStr suchThat (!_.isEmpty))
 
     "If protocol is valid and it was already in compendium returns Ok and the location in the headers" >> prop {
@@ -100,7 +101,7 @@ object RootServiceSpec extends Specification with ScalaCheck {
         implicit val compendiumService = new CompendiumServiceStub(None, true)
 
         val request: Request[IO] =
-          Request[IO](method = Method.POST, uri = Uri(path = s"/v0/protocol/$id"))
+          Request[IO](method = Method.POST, uri = Uri(path = s"/protocol/$id"))
             .withEntity(dummyProtocol)
 
         val response: IO[Response[IO]] =
@@ -110,11 +111,11 @@ object RootServiceSpec extends Specification with ScalaCheck {
         response
           .map(_.headers.find(_.name == "Location".ci))
           .unsafeRunSync
-          .map(_.value) === Some(s"/v0/protocol/$id")
+          .map(_.value) === Some(s"/protocol/$id")
     }.setGen(Gen.alphaNumStr suchThat (!_.isEmpty))
   }
 
-  "GET /v0/protocol/id/generate?target={target}" >> {
+  "GET /protocol/id/generate?target={target}" >> {
     "If identifier and target is valid returns Ok and the client" >> {
       failure
     }.pendingUntilFixed
