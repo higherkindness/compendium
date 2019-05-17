@@ -20,8 +20,8 @@ import cats.effect.IO
 import higherkindness.compendium.models._
 import org.specs2.mutable.Specification
 import org.http4s.{Method, Request, Response, Status, Uri}
-import org.http4s.dsl.io._
 import org.http4s.circe.CirceEntityCodec._
+import org.http4s.implicits._
 import Encoders._
 import Decoders._
 import higherkindness.compendium.core.CompendiumServiceStub

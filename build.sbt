@@ -18,7 +18,7 @@ lazy val V = new {
   val specs2: String           = "4.5.1"
   val enumeratum: String       = "1.5.13"
   val enumeratumCirce: String  = "1.5.21"
-  val http4s: String           = "0.19.0"
+  val http4s: String           = "0.20.1"
   val shapeless: String        = "2.3.3"
   val pureConfig: String       = "0.11.0"
   val hammock: String          = "0.9.1"
@@ -113,6 +113,7 @@ lazy val commonSettings = Seq(
   scalaVersion := "2.12.8",
   crossScalaVersions := Seq(scalaVersion.value),
   ThisBuild / scalacOptions -= "-Xplugin-require:macroparadise",
+  //parallelExecution in Test := false,
   libraryDependencies ++= Seq(
     %%("cats-core", V.cats),
     "org.typelevel" %% "mouse" % V.mouse,
