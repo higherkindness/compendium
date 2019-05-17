@@ -33,12 +33,13 @@ jobs:
       sudo: required
       services:
         - docker
-      before_install:
-        - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
+#      before_install:
+#        - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
       script:
-        - docker build --build-arg PROJECT=server --build-arg VERSION=0.0.1-SNAPSHOT -t compendium/server:0.0.1 .
+        - export VERSION=cut -d'=' -f2  version.sbt | sed -e 's/^[ \t]*//;s/"//g'
+        - docker build --build-arg PROJECT=server --build-arg VERSION=$VERSION -t compendium/server:latest .
       deploy:
         provider: script
         script:
-          docker push compendium/server:0.0.1
+          docker push compendium/server:latest
         branch: master
