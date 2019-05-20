@@ -64,7 +64,7 @@ object CompendiumStreamApp {
             implicit val compendiumService = CompendiumService.impl[F]
             val rootService                = RootService.rootRouteService
             val healthService              = HealthService.healthRouteService
-            val app                        = Router("/" -> healthService, "/v0" -> rootService).orNotFound
+            val app                        = Router("/" -> healthService, "/v0" -> rootService)
 
             for {
               _ <- Migrations.makeMigrations(
