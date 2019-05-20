@@ -25,8 +25,6 @@ import org.http4s.implicits._
 import Encoders._
 import Decoders._
 import higherkindness.compendium.core.CompendiumServiceStub
-import org.http4s.syntax.string._
-import org.http4s.syntax.kleisli._
 import org.specs2.ScalaCheck
 import org.scalacheck.Gen
 
