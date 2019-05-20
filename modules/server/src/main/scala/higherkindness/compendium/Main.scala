@@ -18,7 +18,6 @@ package higherkindness.compendium
 
 import cats.effect._
 import cats.syntax.functor._
-import cats.syntax.flatMap._
 import doobie._
 import doobie.hikari.HikariTransactor
 import fs2.Stream
@@ -60,7 +59,8 @@ object CompendiumStreamApp {
     } yield code
   }
 
-  private def createHikariTransactor[F[_]: ContextShift: ConcurrentEffect](config: CompendiumConfig) =
+  private def createHikariTransactor[F[_]: ContextShift: ConcurrentEffect](
+      config: CompendiumConfig) =
     for {
       ce <- ExecutionContexts.fixedThreadPool[F](32)
       te <- ExecutionContexts.cachedThreadPool[F]
