@@ -18,6 +18,8 @@ package higherkindness.compendium
 
 import cats.effect._
 import cats.syntax.functor._
+import doobie.hikari.HikariTransactor
+import doobie.util.ExecutionContexts
 import doobie.util.transactor.Transactor
 import fs2.Stream
 import higherkindness.compendium.core.{CompendiumService, ProtocolUtils}
@@ -35,15 +37,27 @@ object Main extends IOApp {
 
 object CompendiumStreamApp {
 
-  private def createTransactor[F[_]: Async: ContextShift](conf: PostgresConfig): Transactor[F] =
-    Transactor.fromDriverManager[F](conf.driver, conf.jdbcUrl, conf.username, conf.password)
+  private def createTransactor[F[_]: Async: ContextShift](
+      conf: PostgresConfig): Resource[F, Transactor[F]] =
+    for {
+      ce <- ExecutionContexts.fixedThreadPool[F](10)
+      te <- ExecutionContexts.cachedThreadPool[F]
+      xa <- HikariTransactor.newHikariTransactor[F](
+        conf.driver,
+        conf.jdbcUrl,
+        conf.username,
+        conf.password,
+        ce,
+        te
+      )
+    } yield xa
 
   def stream[F[_]: ConcurrentEffect: Timer: ContextShift]: Stream[F, ExitCode] =
     for {
       conf <- Stream.eval(
         Effect[F].delay(pureconfig.loadConfigOrThrow[CompendiumConfig]("compendium")))
-      _ <- Stream.eval(Migrations.makeMigrations(conf.postgres))
-      transactor                                         = createTransactor(conf.postgres)
+      _          <- Stream.eval(Migrations.makeMigrations(conf.postgres))
+      transactor <- Stream.resource(createTransactor(conf.postgres))
       implicit0(storage: Storage[F])                     = FileStorage.impl[F](conf.storage)
       implicit0(dbService: DBService[F])                 = PgDBService.impl[F](transactor)
       implicit0(utils: ProtocolUtils[F])                 = ProtocolUtils.impl[F]
