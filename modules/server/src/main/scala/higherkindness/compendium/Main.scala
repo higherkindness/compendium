@@ -21,66 +21,56 @@ import cats.syntax.functor._
 import cats.syntax.flatMap._
 import doobie._
 import doobie.hikari.HikariTransactor
+import fs2.Stream
 import higherkindness.compendium.core.{CompendiumService, ProtocolUtils}
-import higherkindness.compendium.db.PgDBService
+import higherkindness.compendium.db.{DBService, PgDBService}
 import higherkindness.compendium.http.{HealthService, RootService}
 import higherkindness.compendium.migrations.Migrations
 import higherkindness.compendium.models.CompendiumConfig
-import higherkindness.compendium.storage.FileStorage
+import higherkindness.compendium.storage.{FileStorage, Storage}
 import org.http4s.server.Router
-import org.http4s.syntax.kleisli._
 import pureconfig.generic.auto._
 
 object Main extends IOApp {
   override def run(args: List[String]): IO[ExitCode] =
-    CompendiumStreamApp.program[IO]
+    CompendiumStreamApp.stream[IO].compile.drain.as(ExitCode.Success)
 }
 
 object CompendiumStreamApp {
 
-  def program[F[_]: ContextShift: ConcurrentEffect: Timer]: F[ExitCode] = {
-
-    Effect[F].delay(pureconfig.loadConfigOrThrow[CompendiumConfig]("compendium")).flatMap {
-      config =>
-        {
-          val transactor: Resource[F, HikariTransactor[F]] =
-            for {
-              ce <- ExecutionContexts.fixedThreadPool[F](32)
-              te <- ExecutionContexts.cachedThreadPool[F]
-              xa <- HikariTransactor.newHikariTransactor[F](
-                config.postgres.driver,
-                config.postgres.jdbcUrl,
-                config.postgres.username,
-                config.postgres.password,
-                ce,
-                te
-              )
-            } yield xa
-
-          transactor.use(xa => {
-            implicit val db                = PgDBService.impl[F](xa)
-            implicit val storage           = FileStorage.impl[F](config.storage)
-            implicit val utils             = ProtocolUtils.impl[F]
-            implicit val compendiumService = CompendiumService.impl[F]
-            val rootService                = RootService.rootRouteService
-            val healthService              = HealthService.healthRouteService
-            val app                        = Router("/" -> healthService, "/v0" -> rootService)
-
-            for {
-              _ <- Migrations.makeMigrations(
-                config.postgres.jdbcUrl,
-                config.postgres.username,
-                config.postgres.password
-              )
-              code <- CompendiumServerStream
-                .serverStream(config.http, app)
-                .compile
-                .drain
-                .as(ExitCode.Success)
-            } yield code
-          })
-        }
-    }
+  def stream[F[_]: ContextShift: ConcurrentEffect: Timer]: Stream[F, ExitCode] = {
+    for {
+      conf <- Stream.eval(
+        Effect[F].delay(pureconfig.loadConfigOrThrow[CompendiumConfig]("compendium")))
+      transactor <- Stream.resource(createHikariTransactor[F](conf))
+      implicit0(storage: Storage[F])                     = FileStorage.impl[F](conf.storage)
+      implicit0(utils: ProtocolUtils[F])                 = ProtocolUtils.impl[F]
+      implicit0(db: DBService[F])                        = PgDBService.impl[F](transactor)
+      implicit0(compendiumService: CompendiumService[F]) = CompendiumService.impl[F]
+      rootService                                        = RootService.rootRouteService
+      healthService                                      = HealthService.healthRouteService
+      app                                                = Router("/" -> healthService, "/v0" -> rootService)
+      _ <- Stream.eval(
+        Migrations.makeMigrations(
+          conf.postgres.jdbcUrl,
+          conf.postgres.username,
+          conf.postgres.password
+        ))
+      code <- CompendiumServerStream.serverStream(conf.http, app)
+    } yield code
   }
 
+  private def createHikariTransactor[F[_]: ContextShift: ConcurrentEffect](config: CompendiumConfig) =
+    for {
+      ce <- ExecutionContexts.fixedThreadPool[F](32)
+      te <- ExecutionContexts.cachedThreadPool[F]
+      xa <- HikariTransactor.newHikariTransactor[F](
+        config.postgres.driver,
+        config.postgres.jdbcUrl,
+        config.postgres.username,
+        config.postgres.password,
+        ce,
+        te
+      )
+    } yield xa
 }
