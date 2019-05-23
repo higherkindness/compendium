@@ -5,7 +5,7 @@ COPY project project
 COPY build.sbt .
 RUN sbt update
 COPY . .
-RUN sbt $PROJECT/test $PROJECT/universal:packageBin
+RUN sbt $PROJECT/universal:packageBin
 
 FROM openjdk:8u181-jre-slim
 ARG VERSION

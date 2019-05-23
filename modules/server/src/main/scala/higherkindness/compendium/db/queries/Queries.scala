@@ -26,9 +26,6 @@ object Queries {
           SELECT exists (SELECT true FROM protocols WHERE id=$id)
        """.query[Boolean]
 
-  def checkConnection(): Query0[Boolean] =
-    sql"SELECT exists (SELECT 1)".query[Boolean]
-
   def upsertProtocolIdQ(id: String): Update0 =
     sql"""
           INSERT INTO protocols
