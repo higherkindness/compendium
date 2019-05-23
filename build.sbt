@@ -126,6 +126,7 @@ lazy val commonSettings = Seq(
     %%("circe-generic", V.circe),
     %%("doobie-core", V.doobie),
     %%("doobie-postgres", V.doobie),
+    %%("doobie-hikari", V.doobie),
     "com.beachape" %% "enumeratum" % V.enumeratum,
     "com.beachape" %% "enumeratum-circe" % V.enumeratumCirce,
     "org.flywaydb" % "flyway-core" % V.flyway,

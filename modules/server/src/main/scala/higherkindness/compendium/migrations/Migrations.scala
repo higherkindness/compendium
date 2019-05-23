@@ -18,22 +18,17 @@ package higherkindness.compendium.migrations
 
 import cats.effect.Sync
 import cats.implicits._
+import higherkindness.compendium.models.PostgresConfig
 import org.flywaydb.core.Flyway
 
 object Migrations {
 
-  def makeMigrations[F[_]: Sync](
-      jdbcUrl: String,
-      user: String,
-      password: String,
-      location: Option[String] = None
-  ): F[Int] =
+  def makeMigrations[F[_]: Sync](conf: PostgresConfig): F[Int] =
     Sync[F]
       .delay {
-        location
-          .fold(
-            Flyway.configure().dataSource(jdbcUrl, user, password)
-          )(Flyway.configure().dataSource(jdbcUrl, user, password).locations(_))
+        Flyway
+          .configure()
+          .dataSource(conf.jdbcUrl, conf.username, conf.password)
           .load()
           .migrate()
       }
