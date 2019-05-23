@@ -5,6 +5,7 @@ COPY project project
 COPY build.sbt .
 RUN sbt update
 COPY . .
+RUN sbt $PROJECT/compile
 RUN sbt $PROJECT/universal:packageBin
 
 FROM openjdk:8u181-jre-slim
