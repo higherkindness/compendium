@@ -37,25 +37,11 @@ object Main extends IOApp {
 
 object CompendiumStreamApp {
 
-  private def createTransactor[F[_]: Async: ContextShift](
-      conf: PostgresConfig): Resource[F, Transactor[F]] =
-    for {
-      ce <- ExecutionContexts.fixedThreadPool[F](10)
-      te <- ExecutionContexts.cachedThreadPool[F]
-      xa <- HikariTransactor.newHikariTransactor[F](
-        conf.driver,
-        conf.jdbcUrl,
-        conf.username,
-        conf.password,
-        ce,
-        te
-      )
-    } yield xa
-
   def stream[F[_]: ConcurrentEffect: Timer: ContextShift]: Stream[F, ExitCode] =
     for {
       conf <- Stream.eval(
-        Effect[F].delay(pureconfig.loadConfigOrThrow[CompendiumConfig]("compendium")))
+        Sync[F].delay(pureconfig.loadConfigOrThrow[CompendiumConfig]("compendium"))
+      )
       _          <- Stream.eval(Migrations.makeMigrations(conf.postgres))
       transactor <- Stream.resource(createTransactor(conf.postgres))
       implicit0(storage: Storage[F])                     = FileStorage.impl[F](conf.storage)
@@ -65,5 +51,18 @@ object CompendiumStreamApp {
       service                                            = RootService.rootRouteService
       code <- CompendiumServerStream.serverStream(conf.http, service)
     } yield code
+
+  private def createTransactor[F[_]: Async: ContextShift](
+      conf: PostgresConfig
+  ): Resource[F, Transactor[F]] =
+    for {
+      ce <- ExecutionContexts.fixedThreadPool[F](10)
+      te <- ExecutionContexts.cachedThreadPool[F]
+      xa <- HikariTransactor.fromHikariConfig[F](
+        PostgresConfig.getHikariConfig(conf),
+        ce,
+        te
+      )
+    } yield xa
 
 }
