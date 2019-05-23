@@ -27,9 +27,7 @@ object Queries {
        """.query[Boolean]
 
   def checkConnection(): Query0[Boolean] =
-    sql"""
-          SELECT exists (SELECT 1)
-       """.query[Boolean]
+    sql"SELECT exists (SELECT 1)".query[Boolean]
 
   def upsertProtocolIdQ(id: String): Update0 =
     sql"""

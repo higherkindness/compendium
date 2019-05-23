@@ -19,10 +19,8 @@ package higherkindness.compendium.http
 import buildinfo.BuildInfo
 import cats.effect.Sync
 import cats.syntax.flatMap._
-import cats.syntax.functor._
 import io.circe.syntax._
 import org.http4s.circe.CirceEntityCodec._
-import mouse.all._
 import higherkindness.compendium.db.DBService
 import higherkindness.compendium.models.HealthResponse
 import higherkindness.compendium.models.Encoders._
@@ -38,13 +36,12 @@ object HealthService {
 
     HttpRoutes.of[F] {
       case GET -> Root / "health" =>
-        for {
-          exists <- DBService[F].ping()
-          resp <- exists.fold(
+        DBService[F]
+          .ping()
+          .ifM(
             Ok(HealthResponse("pass", BuildInfo.version, BuildInfo.name).asJson),
             InternalServerError()
           )
-        } yield resp
     }
   }
 }

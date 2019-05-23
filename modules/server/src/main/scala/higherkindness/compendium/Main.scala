@@ -25,7 +25,7 @@ import higherkindness.compendium.core.{CompendiumService, ProtocolUtils}
 import higherkindness.compendium.db.{DBService, PgDBService}
 import higherkindness.compendium.http.{HealthService, RootService}
 import higherkindness.compendium.migrations.Migrations
-import higherkindness.compendium.models.CompendiumConfig
+import higherkindness.compendium.models.{CompendiumConfig, PostgresConfig}
 import higherkindness.compendium.storage.{FileStorage, Storage}
 import org.http4s.server.Router
 import pureconfig.generic.auto._
@@ -41,7 +41,7 @@ object CompendiumStreamApp {
     for {
       conf <- Stream.eval(
         Effect[F].delay(pureconfig.loadConfigOrThrow[CompendiumConfig]("compendium")))
-      transactor <- Stream.resource(createHikariTransactor[F](conf))
+      transactor <- Stream.resource(createHikariTransactor[F](conf.postgres))
       implicit0(storage: Storage[F])                     = FileStorage.impl[F](conf.storage)
       implicit0(utils: ProtocolUtils[F])                 = ProtocolUtils.impl[F]
       implicit0(db: DBService[F])                        = PgDBService.impl[F](transactor)
@@ -49,26 +49,23 @@ object CompendiumStreamApp {
       rootService                                        = RootService.rootRouteService
       healthService                                      = HealthService.healthRouteService
       app                                                = Router("/" -> healthService, "/v0" -> rootService)
-      _ <- Stream.eval(
-        Migrations.makeMigrations(
-          conf.postgres.jdbcUrl,
-          conf.postgres.username,
-          conf.postgres.password
-        ))
+      _ <- Stream.eval {
+        import conf.postgres._
+        Migrations.makeMigrations(jdbcUrl, username, password)
+      }
       code <- CompendiumServerStream.serverStream(conf.http, app)
     } yield code
   }
 
-  private def createHikariTransactor[F[_]: ContextShift: ConcurrentEffect](
-      config: CompendiumConfig) =
+  private def createHikariTransactor[F[_]: ContextShift: ConcurrentEffect](config: PostgresConfig) =
     for {
       ce <- ExecutionContexts.fixedThreadPool[F](32)
       te <- ExecutionContexts.cachedThreadPool[F]
       xa <- HikariTransactor.newHikariTransactor[F](
-        config.postgres.driver,
-        config.postgres.jdbcUrl,
-        config.postgres.username,
-        config.postgres.password,
+        config.driver,
+        config.jdbcUrl,
+        config.username,
+        config.password,
         ce,
         te
       )
