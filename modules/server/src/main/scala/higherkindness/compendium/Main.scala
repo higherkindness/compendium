@@ -24,10 +24,11 @@ import doobie.util.transactor.Transactor
 import fs2.Stream
 import higherkindness.compendium.core.{CompendiumService, ProtocolUtils}
 import higherkindness.compendium.db.{DBService, PgDBService}
-import higherkindness.compendium.http.RootService
+import higherkindness.compendium.http.{HealthService, RootService}
 import higherkindness.compendium.migrations.Migrations
 import higherkindness.compendium.models._
 import higherkindness.compendium.storage.{FileStorage, Storage}
+import org.http4s.server.Router
 import pureconfig.generic.auto._
 
 object Main extends IOApp {
@@ -48,8 +49,10 @@ object CompendiumStreamApp {
       implicit0(dbService: DBService[F])                 = PgDBService.impl[F](transactor)
       implicit0(utils: ProtocolUtils[F])                 = ProtocolUtils.impl[F]
       implicit0(compendiumService: CompendiumService[F]) = CompendiumService.impl[F]
-      service                                            = RootService.rootRouteService
-      code <- CompendiumServerStream.serverStream(conf.http, service)
+      rootService                                        = RootService.rootRouteService
+      healthService                                      = HealthService.healthRouteService
+      app                                                = Router("/" -> healthService, "/v0" -> rootService)
+      code <- CompendiumServerStream.serverStream(conf.http, app)
     } yield code
 
   private def createTransactor[F[_]: Async: ContextShift](
