@@ -16,17 +16,44 @@
 
 package higherkindness.compendium.models
 
-final case class StorageConfig(path: String)
+import com.zaxxer.hikari.HikariConfig
 
-final case class PostgresConfig(
-    jdbcUrl: String,
-    username: String,
-    password: String,
-    driver: String
-)
+import scala.concurrent.duration.FiniteDuration
 
 final case class CompendiumConfig(
     http: HttpConfig,
     storage: StorageConfig,
     postgres: PostgresConfig
 )
+
+final case class StorageConfig(path: String)
+
+final case class PostgresConfig(
+    jdbcUrl: String,
+    username: String,
+    password: String,
+    driver: String,
+    connectionTimeout: Option[FiniteDuration] = None,
+    idleTimeout: Option[FiniteDuration] = None,
+    maxLifetime: Option[FiniteDuration] = None,
+    minimumIdle: Option[Int] = None,
+    maximumPoolSize: Option[Int] = None
+)
+
+object PostgresConfig {
+
+  def getHikariConfig(c: PostgresConfig): HikariConfig = {
+
+    val hikariConfig: HikariConfig = new HikariConfig()
+
+    hikariConfig.setJdbcUrl(c.jdbcUrl)
+    hikariConfig.setUsername(c.username)
+    hikariConfig.setPassword(c.password)
+    hikariConfig.setDriverClassName(c.driver)
+
+    c.connectionTimeout.foreach(v => hikariConfig.setConnectionTimeout(v.toMillis))
+    c.idleTimeout.foreach(v => hikariConfig.setIdleTimeout(v.toMillis))
+
+    hikariConfig
+  }
+}
