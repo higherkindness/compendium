@@ -18,14 +18,15 @@ package higherkindness.compendium
 
 import cats.effect._
 import cats.syntax.functor._
-import doobie._
 import doobie.hikari.HikariTransactor
+import doobie.util.ExecutionContexts
+import doobie.util.transactor.Transactor
 import fs2.Stream
 import higherkindness.compendium.core.{CompendiumService, ProtocolUtils}
 import higherkindness.compendium.db.{DBService, PgDBService}
 import higherkindness.compendium.http.{HealthService, RootService}
 import higherkindness.compendium.migrations.Migrations
-import higherkindness.compendium.models.{CompendiumConfig, PostgresConfig}
+import higherkindness.compendium.models._
 import higherkindness.compendium.storage.{FileStorage, Storage}
 import org.http4s.server.Router
 import pureconfig.generic.auto._
@@ -37,37 +38,34 @@ object Main extends IOApp {
 
 object CompendiumStreamApp {
 
-  def stream[F[_]: ContextShift: ConcurrentEffect: Timer]: Stream[F, ExitCode] = {
+  def stream[F[_]: ConcurrentEffect: Timer: ContextShift]: Stream[F, ExitCode] =
     for {
       conf <- Stream.eval(
-        Effect[F].delay(pureconfig.loadConfigOrThrow[CompendiumConfig]("compendium")))
-      transactor <- Stream.resource(createHikariTransactor[F](conf.postgres))
+        Sync[F].delay(pureconfig.loadConfigOrThrow[CompendiumConfig]("compendium"))
+      )
+      _          <- Stream.eval(Migrations.makeMigrations(conf.postgres))
+      transactor <- Stream.resource(createTransactor(conf.postgres))
       implicit0(storage: Storage[F])                     = FileStorage.impl[F](conf.storage)
+      implicit0(dbService: DBService[F])                 = PgDBService.impl[F](transactor)
       implicit0(utils: ProtocolUtils[F])                 = ProtocolUtils.impl[F]
-      implicit0(db: DBService[F])                        = PgDBService.impl[F](transactor)
       implicit0(compendiumService: CompendiumService[F]) = CompendiumService.impl[F]
       rootService                                        = RootService.rootRouteService
       healthService                                      = HealthService.healthRouteService
       app                                                = Router("/" -> healthService, "/v0" -> rootService)
-      _ <- Stream.eval {
-        import conf.postgres._
-        Migrations.makeMigrations(jdbcUrl, username, password)
-      }
       code <- CompendiumServerStream.serverStream(conf.http, app)
     } yield code
-  }
 
-  private def createHikariTransactor[F[_]: ContextShift: ConcurrentEffect](config: PostgresConfig) =
+  private def createTransactor[F[_]: Async: ContextShift](
+      conf: PostgresConfig
+  ): Resource[F, Transactor[F]] =
     for {
-      ce <- ExecutionContexts.fixedThreadPool[F](32)
+      ce <- ExecutionContexts.fixedThreadPool[F](10)
       te <- ExecutionContexts.cachedThreadPool[F]
-      xa <- HikariTransactor.newHikariTransactor[F](
-        config.driver,
-        config.jdbcUrl,
-        config.username,
-        config.password,
+      xa <- HikariTransactor.fromHikariConfig[F](
+        PostgresConfig.getHikariConfig(conf),
         ce,
         te
       )
     } yield xa
+
 }

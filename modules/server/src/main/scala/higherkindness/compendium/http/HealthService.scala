@@ -39,7 +39,7 @@ object HealthService {
         DBService[F]
           .ping()
           .ifM(
-            Ok(HealthResponse("pass", BuildInfo.version, BuildInfo.name).asJson),
+            Ok(HealthResponse("pass", BuildInfo.name, BuildInfo.version).asJson),
             InternalServerError()
           )
     }

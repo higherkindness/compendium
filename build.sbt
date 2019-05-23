@@ -11,7 +11,7 @@ lazy val V = new {
   val catsScalacheck: String   = "0.1.1"
   val mouse: String            = "0.20"
   val circe: String            = "0.11.1"
-  val kindProjector: String    = "0.10.0"
+  val kindProjector: String    = "0.10.1"
   val paradise: String         = "2.1.1"
   val scala: String            = "2.12.8"
   val skeumorph: String        = "0.0.1"
@@ -47,9 +47,7 @@ lazy val server = project
   .settings(serverSettings)
   .settings(
     buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
-    buildInfoPackage := "buildinfo"
-  )
-  .settings(
+    buildInfoPackage := "buildinfo",
     name := "compendium-server"
   )
   .dependsOn(common)
@@ -139,8 +137,8 @@ lazy val commonSettings = Seq(
     %%("specs2-scalacheck", V.specs2) % Test,
     %%("doobie-specs2", V.doobie)     % Test,
     "io.chrisdavenport"  %% "cats-scalacheck" % V.catsScalacheck % Test,
-    "io.chrisdavenport"  %% "testcontainers-specs2" % "0.1.0"  % Test,
-    "org.testcontainers" % "postgresql"             % "1.11.2" % Test
+    "io.chrisdavenport"  %% "testcontainers-specs2" % "0.1.0"    % Test,
+    "org.testcontainers" % "postgresql"             % "1.11.3"   % Test
   ),
   orgScriptTaskListSetting := List(
     (clean in Global).asRunnableItemFull,

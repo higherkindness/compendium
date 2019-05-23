@@ -16,8 +16,11 @@
 
 package higherkindness.compendium.models
 
+import com.zaxxer.hikari.HikariConfig
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+
+import scala.concurrent.duration.FiniteDuration
 
 object Decoders {
   implicit val healthResponseDecoder: Decoder[HealthResponse] = deriveDecoder[HealthResponse]
@@ -27,7 +30,13 @@ object Encoders {
   implicit val healthResponseEncoder: Encoder[HealthResponse] = deriveEncoder[HealthResponse]
 }
 
-final case class HealthResponse(status: String, version: String, serviceID: String)
+final case class HealthResponse(status: String, serviceID: String, version: String)
+
+final case class CompendiumConfig(
+    http: HttpConfig,
+    storage: StorageConfig,
+    postgres: PostgresConfig
+)
 
 final case class StorageConfig(path: String)
 
@@ -35,11 +44,28 @@ final case class PostgresConfig(
     jdbcUrl: String,
     username: String,
     password: String,
-    driver: String
+    driver: String,
+    connectionTimeout: Option[FiniteDuration] = None,
+    idleTimeout: Option[FiniteDuration] = None,
+    maxLifetime: Option[FiniteDuration] = None,
+    minimumIdle: Option[Int] = None,
+    maximumPoolSize: Option[Int] = None
 )
 
-final case class CompendiumConfig(
-    http: HttpConfig,
-    storage: StorageConfig,
-    postgres: PostgresConfig
-)
+object PostgresConfig {
+
+  def getHikariConfig(c: PostgresConfig): HikariConfig = {
+
+    val hikariConfig: HikariConfig = new HikariConfig()
+
+    hikariConfig.setJdbcUrl(c.jdbcUrl)
+    hikariConfig.setUsername(c.username)
+    hikariConfig.setPassword(c.password)
+    hikariConfig.setDriverClassName(c.driver)
+
+    c.connectionTimeout.foreach(v => hikariConfig.setConnectionTimeout(v.toMillis))
+    c.idleTimeout.foreach(v => hikariConfig.setIdleTimeout(v.toMillis))
+
+    hikariConfig
+  }
+}

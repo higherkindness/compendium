@@ -35,4 +35,7 @@ object Queries {
           VALUES ($id)
           ON CONFLICT DO NOTHING
        """.update
+
+  def checkConnection(): Query0[Boolean] =
+    sql"SELECT exists (SELECT 1)".query[Boolean]
 }
