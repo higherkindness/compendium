@@ -41,10 +41,13 @@ lazy val common = project
   )
 
 lazy val server = project
+  .enablePlugins(BuildInfoPlugin)
   .in(file("modules/server"))
   .settings(commonSettings)
   .settings(serverSettings)
   .settings(
+    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
+    buildInfoPackage := "buildinfo",
     name := "compendium-server"
   )
   .dependsOn(common)
