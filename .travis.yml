@@ -37,9 +37,9 @@ jobs:
         - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
       script:
         - export VERSION=$(cut -d'=' -f2  version.sbt | sed -e 's/^[ \t]*//;s/"//g')
-        - docker build --build-arg PROJECT=server --build-arg VERSION=$VERSION -t compendium/server:$VERSION .
+        - docker build --build-arg PROJECT=server --build-arg VERSION=$VERSION -t $DOCKER_USER/compendium:$VERSION .
       deploy:
         provider: script
         script:
-          export tag=$(cut -d'=' -f2  version.sbt | sed -e 's/^[ \t]*//;s/"//g') && docker push compendium/server:$tag
+          export tag=$(cut -d'=' -f2  version.sbt | sed -e 's/^[ \t]*//;s/"//g') && docker push $DOCKER_USER/compendium:$tag
         branch: master
