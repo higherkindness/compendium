@@ -41,7 +41,7 @@ lazy val common = project
   )
 
 lazy val server = project
-  .enablePlugins(BuildInfoPlugin)
+  .enablePlugins(UniversalPlugin, JavaAppPackaging, BuildInfoPlugin)
   .in(file("modules/server"))
   .settings(commonSettings)
   .settings(serverSettings)
