@@ -13,7 +13,7 @@ services:
       - database_data:/var/lib/postgresql/data
 
   compendium:
-    image: compendium/server:latest
+    image: 47deg/compendium:latest
     expose:
       - 8080
     ports:
