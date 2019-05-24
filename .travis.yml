@@ -33,13 +33,9 @@ jobs:
       sudo: required
       services:
         - docker
-      before_install:
-        - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
       script:
         - export VERSION=$(cut -d'=' -f2  version.sbt | sed -e 's/^[ \t]*//;s/"//g')
-        - docker build --build-arg PROJECT=server --build-arg VERSION=$VERSION -t $DOCKER_USER/compendium:$VERSION .
+        - docker build --build-arg PROJECT=server --build-arg VERSION=$VERSION -t $DOCKER_USER/compendium:$VERSION -t $DOCKER_USER/compendium:latest .
       deploy:
         provider: script
-        script:
-          export tag=$(cut -d'=' -f2  version.sbt | sed -e 's/^[ \t]*//;s/"//g') && docker push $DOCKER_USER/compendium:$tag
-        branch: master
+        script: bash docker_push.sh $DOCKER_PASSWORD $DOCKER_USER
