@@ -9,7 +9,7 @@ lazy val V = new {
   val betterMonadicFor: String = "0.3.0"
   val cats: String             = "1.6.0"
   val catsScalacheck: String   = "0.1.1"
-  val mouse: String            = "0.20"
+  val mouse: String            = "0.21"
   val circe: String            = "0.11.1"
   val kindProjector: String    = "0.10.1"
   val paradise: String         = "2.1.1"
@@ -180,6 +180,7 @@ lazy val clientSettings = Seq(
 )
 
 lazy val serverSettings = Seq(
+  parallelExecution in Test := false,
   libraryDependencies ++= Seq(
     "org.slf4j" % "slf4j-simple" % "1.7.26",
     "io.chrisdavenport" %% "cats-scalacheck" % V.catsScalacheck % Test
