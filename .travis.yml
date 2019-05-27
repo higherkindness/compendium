@@ -1,9 +1,8 @@
 jobs:
   include:
     - stage: build
-      sudo: required
-      services:
-        - docker
+      name: sbt build
+      sudo: false
       language: scala
       jdk:
         - oraclejdk8
@@ -27,16 +26,18 @@ jobs:
         - gem install sass
         - gem install jekyll-watch -v 2.1.2
         - gem install jekyll -v 3.8.3
-      - script: sbt ++$TRAVIS_SCALA_VERSION orgScriptCI
-        name: "Unit Tests"
+      script:
+        - sbt ++$TRAVIS_SCALA_VERSION orgScriptCI
       after_success:
         - sbt ++$TRAVIS_SCALA_VERSION orgAfterCISuccess
+    - stage: publish-docker
+      name: docker build
+      sudo: required
+      services:
+        - docker
       script:
         - export VERSION=$(cut -d'=' -f2  version.sbt | sed -e 's/^[ \t]*//;s/"//g')
         - docker build --build-arg PROJECT=server --build-arg VERSION=$VERSION -t $DOCKER_USER/compendium:$VERSION -t $DOCKER_USER/compendium:latest .
-      name: "Build docker image"
-    - stage: publish-docker
-      script: skip
       deploy:
         provider: script
         script: bash docker_push.sh $DOCKER_PASSWORD $DOCKER_USER
