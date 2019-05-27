@@ -1,6 +1,7 @@
 jobs:
   include:
     - stage: build
+      name: "Unit Tests"
       sudo: required
       services:
         - docker
@@ -29,12 +30,14 @@ jobs:
         - gem install jekyll -v 3.8.3
       script:
         - sbt ++$TRAVIS_SCALA_VERSION orgScriptCI
-      script:
-        - export VERSION=$(cut -d'=' -f2  version.sbt | sed -e 's/^[ \t]*//;s/"//g')
-        - docker build --build-arg PROJECT=server --build-arg VERSION=$VERSION -t $DOCKER_USER/compendium:$VERSION -t $DOCKER_USER/compendium:latest .
       after_success:
         - sbt ++$TRAVIS_SCALA_VERSION orgAfterCISuccess
+      - script:
+        - export VERSION=$(cut -d'=' -f2  version.sbt | sed -e 's/^[ \t]*//;s/"//g')
+        - docker build --build-arg PROJECT=server --build-arg VERSION=$VERSION -t $DOCKER_USER/compendium:$VERSION -t $DOCKER_USER/compendium:latest .
+      - name: "Build docker image"
     - stage: publish-docker
+      script: skip
       deploy:
         provider: script
         script: bash docker_push.sh $DOCKER_PASSWORD $DOCKER_USER
