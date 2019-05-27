@@ -1,7 +1,9 @@
 jobs:
   include:
     - stage: build
-      sudo: false
+      sudo: required
+      services:
+        - docker
       language: scala
       jdk:
         - oraclejdk8
@@ -27,15 +29,12 @@ jobs:
         - gem install jekyll -v 3.8.3
       script:
         - sbt ++$TRAVIS_SCALA_VERSION orgScriptCI
-      after_success:
-        - sbt ++$TRAVIS_SCALA_VERSION orgAfterCISuccess
-    - stage: publish-docker
-      sudo: required
-      services:
-        - docker
       script:
         - export VERSION=$(cut -d'=' -f2  version.sbt | sed -e 's/^[ \t]*//;s/"//g')
         - docker build --build-arg PROJECT=server --build-arg VERSION=$VERSION -t $DOCKER_USER/compendium:$VERSION -t $DOCKER_USER/compendium:latest .
+      after_success:
+        - sbt ++$TRAVIS_SCALA_VERSION orgAfterCISuccess
+    - stage: publish-docker
       deploy:
         provider: script
         script: bash docker_push.sh $DOCKER_PASSWORD $DOCKER_USER
