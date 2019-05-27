@@ -1,7 +1,7 @@
 jobs:
   include:
     - stage: build
-      name: sbt build
+      name: build and test
       sudo: false
       language: scala
       jdk:
