@@ -1,7 +1,6 @@
 jobs:
   include:
     - stage: build
-      name: "Unit Tests"
       sudo: required
       services:
         - docker
@@ -28,14 +27,14 @@ jobs:
         - gem install sass
         - gem install jekyll-watch -v 2.1.2
         - gem install jekyll -v 3.8.3
-      script:
-        - sbt ++$TRAVIS_SCALA_VERSION orgScriptCI
+      - script: sbt ++$TRAVIS_SCALA_VERSION orgScriptCI
+        name: "Unit Tests"
       after_success:
         - sbt ++$TRAVIS_SCALA_VERSION orgAfterCISuccess
-      - script:
+      script:
         - export VERSION=$(cut -d'=' -f2  version.sbt | sed -e 's/^[ \t]*//;s/"//g')
         - docker build --build-arg PROJECT=server --build-arg VERSION=$VERSION -t $DOCKER_USER/compendium:$VERSION -t $DOCKER_USER/compendium:latest .
-      - name: "Build docker image"
+      name: "Build docker image"
     - stage: publish-docker
       script: skip
       deploy:
