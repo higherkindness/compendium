@@ -30,14 +30,20 @@ jobs:
         - sbt ++$TRAVIS_SCALA_VERSION orgScriptCI
       after_success:
         - sbt ++$TRAVIS_SCALA_VERSION orgAfterCISuccess
-    - stage: publish-docker
+    - stage: build
       name: docker build
+      sudo: required
+        services:
+          - docker
+        script:
+          - export VERSION=$(cut -d'=' -f2  version.sbt | sed -e 's/^[ \t]*//;s/"//g')
+          - docker build --build-arg PROJECT=server --build-arg VERSION=$VERSION -t $DOCKER_USER/compendium:$VERSION -t $DOCKER_USER/compendium:latest .
+    - stage: publish-docker
+      name: docker publish
       sudo: required
       services:
         - docker
-      script:
-        - export VERSION=$(cut -d'=' -f2  version.sbt | sed -e 's/^[ \t]*//;s/"//g')
-        - docker build --build-arg PROJECT=server --build-arg VERSION=$VERSION -t $DOCKER_USER/compendium:$VERSION -t $DOCKER_USER/compendium:latest .
+      script: skip
       deploy:
         provider: script
         script: bash docker_push.sh $DOCKER_PASSWORD $DOCKER_USER
