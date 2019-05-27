@@ -22,7 +22,7 @@ lazy val V = new {
   val shapeless: String        = "2.3.3"
   val pureConfig: String       = "0.11.0"
   val hammock: String          = "0.9.1"
-  val doobie: String           = "0.7.0-M5"
+  val doobie: String           = "0.7.0"
   val flyway: String           = "5.2.4"
 }
 
