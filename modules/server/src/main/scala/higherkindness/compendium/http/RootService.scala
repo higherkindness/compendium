@@ -19,17 +19,14 @@ package higherkindness.compendium.http
 import cats.effect.Sync
 import cats.syntax.flatMap._
 import cats.syntax.functor._
-import org.http4s.circe.CirceEntityCodec._
-import io.circe.syntax._
-import higherkindness.compendium.models._
-import org.http4s.dsl.Http4sDsl
-import Decoders._
-import Encoders._
 import higherkindness.compendium.core.CompendiumService
 import higherkindness.compendium.http.QueryParams.TargetQueryParam
-import org.http4s.HttpRoutes
-import org.http4s.headers.Location
+import higherkindness.compendium.models._
 import mouse.all._
+import org.http4s.HttpRoutes
+import org.http4s.circe.CirceEntityCodec._
+import org.http4s.dsl.Http4sDsl
+import org.http4s.headers.Location
 
 object RootService {
 
@@ -39,9 +36,7 @@ object RootService {
     import f._
 
     HttpRoutes.of[F] {
-      case GET -> Root / "ping" => Ok("pong".asJson)
-
-      case req @ POST -> Root / "v0" / "protocol" / id =>
+      case req @ POST -> Root / "protocol" / id =>
         Sync[F].recoverWith(
           for {
             protocol <- req.as[Protocol]
@@ -54,13 +49,13 @@ object RootService {
           case _                                       => InternalServerError()
         }
 
-      case GET -> Root / "v0" / "protocol" / id =>
+      case GET -> Root / "protocol" / id =>
         for {
           protocol <- CompendiumService[F].recoverProtocol(id)
           resp     <- protocol.fold(NotFound())(Ok(_))
         } yield resp
 
-      case GET -> Root / "v0" / "protocol" / protocolName / "generate" :? TargetQueryParam(
+      case GET -> Root / "protocol" / protocolName / "generate" :? TargetQueryParam(
             target) =>
         CompendiumService[F]
           .parseProtocol(protocolName, target.toString)

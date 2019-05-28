@@ -14,24 +14,25 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium
+package higherkindness.compendium.db.queries
 
-import higherkindness.compendium.models.Protocol
-import org.scalacheck.{Arbitrary, Gen}
+import doobie._
+import doobie.implicits.toSqlInterpolator
 
-trait CompendiumArbitrary {
+object Queries {
 
-  implicit val protocolArbitrary: Arbitrary[Protocol] = Arbitrary {
-    Gen.alphaNumStr.map(Protocol.apply)
-  }
+  def checkIfExistsQ(id: String): Query0[Boolean] =
+    sql"""
+          SELECT exists (SELECT true FROM protocols WHERE id=$id)
+       """.query[Boolean]
 
-  implicit val differentIdentifiersArb: Arbitrary[DifferentIdentifiers] = Arbitrary {
-    for {
-      id1 <- Gen.alphaStr
-      id2 <- Gen.alphaStr.suchThat(id => !id.equalsIgnoreCase(id1))
-    } yield DifferentIdentifiers(id1, id2)
-  }
+  def upsertProtocolIdQ(id: String): Update0 =
+    sql"""
+          INSERT INTO protocols
+          VALUES ($id)
+          ON CONFLICT DO NOTHING
+       """.update
 
+  def checkConnection(): Query0[Boolean] =
+    sql"SELECT exists (SELECT 1)".query[Boolean]
 }
-
-object CompendiumArbitrary extends CompendiumArbitrary

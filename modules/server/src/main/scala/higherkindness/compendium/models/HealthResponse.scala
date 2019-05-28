@@ -16,4 +16,12 @@
 
 package higherkindness.compendium.models
 
-final case class HttpConfig(host: String, port: Int)
+import io.circe._
+import io.circe.generic.semiauto._
+
+final case class HealthResponse(status: String, serviceId: String, version: String)
+
+object HealthResponse {
+  implicit val decoder: Decoder[HealthResponse] = deriveDecoder[HealthResponse]
+  implicit val encoder: Encoder[HealthResponse] = deriveEncoder[HealthResponse]
+}

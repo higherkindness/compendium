@@ -6,22 +6,24 @@ import sbtorgpolicies.templates._
 import sbtorgpolicies.templates.badges._
 
 lazy val V = new {
-  val betterMonadicFor: String = "0.3.0-M4"
+  val betterMonadicFor: String = "0.3.0"
   val cats: String             = "1.6.0"
-  val catsScalacheck: String   = "0.1.0"
+  val catsScalacheck: String   = "0.1.1"
   val mouse: String            = "0.20"
   val circe: String            = "0.11.1"
-  val kindProjector: String    = "0.9.9"
+  val kindProjector: String    = "0.10.1"
   val paradise: String         = "2.1.1"
   val scala: String            = "2.12.8"
   val skeumorph: String        = "0.0.1"
-  val specs2: String           = "4.4.1"
+  val specs2: String           = "4.5.1"
   val enumeratum: String       = "1.5.13"
-  val enumeratumCirce: String  = "1.5.20"
-  val http4s: String           = "0.19.0"
+  val enumeratumCirce: String  = "1.5.21"
+  val http4s: String           = "0.20.1"
   val shapeless: String        = "2.3.3"
-  val pureConfig: String       = "0.10.2"
-  val hammock: String          = "0.9.0"
+  val pureConfig: String       = "0.11.0"
+  val hammock: String          = "0.9.1"
+  val doobie: String           = "0.7.0"
+  val flyway: String           = "5.2.4"
 }
 
 lazy val root = project
@@ -39,10 +41,13 @@ lazy val common = project
   )
 
 lazy val server = project
+  .enablePlugins(UniversalPlugin, JavaAppPackaging, BuildInfoPlugin)
   .in(file("modules/server"))
   .settings(commonSettings)
   .settings(serverSettings)
   .settings(
+    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
+    buildInfoPackage := "buildinfo",
     name := "compendium-server"
   )
   .dependsOn(common)
@@ -122,11 +127,18 @@ lazy val commonSettings = Seq(
     %%("http4s-circe", V.http4s),
     %%("circe-core", V.circe),
     %%("circe-generic", V.circe),
-    %%("specs2-core", V.specs2)       % Test,
-    %%("specs2-scalacheck", V.specs2) % Test,
+    %%("doobie-core", V.doobie),
+    %%("doobie-postgres", V.doobie),
+    %%("doobie-hikari", V.doobie),
     "com.beachape" %% "enumeratum" % V.enumeratum,
     "com.beachape" %% "enumeratum-circe" % V.enumeratumCirce,
-    "io.chrisdavenport" %% "cats-scalacheck" % V.catsScalacheck % Test
+    "org.flywaydb" % "flyway-core" % V.flyway,
+    %%("specs2-core", V.specs2)       % Test,
+    %%("specs2-scalacheck", V.specs2) % Test,
+    %%("doobie-specs2", V.doobie)     % Test,
+    "io.chrisdavenport"  %% "cats-scalacheck" % V.catsScalacheck % Test,
+    "io.chrisdavenport"  %% "testcontainers-specs2" % "0.1.0"    % Test,
+    "org.testcontainers" % "postgresql"             % "1.11.3"   % Test
   ),
   orgScriptTaskListSetting := List(
     (clean in Global).asRunnableItemFull,
@@ -168,6 +180,7 @@ lazy val clientSettings = Seq(
 )
 
 lazy val serverSettings = Seq(
+  parallelExecution in Test := false,
   libraryDependencies ++= Seq(
     "org.slf4j" % "slf4j-simple" % "1.7.26",
     "io.chrisdavenport" %% "cats-scalacheck" % V.catsScalacheck % Test
@@ -176,7 +189,7 @@ lazy val serverSettings = Seq(
 
 lazy val compilerPlugins = Seq(
   libraryDependencies ++= Seq(
-    compilerPlugin("org.spire-math"  % "kind-projector"      % V.kindProjector cross CrossVersion.binary),
+    compilerPlugin("org.typelevel"   % "kind-projector"      % V.kindProjector cross CrossVersion.binary),
     compilerPlugin("com.olegpy"      %% "better-monadic-for" % V.betterMonadicFor),
     compilerPlugin("org.scalamacros" % "paradise"            % V.paradise cross CrossVersion.patch)
   )

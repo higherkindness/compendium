@@ -14,21 +14,6 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.db
+package higherkindness.compendium.models.config
 
-import cats.effect.Sync
-import higherkindness.compendium.models.Protocol
-import higherkindness.compendium.storage.Storage
-
-object FileDBService {
-
-  def apply[F[_]](implicit S: Storage[F]): Storage[F] = S
-
-  implicit def impl[F[_]: Sync: Storage](): DBService[F] =
-    new DBService[F] {
-      override def upsertProtocol(id: String, protocol: Protocol): F[Unit] = Sync[F].unit
-
-      override def existsProtocol(id: String): F[Boolean] = Storage[F].exists(id)
-    }
-
-}
+final case class HttpConfig(host: String, port: Int)

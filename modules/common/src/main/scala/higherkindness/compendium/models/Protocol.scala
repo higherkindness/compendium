@@ -16,16 +16,12 @@
 
 package higherkindness.compendium.models
 
-import enumeratum._
+import io.circe._
+import io.circe.generic.semiauto._
 
 final case class Protocol(raw: String)
-final case class ErrorResponse(message: String)
 
-sealed trait Target extends EnumEntry
-
-object Target extends Enum[Target] {
-
-  val values = findValues
-
-  case object Scala extends Target
+object Protocol {
+  implicit val decoder: Decoder[Protocol] = deriveDecoder[Protocol]
+  implicit val encoder: Encoder[Protocol] = deriveEncoder[Protocol]
 }

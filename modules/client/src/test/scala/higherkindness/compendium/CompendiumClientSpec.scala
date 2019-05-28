@@ -20,13 +20,12 @@ import cats.effect.{IO, Sync}
 import cats.~>
 import cats.effect._
 import hammock.{HttpF, HttpRequest, InterpTrans, Post}
-import higherkindness.compendium.models.{CompendiumConfig, ErrorResponse, Protocol, Target}
+import higherkindness.compendium.models._
+import higherkindness.compendium.models.config._
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
 import pureconfig.generic.auto._
 import hammock._
-import higherkindness.compendium.http._
-import Encoders._
 import io.circe.syntax._
 
 object CompendiumClientSpec extends Specification with ScalaCheck {
@@ -41,9 +40,9 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
   private[this] def asEntityJson[T: io.circe.Encoder](t: T): Entity =
     Entity.StringEntity(t.asJson.toString, ContentType.`application/json`)
 
-  def interp(identifier: String, target: Target) = new InterpTrans[IO] {
+  def interp(identifier: String, target: Target)(implicit S: Sync[IO]) = new InterpTrans[IO] {
 
-    def trans(implicit S: Sync[IO]): HttpF ~> IO = new (HttpF ~> IO) {
+    val trans: HttpF ~> IO = new (HttpF ~> IO) {
       private def response(entity: Entity): HttpResponse =
         HttpResponse(Status.OK, Map(), entity)
 
@@ -104,21 +103,21 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
 
       implicit val terp = interp("proto1", Target.Scala)
 
-      CompendiumClient[IO].recoverProtocol("proto1").unsafeRunSync() should beSome(dummyProtocol)
+      CompendiumClient().recoverProtocol("proto1").unsafeRunSync() should beSome(dummyProtocol)
     }
 
     "Given an invalid identifier returns no protocol" >> {
 
       implicit val terp = interp("proto1", Target.Scala)
 
-      CompendiumClient[IO].recoverProtocol("proto2").unsafeRunSync() should beNone
+      CompendiumClient().recoverProtocol("proto2").unsafeRunSync() should beNone
     }
 
     "Given an identifier returns a internal server error" >> {
 
       implicit val terp = interp("proto1", Target.Scala)
 
-      CompendiumClient[IO]
+      CompendiumClient()
         .recoverProtocol("error")
         .unsafeRunSync() must throwA[higherkindness.compendium.models.UnknownError]
     }
@@ -129,7 +128,7 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
 
       implicit val terp = interp("proto1", Target.Scala)
 
-      CompendiumClient[IO].storeProtocol("proto1", dummyProtocol).unsafeRunSync() must not(
+      CompendiumClient().storeProtocol("proto1", dummyProtocol).unsafeRunSync() must not(
         throwA[Exception])
     }
 
@@ -137,7 +136,7 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
 
       implicit val terp = interp("proto1", Target.Scala)
 
-      CompendiumClient[IO]
+      CompendiumClient()
         .storeProtocol("schemaerror", dummyProtocol)
         .unsafeRunSync() must throwA[higherkindness.compendium.models.SchemaError]
     }
@@ -146,7 +145,7 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
 
       implicit val terp = interp("proto1", Target.Scala)
 
-      CompendiumClient[IO]
+      CompendiumClient()
         .storeProtocol("alreadyexists", dummyProtocol)
         .unsafeRunSync() must not(throwA[Exception])
     }
@@ -155,7 +154,7 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
 
       implicit val terp = interp("proto1", Target.Scala)
 
-      CompendiumClient[IO]
+      CompendiumClient()
         .storeProtocol("internal", dummyProtocol)
         .unsafeRunSync() must throwA[higherkindness.compendium.models.UnknownError]
     }

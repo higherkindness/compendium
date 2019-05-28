@@ -14,24 +14,23 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium
+package higherkindness.compendium.db
 
-import higherkindness.compendium.models.Protocol
-import org.scalacheck.{Arbitrary, Gen}
+import doobie.specs2._
+import higherkindness.compendium.db.queries.Queries
+import org.specs2.specification.Scope
 
-trait CompendiumArbitrary {
+class QueriesSpec extends PGHelper with IOChecker {
 
-  implicit val protocolArbitrary: Arbitrary[Protocol] = Arbitrary {
-    Gen.alphaNumStr.map(Protocol.apply)
+  "Queries" should {
+    "match db model" in new context {
+      check(Queries.checkIfExistsQ(protocolId))
+      check(Queries.upsertProtocolIdQ(protocolId))
+    }
   }
 
-  implicit val differentIdentifiersArb: Arbitrary[DifferentIdentifiers] = Arbitrary {
-    for {
-      id1 <- Gen.alphaStr
-      id2 <- Gen.alphaStr.suchThat(id => !id.equalsIgnoreCase(id1))
-    } yield DifferentIdentifiers(id1, id2)
+  trait context extends Scope {
+    val protocolId: String = "my.test.protocol.id"
   }
 
 }
-
-object CompendiumArbitrary extends CompendiumArbitrary

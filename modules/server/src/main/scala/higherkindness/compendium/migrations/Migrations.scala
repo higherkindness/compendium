@@ -14,12 +14,27 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.models
+package higherkindness.compendium.migrations
 
-final case class StorageConfig(path: String)
-final case class CompendiumConfig(http: HttpConfig, storage: StorageConfig)
-final case class ParserError(msg: String)
+import cats.effect.Sync
+import cats.implicits._
+import higherkindness.compendium.models.config.PostgresConfig
+import org.flywaydb.core.Flyway
 
-object types {
-  type ParserResult = Either[ParserError, Protocol]
+object Migrations {
+
+  def makeMigrations[F[_]: Sync](conf: PostgresConfig): F[Int] =
+    Sync[F]
+      .delay {
+        Flyway
+          .configure()
+          .dataSource(conf.jdbcUrl, conf.username, conf.password)
+          .load()
+          .migrate()
+      }
+      .attempt
+      .flatMap {
+        case Right(count) => Sync[F].delay(count)
+        case Left(error)  => Sync[F].raiseError(error)
+      }
 }

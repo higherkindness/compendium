@@ -14,20 +14,25 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.http
+package higherkindness.compendium.db
 
-import higherkindness.compendium.models.{ErrorResponse, Protocol}
-import io.circe.{Decoder, Encoder}
-import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+import cats.effect.Async
+import cats.implicits._
+import doobie.util.transactor.Transactor
+import doobie.implicits._
+import higherkindness.compendium.db.queries.Queries
 
-object Decoders {
+object PgDBService {
 
-  implicit val protocolDecoder: Decoder[Protocol]           = deriveDecoder[Protocol]
-  implicit val errorResponseDecoder: Decoder[ErrorResponse] = deriveDecoder[ErrorResponse]
-}
+  def impl[F[_]: Async](xa: Transactor[F]): DBService[F] =
+    new DBService[F] {
 
-object Encoders {
+      override def upsertProtocol(id: String): F[Unit] =
+        Queries.upsertProtocolIdQ(id).run.void.transact(xa)
 
-  implicit val protocolEnconder: Encoder[Protocol]          = deriveEncoder[Protocol]
-  implicit val errorResponseEncoder: Encoder[ErrorResponse] = deriveEncoder[ErrorResponse]
+      override def existsProtocol(id: String): F[Boolean] =
+        Queries.checkIfExistsQ(id).unique.transact(xa)
+
+      override def ping(): F[Boolean] = Queries.checkConnection().unique.transact(xa)
+    }
 }

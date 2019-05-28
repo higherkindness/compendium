@@ -20,7 +20,8 @@ import java.io.File
 
 import cats.effect.IO
 import higherkindness.compendium.CompendiumArbitrary._
-import higherkindness.compendium.models.{Protocol, StorageConfig}
+import higherkindness.compendium.models.Protocol
+import higherkindness.compendium.models.config.StorageConfig
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
 import org.specs2.specification.{AfterEach, BeforeAfterAll}
