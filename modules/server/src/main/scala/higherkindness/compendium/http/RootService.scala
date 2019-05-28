@@ -19,16 +19,14 @@ package higherkindness.compendium.http
 import cats.effect.Sync
 import cats.syntax.flatMap._
 import cats.syntax.functor._
-import org.http4s.circe.CirceEntityCodec._
-import higherkindness.compendium.models._
-import org.http4s.dsl.Http4sDsl
-import Decoders._
-import Encoders._
 import higherkindness.compendium.core.CompendiumService
 import higherkindness.compendium.http.QueryParams.TargetQueryParam
-import org.http4s.HttpRoutes
-import org.http4s.headers.Location
+import higherkindness.compendium.models._
 import mouse.all._
+import org.http4s.HttpRoutes
+import org.http4s.circe.CirceEntityCodec._
+import org.http4s.dsl.Http4sDsl
+import org.http4s.headers.Location
 
 object RootService {
 

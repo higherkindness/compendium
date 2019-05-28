@@ -14,24 +14,15 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium
+package higherkindness.compendium.models
 
-import higherkindness.compendium.models.Protocol
-import org.scalacheck.{Arbitrary, Gen}
+import enumeratum._
 
-trait CompendiumArbitrary {
+sealed trait Target extends EnumEntry
 
-  implicit val protocolArbitrary: Arbitrary[Protocol] = Arbitrary {
-    Gen.alphaNumStr.map(Protocol.apply)
-  }
+object Target extends Enum[Target] {
 
-  implicit val differentIdentifiersArb: Arbitrary[DifferentIdentifiers] = Arbitrary {
-    for {
-      id1 <- Gen.alphaStr
-      id2 <- Gen.alphaStr.suchThat(id => !id.equalsIgnoreCase(id1))
-    } yield DifferentIdentifiers(id1, id2)
-  }
+  val values = findValues
 
+  case object Scala extends Target
 }
-
-object CompendiumArbitrary extends CompendiumArbitrary

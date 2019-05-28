@@ -19,9 +19,9 @@ package higherkindness.compendium.storage
 import java.io.{File, PrintWriter}
 
 import cats.effect.Sync
-import cats.syntax.functor._
-import cats.syntax.flatMap._
-import higherkindness.compendium.models.{Protocol, StorageConfig}
+import cats.implicits._
+import higherkindness.compendium.models.Protocol
+import higherkindness.compendium.models.config.StorageConfig
 
 object FileStorage {
 

@@ -17,16 +17,14 @@
 package higherkindness.compendium.http
 
 import cats.effect.IO
+import higherkindness.compendium.core.CompendiumServiceStub
 import higherkindness.compendium.models._
-import org.specs2.mutable.Specification
-import org.http4s.{Method, Request, Response, Status, Uri}
 import org.http4s.circe.CirceEntityCodec._
 import org.http4s.implicits._
-import Encoders._
-import Decoders._
-import higherkindness.compendium.core.CompendiumServiceStub
-import org.specs2.ScalaCheck
+import org.http4s.{Method, Request, Response, Status, Uri}
 import org.scalacheck.Gen
+import org.specs2.ScalaCheck
+import org.specs2.mutable.Specification
 
 object RootServiceSpec extends Specification with ScalaCheck {
 

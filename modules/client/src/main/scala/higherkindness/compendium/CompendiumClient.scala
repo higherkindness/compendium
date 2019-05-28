@@ -20,9 +20,8 @@ import cats.effect.IO
 import cats.free.Free
 import hammock._
 import hammock.circe.implicits._
-import higherkindness.compendium.http.Encoders._
-import higherkindness.compendium.http.Decoders._
 import higherkindness.compendium.models._
+import higherkindness.compendium.models.config._
 
 trait CompendiumClient {
 

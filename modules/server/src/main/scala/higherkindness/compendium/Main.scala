@@ -22,12 +22,12 @@ import doobie.hikari.HikariTransactor
 import doobie.util.ExecutionContexts
 import doobie.util.transactor.Transactor
 import fs2.Stream
-import higherkindness.compendium.core.{CompendiumService, ProtocolUtils}
-import higherkindness.compendium.db.{DBService, PgDBService}
-import higherkindness.compendium.http.{HealthService, RootService}
+import higherkindness.compendium.core._
+import higherkindness.compendium.db._
+import higherkindness.compendium.http._
 import higherkindness.compendium.migrations.Migrations
-import higherkindness.compendium.models._
-import higherkindness.compendium.storage.{FileStorage, Storage}
+import higherkindness.compendium.models.config._
+import higherkindness.compendium.storage._
 import org.http4s.server.Router
 import pureconfig.generic.auto._
 

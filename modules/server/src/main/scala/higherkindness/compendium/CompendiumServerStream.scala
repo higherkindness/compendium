@@ -18,7 +18,7 @@ package higherkindness.compendium
 
 import cats.effect._
 import fs2.Stream
-import higherkindness.compendium.models.HttpConfig
+import higherkindness.compendium.models.config._
 import org.http4s._
 import org.http4s.implicits._
 import org.http4s.server.blaze.BlazeServerBuilder

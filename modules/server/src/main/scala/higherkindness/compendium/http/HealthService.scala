@@ -19,12 +19,10 @@ package higherkindness.compendium.http
 import buildinfo.BuildInfo
 import cats.effect.Sync
 import cats.syntax.flatMap._
-import io.circe.syntax._
-import org.http4s.circe.CirceEntityCodec._
 import higherkindness.compendium.db.DBService
 import higherkindness.compendium.models.HealthResponse
-import higherkindness.compendium.models.Encoders._
 import org.http4s.HttpRoutes
+import org.http4s.circe.CirceEntityEncoder._
 import org.http4s.dsl.Http4sDsl
 
 object HealthService {
@@ -39,7 +37,7 @@ object HealthService {
         DBService[F]
           .ping()
           .ifM(
-            Ok(HealthResponse("pass", BuildInfo.name, BuildInfo.version).asJson),
+            Ok(HealthResponse("pass", BuildInfo.name, BuildInfo.version)),
             InternalServerError()
           )
     }
