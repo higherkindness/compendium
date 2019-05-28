@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.models
+package higherkindness.compendium.models.config
 
 final case class CompendiumConfig(http: HttpConfig)

@@ -17,7 +17,8 @@
 package higherkindness.compendium
 
 import hammock.asynchttpclient.AsyncHttpClientInterpreter._
-import higherkindness.compendium.models.{CompendiumConfig, Protocol}
+import higherkindness.compendium.models._
+import higherkindness.compendium.models.config._
 import pureconfig.generic.auto._
 
 object Test extends App {

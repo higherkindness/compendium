@@ -20,13 +20,12 @@ import cats.effect.{IO, Sync}
 import cats.~>
 import cats.effect._
 import hammock.{HttpF, HttpRequest, InterpTrans, Post}
-import higherkindness.compendium.models.{CompendiumConfig, ErrorResponse, Protocol, Target}
+import higherkindness.compendium.models._
+import higherkindness.compendium.models.config._
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
 import pureconfig.generic.auto._
 import hammock._
-import higherkindness.compendium.http._
-import Encoders._
 import io.circe.syntax._
 
 object CompendiumClientSpec extends Specification with ScalaCheck {
