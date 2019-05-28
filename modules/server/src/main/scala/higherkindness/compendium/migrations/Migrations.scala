@@ -18,7 +18,7 @@ package higherkindness.compendium.migrations
 
 import cats.effect.Sync
 import cats.implicits._
-import higherkindness.compendium.models.PostgresConfig
+import higherkindness.compendium.models.config.PostgresConfig
 import org.flywaydb.core.Flyway
 
 object Migrations {

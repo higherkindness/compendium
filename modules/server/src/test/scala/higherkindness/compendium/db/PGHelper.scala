@@ -20,7 +20,7 @@ import cats.effect._
 import com.dimafeng.testcontainers.PostgreSQLContainer
 import doobie.util.transactor.Transactor
 import higherkindness.compendium.migrations.Migrations
-import higherkindness.compendium.models.PostgresConfig
+import higherkindness.compendium.models.config.PostgresConfig
 import io.chrisdavenport.testcontainersspecs2.ForAllTestContainer
 import org.specs2.mutable.Specification
 

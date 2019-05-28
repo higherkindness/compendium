@@ -19,13 +19,12 @@ package higherkindness.compendium.http
 import buildinfo.BuildInfo
 import cats.effect.IO
 import higherkindness.compendium.db.DBServiceStub
-import higherkindness.compendium.models.Decoders._
 import higherkindness.compendium.models.HealthResponse
-import org.specs2.ScalaCheck
-import org.specs2.mutable.Specification
-import org.http4s.{Method, Request, Response, Status, Uri}
 import org.http4s.circe.CirceEntityCodec._
 import org.http4s.implicits._
+import org.http4s.{Method, Request, Response, Status, Uri}
+import org.specs2.ScalaCheck
+import org.specs2.mutable.Specification
 
 object HealthServiceSpec extends Specification with ScalaCheck {
 

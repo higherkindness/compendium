@@ -14,23 +14,11 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.models
+package higherkindness.compendium.models.config
 
 import com.zaxxer.hikari.HikariConfig
-import io.circe.{Decoder, Encoder}
-import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
 import scala.concurrent.duration.FiniteDuration
-
-object Decoders {
-  implicit val healthResponseDecoder: Decoder[HealthResponse] = deriveDecoder[HealthResponse]
-}
-
-object Encoders {
-  implicit val healthResponseEncoder: Encoder[HealthResponse] = deriveEncoder[HealthResponse]
-}
-
-final case class HealthResponse(status: String, serviceID: String, version: String)
 
 final case class CompendiumConfig(
     http: HttpConfig,

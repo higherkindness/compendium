@@ -14,24 +14,14 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium
+package higherkindness.compendium.models
 
-import higherkindness.compendium.models.Protocol
-import org.scalacheck.{Arbitrary, Gen}
+import io.circe._
+import io.circe.generic.semiauto._
 
-trait CompendiumArbitrary {
+final case class HealthResponse(status: String, serviceId: String, version: String)
 
-  implicit val protocolArbitrary: Arbitrary[Protocol] = Arbitrary {
-    Gen.alphaNumStr.map(Protocol.apply)
-  }
-
-  implicit val differentIdentifiersArb: Arbitrary[DifferentIdentifiers] = Arbitrary {
-    for {
-      id1 <- Gen.alphaStr
-      id2 <- Gen.alphaStr.suchThat(id => !id.equalsIgnoreCase(id1))
-    } yield DifferentIdentifiers(id1, id2)
-  }
-
+object HealthResponse {
+  implicit val decoder: Decoder[HealthResponse] = deriveDecoder[HealthResponse]
+  implicit val encoder: Encoder[HealthResponse] = deriveEncoder[HealthResponse]
 }
-
-object CompendiumArbitrary extends CompendiumArbitrary
