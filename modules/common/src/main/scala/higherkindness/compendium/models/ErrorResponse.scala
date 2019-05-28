@@ -16,4 +16,12 @@
 
 package higherkindness.compendium.models
 
-final case class HttpConfig(host: String, port: Int)
+import io.circe._
+import io.circe.generic.semiauto._
+
+final case class ErrorResponse(message: String)
+
+object ErrorResponse {
+  implicit val decoder: Decoder[ErrorResponse] = deriveDecoder[ErrorResponse]
+  implicit val encoder: Encoder[ErrorResponse] = deriveEncoder[ErrorResponse]
+}
