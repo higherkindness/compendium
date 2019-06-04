@@ -47,7 +47,7 @@ object RootService {
         ) {
           case e: org.apache.avro.SchemaParseException => BadRequest(ErrorResponse(e.getMessage))
           case e: org.http4s.InvalidMessageBodyFailure => BadRequest(ErrorResponse(e.getMessage))
-          case e => InternalServerError()
+          case _ => InternalServerError()
         }
 
       case GET -> Root / "protocol" / id =>
