@@ -19,6 +19,8 @@ package higherkindness.compendium.http
 import cats.effect.IO
 import higherkindness.compendium.core.CompendiumServiceStub
 import higherkindness.compendium.models._
+import io.circe.Encoder
+import io.circe.generic.semiauto.deriveEncoder
 import org.http4s.circe.CirceEntityCodec._
 import org.http4s.implicits._
 import org.http4s.{Method, Request, Response, Status, Uri}
@@ -91,6 +93,23 @@ object RootServiceSpec extends Specification with ScalaCheck {
         .map(_.headers.find(_.name == "Location".ci))
         .unsafeRunSync
         .map(_.value) === Some(s"/protocol/$id")
+    }.setGen(Gen.alphaNumStr suchThat (!_.isEmpty))
+
+    "If json is invalid returns a 422 Unprocessable entity" >> prop { id: String =>
+      implicit val compendiumService = new CompendiumServiceStub(None, false)
+
+      case class Malformed(malformed: String)
+
+      implicit val encoder: Encoder[Malformed] = deriveEncoder[Malformed]
+
+      val request: Request[IO] =
+        Request[IO](method = Method.POST, uri = Uri(path = s"/protocol/$id"))
+          .withEntity(Malformed("test"))
+
+      val response: IO[Response[IO]] =
+        RootService.rootRouteService[IO].orNotFound(request)
+
+      response.map(_.status).unsafeRunSync === Status.BadRequest
     }.setGen(Gen.alphaNumStr suchThat (!_.isEmpty))
 
     "If protocol is valid and it was already in compendium returns Ok and the location in the headers" >> prop {

@@ -46,7 +46,8 @@ object RootService {
           } yield resp.putHeaders(Location(req.uri.withPath(s"${req.uri.path}")))
         ) {
           case e: org.apache.avro.SchemaParseException => BadRequest(ErrorResponse(e.getMessage))
-          case _                                       => InternalServerError()
+          case e: org.http4s.InvalidMessageBodyFailure => BadRequest(ErrorResponse(e.getMessage))
+          case e => InternalServerError()
         }
 
       case GET -> Root / "protocol" / id =>
