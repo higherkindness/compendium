@@ -95,7 +95,7 @@ object RootServiceSpec extends Specification with ScalaCheck {
         .map(_.value) === Some(s"/protocol/$id")
     }.setGen(Gen.alphaNumStr suchThat (!_.isEmpty))
 
-    "If json is invalid returns a 422 Unprocessable entity" >> prop { id: String =>
+    "If json is invalid returns a 400 Bad Request" >> prop { id: String =>
       implicit val compendiumService = new CompendiumServiceStub(None, false)
 
       case class Malformed(malformed: String)
