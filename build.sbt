@@ -21,7 +21,7 @@ lazy val V = new {
   val http4s: String           = "0.20.1"
   val shapeless: String        = "2.3.3"
   val pureConfig: String       = "0.11.0"
-  val hammock: String          = "0.9.1"
+  val hammock: String          = "0.9.2"
   val doobie: String           = "0.7.0"
   val flyway: String           = "5.2.4"
 }
