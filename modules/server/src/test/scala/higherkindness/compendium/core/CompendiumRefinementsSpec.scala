@@ -35,8 +35,16 @@ object CompendiumRefinementsSpec extends Specification with ScalaCheck {
       refine.unsafeRunSync() === ProtocolId("super-domain.proto")
     }
 
-    "Returns a given exception if refining was unsuccessful" >> {
+    "Returns a given exception if refining was unsuccessful due to invalid chars" >> {
       val rawProtocolId = "invalid_dom@in"
+
+      val refine = validateProtocolId[IO](rawProtocolId)(ProtocolIdentifierError)
+
+      refine.unsafeRunSync() must throwA[ProtocolIdentifierError]
+    }
+
+    "Returns a given exception if refining was unsuccessful due to very long size" >> {
+      val rawProtocolId = (1 to 10).flatMap(_ => 'a' to 'z').mkString
 
       val refine = validateProtocolId[IO](rawProtocolId)(ProtocolIdentifierError)
 
