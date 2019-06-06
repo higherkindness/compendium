@@ -17,5 +17,5 @@
 package higherkindness.compendium.models
 
 final case class ProtocolIdentifierError(message: String) extends Exception(message)
-class SchemaError(message: String)                        extends Exception(message)
-class UnknownError(message: String)                       extends Exception(message)
+final case class SchemaError(message: String)             extends Exception(message)
+final case class UnknownError(message: String)            extends Exception(message)
