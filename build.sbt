@@ -24,6 +24,7 @@ lazy val V = new {
   val hammock: String          = "0.9.2"
   val doobie: String           = "0.7.0"
   val flyway: String           = "5.2.4"
+  val refined: String          = "0.9.7"
 }
 
 lazy val root = project
@@ -183,6 +184,8 @@ lazy val serverSettings = Seq(
   parallelExecution in Test := false,
   libraryDependencies ++= Seq(
     "org.slf4j" % "slf4j-simple" % "1.7.26",
+    "eu.timepit" %% "refined"            % V.refined,
+    "eu.timepit" %% "refined-scalacheck" % V.refined,
     "io.chrisdavenport" %% "cats-scalacheck" % V.catsScalacheck % Test
   )
 )

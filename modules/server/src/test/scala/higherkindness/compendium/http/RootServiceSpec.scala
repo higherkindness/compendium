@@ -17,6 +17,7 @@
 package higherkindness.compendium.http
 
 import cats.effect.IO
+import higherkindness.compendium.core.refinements.ProtocolId
 import higherkindness.compendium.core.CompendiumServiceStub
 import higherkindness.compendium.models._
 import io.circe.Encoder
@@ -59,12 +60,24 @@ object RootServiceSpec extends Specification with ScalaCheck {
 
       response.map(_.status).unsafeRunSync === Status.NotFound
     }
+
+    "If protocol identifier is malformed returns bad request" >> {
+      implicit val compendiumService = new CompendiumServiceStub(Some(dummyProtocol), true)
+
+      val request: Request[IO] =
+        Request[IO](method = Method.GET, uri = Uri(path = s"/protocol/not_valid@"))
+
+      val response: IO[Response[IO]] =
+        RootService.rootRouteService[IO].orNotFound(request)
+
+      response.map(_.status).unsafeRunSync === Status.BadRequest
+    }
   }
 
   "POST /protocol/" >> {
     "If protocol returns an invalid avro schema returns BadRequest" >> {
       implicit val compendiumService = new CompendiumServiceStub(None, false) {
-        override def storeProtocol(id: String, protocol: Protocol): IO[Unit] =
+        override def storeProtocol(id: ProtocolId, protocol: Protocol): IO[Unit] =
           IO.raiseError[Unit](new org.apache.avro.SchemaParseException(""))
       }
 
