@@ -20,6 +20,7 @@ import java.io.File
 
 import cats.effect.IO
 import higherkindness.compendium.CompendiumArbitrary._
+import higherkindness.compendium.core.refinements.ProtocolId
 import higherkindness.compendium.models.Protocol
 import higherkindness.compendium.models.config.StorageConfig
 import org.specs2.ScalaCheck
@@ -57,35 +58,43 @@ object FileStorageSpec extends Specification with ScalaCheck with BeforeAfterAll
 
   "Store a file" >> {
     "Successfully stores a file" >> prop { protocol: Protocol =>
-      val storageProtocolFile = storageProtocol("id")
+      val id = ProtocolId("id")
+
+      val storageProtocolFile = storageProtocol(id.value)
       val io = for {
-        _ <- fileStorage.store("id", protocol)
+        _ <- fileStorage.store(id, protocol)
       } yield storageDirectory.exists && storageProtocolFile.exists
 
       io.unsafeRunSync() should beTrue
     }
 
     "Successfully stores and recovers a file" >> prop { protocol: Protocol =>
+      val id = ProtocolId("id")
+
       val file = for {
-        _ <- fileStorage.store("id", protocol)
-        f <- fileStorage.recover("id")
+        _ <- fileStorage.store(id, protocol)
+        f <- fileStorage.recover(id)
       } yield f
 
       file.unsafeRunSync() should beSome(protocol)
     }
 
     "Returns true if there is a file" >> prop { protocol: Protocol =>
+      val id = ProtocolId("id")
+
       val file = for {
-        _      <- fileStorage.store("id", protocol)
-        exists <- fileStorage.exists("id")
+        _      <- fileStorage.store(id, protocol)
+        exists <- fileStorage.exists(id)
       } yield exists
 
       file.unsafeRunSync() should beTrue
     }
 
     "Returns false if there is no file" >> {
+      val id = ProtocolId("id")
+
       val out = for {
-        exists <- fileStorage.exists("id")
+        exists <- fileStorage.exists(id)
       } yield exists
 
       out.unsafeRunSync() should beFalse

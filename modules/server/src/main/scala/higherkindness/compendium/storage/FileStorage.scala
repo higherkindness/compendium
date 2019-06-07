@@ -20,6 +20,7 @@ import java.io.{File, PrintWriter}
 
 import cats.effect.Sync
 import cats.implicits._
+import higherkindness.compendium.core.refinements.ProtocolId
 import higherkindness.compendium.models.Protocol
 import higherkindness.compendium.models.config.StorageConfig
 
@@ -28,7 +29,7 @@ object FileStorage {
   implicit def impl[F[_]: Sync](config: StorageConfig): Storage[F] =
     new Storage[F] {
 
-      override def store(id: String, protocol: Protocol): F[Unit] =
+      override def store(id: ProtocolId, protocol: Protocol): F[Unit] =
         for {
           _ <- Sync[F].catchNonFatal(new File(s"${config.path}${File.separator}$id").mkdirs())
           file <- Sync[F].catchNonFatal(
@@ -40,7 +41,7 @@ object FileStorage {
           }
         } yield ()
 
-      override def recover(id: String): F[Option[Protocol]] =
+      override def recover(id: ProtocolId): F[Option[Protocol]] =
         for {
           filename <- Sync[F].catchNonFatal {
             Option(new File(s"${config.path}${File.separator}$id").listFiles())
@@ -56,7 +57,7 @@ object FileStorage {
           }
         } yield protocol
 
-      override def exists(id: String): F[Boolean] =
+      override def exists(id: ProtocolId): F[Boolean] =
         Sync[F].catchNonFatal(new File(s"${config.path}${File.separator}$id")).map(_.exists)
     }
 

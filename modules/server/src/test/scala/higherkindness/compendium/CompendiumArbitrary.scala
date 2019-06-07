@@ -16,6 +16,7 @@
 
 package higherkindness.compendium
 
+import higherkindness.compendium.core.refinements.ProtocolId
 import higherkindness.compendium.models.Protocol
 import org.scalacheck.{Arbitrary, Gen}
 
@@ -23,6 +24,14 @@ trait CompendiumArbitrary {
 
   implicit val protocolArbitrary: Arbitrary[Protocol] = Arbitrary {
     Gen.alphaNumStr.map(Protocol.apply)
+  }
+
+  implicit val protocolIdArbitrary: Arbitrary[ProtocolId] = Arbitrary {
+    Gen
+      .nonEmptyListOf(
+        Gen.oneOf(Gen.alphaNumChar, Gen.const('-'), Gen.const('.'))
+      )
+      .map(id => ProtocolId.unsafeFrom(id.mkString))
   }
 
   implicit val differentIdentifiersArb: Arbitrary[DifferentIdentifiers] = Arbitrary {

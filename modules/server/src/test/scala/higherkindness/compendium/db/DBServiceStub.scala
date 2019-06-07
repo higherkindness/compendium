@@ -17,9 +17,10 @@
 package higherkindness.compendium.db
 
 import cats.effect.IO
+import higherkindness.compendium.core.refinements.ProtocolId
 
 class DBServiceStub(val exists: Boolean) extends DBService[IO] {
-  override def upsertProtocol(id: String): IO[Unit]    = IO.unit
-  override def existsProtocol(id: String): IO[Boolean] = IO.pure(exists)
-  override def ping(): IO[Boolean]                     = IO.pure(exists)
+  override def upsertProtocol(id: ProtocolId): IO[Unit]    = IO.unit
+  override def existsProtocol(id: ProtocolId): IO[Boolean] = IO.pure(exists)
+  override def ping(): IO[Boolean]                         = IO.pure(exists)
 }

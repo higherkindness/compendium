@@ -17,9 +17,11 @@
 package higherkindness.compendium.http
 
 import cats.effect.Sync
+import cats.syntax.applicativeError._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import higherkindness.compendium.core.CompendiumService
+import higherkindness.compendium.core.refinements._
 import higherkindness.compendium.http.QueryParams.TargetQueryParam
 import higherkindness.compendium.models._
 import mouse.all._
@@ -37,24 +39,28 @@ object RootService {
 
     HttpRoutes.of[F] {
       case req @ POST -> Root / "protocol" / id =>
-        Sync[F].recoverWith(
-          for {
-            protocol <- req.as[Protocol]
-            exists   <- CompendiumService[F].existsProtocol(id)
-            _        <- CompendiumService[F].storeProtocol(id, protocol)
-            resp     <- exists.fold(Ok(), Created())
-          } yield resp.putHeaders(Location(req.uri.withPath(s"${req.uri.path}")))
-        ) {
+        (for {
+          protocol   <- req.as[Protocol]
+          protocolId <- validateProtocolId(id)(ProtocolIdentifierError)
+          exists     <- CompendiumService[F].existsProtocol(protocolId)
+          _          <- CompendiumService[F].storeProtocol(protocolId, protocol)
+          resp       <- exists.fold(Ok(), Created())
+        } yield resp.putHeaders(Location(req.uri.withPath(s"${req.uri.path}")))).recoverWith {
           case e: org.apache.avro.SchemaParseException => BadRequest(ErrorResponse(e.getMessage))
           case e: org.http4s.InvalidMessageBodyFailure => BadRequest(ErrorResponse(e.getMessage))
-          case _ => InternalServerError()
+          case idError: ProtocolIdentifierError        => BadRequest(ErrorResponse(idError.message))
+          case _                                       => InternalServerError()
         }
 
       case GET -> Root / "protocol" / id =>
-        for {
-          protocol <- CompendiumService[F].recoverProtocol(id)
-          resp     <- protocol.fold(NotFound())(Ok(_))
-        } yield resp
+        (for {
+          protocolId <- validateProtocolId(id)(ProtocolIdentifierError)
+          protocol   <- CompendiumService[F].recoverProtocol(protocolId)
+          resp       <- protocol.fold(NotFound())(Ok(_))
+        } yield resp).recoverWith {
+          case idError: ProtocolIdentifierError => BadRequest(ErrorResponse(idError.message))
+          case _                                => InternalServerError()
+        }
 
       case GET -> Root / "protocol" / _ / "generate" :? TargetQueryParam(_) =>
         NotImplemented()

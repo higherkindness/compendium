@@ -20,6 +20,7 @@ import cats.effect.Async
 import cats.implicits._
 import doobie.util.transactor.Transactor
 import doobie.implicits._
+import higherkindness.compendium.core.refinements.ProtocolId
 import higherkindness.compendium.db.queries.Queries
 
 object PgDBService {
@@ -27,11 +28,11 @@ object PgDBService {
   def impl[F[_]: Async](xa: Transactor[F]): DBService[F] =
     new DBService[F] {
 
-      override def upsertProtocol(id: String): F[Unit] =
-        Queries.upsertProtocolIdQ(id).run.void.transact(xa)
+      override def upsertProtocol(id: ProtocolId): F[Unit] =
+        Queries.upsertProtocolIdQ(id.value).run.void.transact(xa)
 
-      override def existsProtocol(id: String): F[Boolean] =
-        Queries.checkIfExistsQ(id).unique.transact(xa)
+      override def existsProtocol(id: ProtocolId): F[Boolean] =
+        Queries.checkIfExistsQ(id.value).unique.transact(xa)
 
       override def ping(): F[Boolean] = Queries.checkConnection().unique.transact(xa)
     }
