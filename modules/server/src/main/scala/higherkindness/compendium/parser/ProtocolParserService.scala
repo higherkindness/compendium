@@ -17,12 +17,12 @@
 package higherkindness.compendium.parser
 
 import cats.effect.Sync
-import higherkindness.compendium.models.Protocol
-import higherkindness.compendium.models.types.ParserResult
+import higherkindness.compendium.models.{MetaProtocol, Target}
+import higherkindness.compendium.models.parserModels.ParserResult
 
 trait ProtocolParserService[F[_]] {
 
-  def parse(protocol: Option[Protocol], target: String): F[ParserResult]
+  def parse(protocol: Option[MetaProtocol], target: Target): F[ParserResult]
 }
 
 object ProtocolParserService {

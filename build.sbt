@@ -14,7 +14,7 @@ lazy val V = new {
   val kindProjector: String    = "0.10.1"
   val paradise: String         = "2.1.1"
   val scala: String            = "2.12.8"
-  val skeumorph: String        = "0.0.1"
+  val skeumorph: String        = "0.0.10"
   val specs2: String           = "4.5.1"
   val enumeratum: String       = "1.5.13"
   val enumeratumCirce: String  = "1.5.21"
@@ -121,7 +121,7 @@ lazy val commonSettings = Seq(
     "org.typelevel" %% "mouse" % V.mouse,
     %%("shapeless", V.shapeless),
     %%("pureconfig", V.pureConfig),
-    "io.frees" %% "skeuomorph" % V.skeumorph,
+    "io.higherkindness" %% "skeuomorph" %  V.skeumorph,
     %%("http4s-dsl", V.http4s),
     %%("http4s-blaze-server", V.http4s),
     %%("http4s-circe", V.http4s),

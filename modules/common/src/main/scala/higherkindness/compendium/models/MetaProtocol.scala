@@ -16,17 +16,5 @@
 
 package higherkindness.compendium.models
 
-import enumeratum._
-
-sealed trait Target extends EnumEntry
-
-object Target extends Enum[Target] {
-
-  val values = findValues
-
-  case object Scala extends Target
-  case object Protobuf extends Target
-  case object Avro extends Target
-  case object Mu extends Target
-  case object OpenApi extends Target
-}
+final case class MetaProtocolDB(idlName: IdlNames, id: String)
+final case class MetaProtocol(idlName: IdlNames, protocol: Protocol)

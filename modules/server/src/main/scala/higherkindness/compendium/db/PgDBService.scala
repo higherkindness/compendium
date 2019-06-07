@@ -21,6 +21,7 @@ import cats.implicits._
 import doobie.util.transactor.Transactor
 import doobie.implicits._
 import higherkindness.compendium.db.queries.Queries
+import higherkindness.compendium.models.MetaProtocolDB
 
 object PgDBService {
 
@@ -32,6 +33,9 @@ object PgDBService {
 
       override def existsProtocol(id: String): F[Boolean] =
         Queries.checkIfExistsQ(id).unique.transact(xa)
+
+      override def selectProtocolBytId(id: String): F[MetaProtocolDB] =
+        Queries.selectProtocolById(id).unique.transact(xa)
 
       override def ping(): F[Boolean] = Queries.checkConnection().unique.transact(xa)
     }

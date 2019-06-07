@@ -58,7 +58,7 @@ object RootService {
       case GET -> Root / "protocol" / protocolName / "generate" :? TargetQueryParam(
             target) =>
         CompendiumService[F]
-          .parseProtocol(protocolName, target.toString)
+          .parseProtocol(protocolName, target)
           .flatMap(_ => NotImplemented()) // delete toString
 
     }

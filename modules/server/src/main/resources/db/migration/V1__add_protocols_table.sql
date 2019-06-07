@@ -1,3 +1,4 @@
 CREATE TABLE protocols (
     id VARCHAR PRIMARY KEY
+    id_name VARCHAR NOT NULL
 )

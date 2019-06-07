@@ -18,6 +18,7 @@ package higherkindness.compendium.db.queries
 
 import doobie._
 import doobie.implicits.toSqlInterpolator
+import higherkindness.compendium.models.MetaProtocolDB
 
 object Queries {
 
@@ -32,6 +33,11 @@ object Queries {
           VALUES ($id)
           ON CONFLICT DO NOTHING
        """.update
+
+  def selectProtocolById(id:String): Query0[MetaProtocolDB] =
+    sql"""
+         SELECT * from protocols WHERE id=$id
+       """.query[MetaProtocolDB]
 
   def checkConnection(): Query0[Boolean] =
     sql"SELECT exists (SELECT 1)".query[Boolean]

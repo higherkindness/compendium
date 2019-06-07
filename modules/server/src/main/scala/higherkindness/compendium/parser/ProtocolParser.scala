@@ -18,15 +18,25 @@ package higherkindness.compendium.parser
 
 import cats.effect.Sync
 import cats.syntax.either._
-import higherkindness.compendium.models.{ParserError, Protocol}
-import higherkindness.compendium.models.types.ParserResult
+import higherkindness.compendium.models.{IdlNames, MetaProtocol, Protocol, Target}
+import higherkindness.compendium.models.parserModels._
+import higherkindness.skeuomorph.avro
+import higherkindness.skeuomorph.openapi
+
 
 object ProtocolParser {
 
   def impl[F[_]: Sync]: ProtocolParserService[F] = new ProtocolParserService[F] {
 
-    override def parse(protocol: Option[Protocol], target: String): F[ParserResult] =
-      protocol.fold(Sync[F].pure(ParserError("No Protocol Found").asLeft[Protocol]))(???)
+    private def skeuomorphParse(mp: MetaProtocol, target: Target): Protocol = (mp.idlName, target) match {
+      case _ if mp.idlName.entryName == target.entryName => mp.protocol
+      case (IdlNames.Protobuf, Target.Avro) => avro.Protocol.fromProto()
+    }
+
+    override def parse(protocol: Option[MetaProtocol], target: Target): F[ParserResult] =
+      protocol.fold(
+        Sync[F].pure(ParserError("No Protocol Found").asLeft[Protocol]))(
+        mp => Sync[F].delay(skeuomorphParse(mp, target).asRight[ParserError]))
   }
 
 }

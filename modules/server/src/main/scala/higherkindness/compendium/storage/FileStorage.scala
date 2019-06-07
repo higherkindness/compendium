@@ -20,7 +20,7 @@ import java.io.{File, PrintWriter}
 
 import cats.effect.Sync
 import cats.implicits._
-import higherkindness.compendium.models.Protocol
+import higherkindness.compendium.models.{MetaProtocol, Protocol}
 import higherkindness.compendium.models.config.StorageConfig
 
 object FileStorage {
@@ -40,7 +40,7 @@ object FileStorage {
           }
         } yield ()
 
-      override def recover(id: String): F[Option[Protocol]] =
+      override def recover(id: String): F[Option[MetaProtocol]] =
         for {
           filename <- Sync[F].catchNonFatal {
             Option(new File(s"${config.path}${File.separator}$id").listFiles())
