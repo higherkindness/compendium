@@ -32,7 +32,7 @@ lazy val root = project
   .settings(name := "compendium")
   .settings(commonSettings)
   .settings(noPublishSettings)
-  .aggregate(server, client)
+  .aggregate(server, client, common)
 
 lazy val common = project
   .in(file("modules/common"))
