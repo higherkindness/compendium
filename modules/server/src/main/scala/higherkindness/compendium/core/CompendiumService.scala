@@ -20,17 +20,17 @@ import cats.effect.Sync
 import cats.implicits._
 import higherkindness.compendium.core.refinements.ProtocolId
 import higherkindness.compendium.db.DBService
-import higherkindness.compendium.models.{MetaProtocol, Protocol, Target}
+import higherkindness.compendium.models.{IdlNames, MetaProtocol, Protocol, Target}
 import higherkindness.compendium.models.parserModels.ParserResult
 import higherkindness.compendium.parser.ProtocolParserService
 import higherkindness.compendium.storage.Storage
 
 trait CompendiumService[F[_]] {
 
-  def storeProtocol(id: ProtocolId, protocol: Protocol): F[Unit]
+  def storeProtocol(id: ProtocolId, protocol: Protocol, idlName: IdlNames): F[Unit]
   def recoverProtocol(protocolId: ProtocolId): F[Option[MetaProtocol]]
   def existsProtocol(protocolId: ProtocolId): F[Boolean]
-  def parseProtocol(protocolName: String, target: Target): F[ParserResult]
+  def parseProtocol(protocolName: ProtocolId, target: Target): F[ParserResult]
 }
 
 object CompendiumService {
@@ -39,9 +39,9 @@ object CompendiumService {
     F] =
     new CompendiumService[F] {
 
-      override def storeProtocol(id: ProtocolId, protocol: Protocol): F[Unit] =
+      override def storeProtocol(id: ProtocolId, protocol: Protocol, idlName: IdlNames): F[Unit] =
         ProtocolUtils[F].validateProtocol(protocol) >>
-          DBService[F].upsertProtocol(id) >>
+          DBService[F].upsertProtocol(id, idlName) >>
           Storage[F].store(id, protocol)
 
       override def recoverProtocol(protocolId: ProtocolId): F[Option[MetaProtocol]] =
@@ -52,7 +52,7 @@ object CompendiumService {
       override def existsProtocol(protocolId: ProtocolId): F[Boolean] =
         DBService[F].existsProtocol(protocolId)
 
-      override def parseProtocol(protocolName: String, target: Target): F[ParserResult] =
+      override def parseProtocol(protocolName: ProtocolId, target: Target): F[ParserResult] =
         for {
           protocol       <- recoverProtocol(protocolName)
           parsedProtocol <- ProtocolParserService[F].parse(protocol, target)

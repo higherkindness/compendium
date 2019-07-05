@@ -22,7 +22,7 @@ import cats.syntax.flatMap._
 import cats.syntax.functor._
 import higherkindness.compendium.core.CompendiumService
 import higherkindness.compendium.core.refinements._
-import higherkindness.compendium.http.QueryParams.TargetQueryParam
+import higherkindness.compendium.http.QueryParams.{IdlQueryParam, TargetQueryParam}
 import higherkindness.compendium.models._
 import mouse.all._
 import org.http4s.HttpRoutes
@@ -38,12 +38,12 @@ object RootService {
     import f._
 
     HttpRoutes.of[F] {
-      case req @ POST -> Root / "protocol" / id =>
+      case req @ POST -> Root / "protocol" / id :? IdlQueryParam(idlName) =>
         (for {
           protocol   <- req.as[Protocol]
           protocolId <- validateProtocolId(id)(ProtocolIdentifierError)
           exists     <- CompendiumService[F].existsProtocol(protocolId)
-          _          <- CompendiumService[F].storeProtocol(protocolId, protocol)
+          _          <- CompendiumService[F].storeProtocol(protocolId, protocol, idlName)
           resp       <- exists.fold(Ok(), Created())
         } yield resp.putHeaders(Location(req.uri.withPath(s"${req.uri.path}")))).recoverWith {
           case e: org.apache.avro.SchemaParseException => BadRequest(ErrorResponse(e.getMessage))
@@ -62,13 +62,15 @@ object RootService {
           case _                                => InternalServerError()
         }
 
-      case GET -> Root / "protocol" / protocolName / "generate" :? TargetQueryParam(target) =>
-        CompendiumService[F]
-          .parseProtocol(protocolName, target)
-          .flatMap(
-            _.fold(pe => InternalServerError(pe.msg), mp => Ok(mp.protocol.raw))
-          )
-
+      case GET -> Root / "protocol" / id / "generate" :? TargetQueryParam(target) =>
+        (for {
+          protocolId   <- validateProtocolId(id)(ProtocolIdentifierError)
+          parserResult <- CompendiumService[F].parseProtocol(protocolId, target)
+          resp         <- parserResult.fold(pe => InternalServerError(pe.msg), mp => Ok(mp.protocol.raw))
+        } yield resp).recoverWith {
+          case idError: ProtocolIdentifierError => BadRequest(ErrorResponse(idError.message))
+          case _                                => InternalServerError()
+        }
     }
   }
 }

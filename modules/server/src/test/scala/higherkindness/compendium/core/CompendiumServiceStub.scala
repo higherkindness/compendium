@@ -19,13 +19,14 @@ package higherkindness.compendium.core
 import cats.effect.IO
 import higherkindness.compendium.core.refinements.ProtocolId
 import higherkindness.compendium.models.parserModels.ParserResult
-import higherkindness.compendium.models.{MetaProtocol, Protocol, Target}
+import higherkindness.compendium.models._
 
 class CompendiumServiceStub(val protocolOpt: Option[MetaProtocol], exists: Boolean)
     extends CompendiumService[IO] {
-  override def storeProtocol(id: ProtocolId, protocol: Protocol): IO[Unit] = IO.unit
-  override def recoverProtocol(id: ProtocolId): IO[Option[MetaProtocol]]   = IO(protocolOpt)
-  override def existsProtocol(protocolId: ProtocolId): IO[Boolean]         = IO(exists)
+  override def storeProtocol(id: ProtocolId, protocol: Protocol, idlName: IdlNames): IO[Unit] =
+    IO.unit
+  override def recoverProtocol(id: ProtocolId): IO[Option[MetaProtocol]] = IO(protocolOpt)
+  override def existsProtocol(protocolId: ProtocolId): IO[Boolean]       = IO(exists)
 
-  override def parseProtocol(protocolName: String, target: Target): IO[ParserResult] = ???
+  override def parseProtocol(protocolId: ProtocolId, target: Target): IO[ParserResult] = ???
 }

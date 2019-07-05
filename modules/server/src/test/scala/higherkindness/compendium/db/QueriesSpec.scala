@@ -25,12 +25,13 @@ class QueriesSpec extends PGHelper with IOChecker {
   "Queries" should {
     "match db model" in new context {
       check(Queries.checkIfExistsQ(protocolId))
-      check(Queries.upsertProtocolIdQ(protocolId))
+      check(Queries.upsertProtocolIdQ(protocolId, idlName))
     }
   }
 
   trait context extends Scope {
     val protocolId: String = "my.test.protocol.id"
+    val idlName: String    = "Protobuf"
   }
 
 }

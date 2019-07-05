@@ -28,10 +28,10 @@ object Queries {
           SELECT exists (SELECT true FROM protocols WHERE id=$id)
        """.query[Boolean]
 
-  def upsertProtocolIdQ(id: String): Update0 =
+  def upsertProtocolIdQ(id: String, idl_name: String): Update0 =
     sql"""
-          INSERT INTO protocols
-          VALUES ($id)
+          INSERT INTO protocols (id, idl_name)
+          VALUES ($id, $idl_name)
           ON CONFLICT DO NOTHING
        """.update
 

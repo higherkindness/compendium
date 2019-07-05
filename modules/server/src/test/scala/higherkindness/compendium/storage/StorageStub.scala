@@ -32,7 +32,7 @@ class StorageStub(val proto: Option[Protocol], val identifier: ProtocolId)
     } *> IO.unit
 
   override def recover(metaProtocol: MetaProtocolDB): IO[Option[MetaProtocol]] =
-    if (metaProtocol.id == identifier) IO(proto.map(MetaProtocol(metaProtocol.idlName, _)))
+    if (metaProtocol.id == identifier.value) IO(proto.map(MetaProtocol(metaProtocol.idlName, _)))
     else IO(None)
 
   override def exists(id: ProtocolId): IO[Boolean] =

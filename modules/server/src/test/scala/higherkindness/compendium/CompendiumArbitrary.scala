@@ -16,9 +16,11 @@
 
 package higherkindness.compendium
 
+import cats.syntax.apply._
 import higherkindness.compendium.core.refinements.ProtocolId
 import higherkindness.compendium.models.{IdlNames, MetaProtocolDB, Protocol}
-import org.scalacheck.{Arbitrary, Gen}
+import org.scalacheck._
+import org.scalacheck.cats.implicits._
 
 trait CompendiumArbitrary {
 
@@ -31,6 +33,7 @@ trait CompendiumArbitrary {
       .nonEmptyListOf(
         Gen.oneOf(Gen.alphaNumChar, Gen.const('-'), Gen.const('.'))
       )
+      .suchThat(_.length > 10)
       .map(id => ProtocolId.unsafeFrom(id.mkString))
   }
 
@@ -39,7 +42,8 @@ trait CompendiumArbitrary {
   }
 
   implicit val metaProtocolArbitrary: Arbitrary[MetaProtocolDB] = Arbitrary {
-    Gen.resultOf(MetaProtocolDB)
+    (idlNamesArbitrary.arbitrary, protocolIdArbitrary.arbitrary.map(_.value))
+      .mapN(MetaProtocolDB.apply)
   }
 
   implicit val differentIdentifiersArb: Arbitrary[DifferentIdentifiers] = Arbitrary {
