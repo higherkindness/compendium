@@ -20,7 +20,7 @@ import java.io.{File, PrintWriter}
 
 import cats.effect.Sync
 import cats.implicits._
-import higherkindness.compendium.models.{MetaProtocol, Protocol}
+import higherkindness.compendium.models.{MetaProtocol, MetaProtocolDB, Protocol}
 import higherkindness.compendium.models.config.StorageConfig
 
 object FileStorage {
@@ -40,10 +40,10 @@ object FileStorage {
           }
         } yield ()
 
-      override def recover(id: String): F[Option[MetaProtocol]] =
+      override def recover(metaProtocolDB: MetaProtocolDB): F[Option[MetaProtocol]] =
         for {
           filename <- Sync[F].catchNonFatal {
-            Option(new File(s"${config.path}${File.separator}$id").listFiles())
+            Option(new File(s"${config.path}${File.separator}${metaProtocolDB.id}").listFiles())
               .fold(Option.empty[String])(_.headOption.map(_.getAbsolutePath))
           }
           source <- Sync[F].catchNonFatal { filename.map(scala.io.Source.fromFile) }
@@ -54,7 +54,7 @@ object FileStorage {
               }
             }
           }
-        } yield protocol
+        } yield protocol.map(MetaProtocol(metaProtocolDB.idlName, _))
 
       override def exists(id: String): F[Boolean] =
         Sync[F].catchNonFatal(new File(s"${config.path}${File.separator}$id")).map(_.exists)

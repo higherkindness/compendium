@@ -45,14 +45,15 @@ object CompendiumStreamApp {
         Sync[F].delay(pureconfig.loadConfigOrThrow[CompendiumConfig]("compendium"))
       )
       _          <- Stream.eval(Migrations.makeMigrations(conf.postgres))
-      transactor <- Stream.resource(createTransactor(conf.postgres))implicit0(storage: Storage[F])                      = FileStorage.impl[F](conf.storage)
+      transactor <- Stream.resource(createTransactor(conf.postgres))
+      implicit0(storage: Storage[F])                      = FileStorage.impl[F](conf.storage)
       implicit0(dbService: DBService[F])                  = PgDBService.impl[F](transactor)
       implicit0(utils: ProtocolUtils[F])                  = ProtocolUtils.impl[F]
       implicit0(protocolParser: ProtocolParserService[F]) = ProtocolParser.impl[F]
       implicit0(compendiumService: CompendiumService[F])  = CompendiumService.impl[F]
-      rootService                                             = RootService.rootRouteService
-      healthService                                      = HealthService.healthRouteService
-      app                                                = Router("/" -> healthService, "/v0" -> rootService)
+      rootService                                         = RootService.rootRouteService
+      healthService                                       = HealthService.healthRouteService
+      app                                                 = Router("/" -> healthService, "/v0" -> rootService)
       code <- CompendiumServerStream.serverStream(conf.http, app)
     } yield code
 

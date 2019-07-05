@@ -121,7 +121,7 @@ lazy val commonSettings = Seq(
     "org.typelevel" %% "mouse" % V.mouse,
     %%("shapeless", V.shapeless),
     %%("pureconfig", V.pureConfig),
-    "io.higherkindness" %% "skeuomorph" %  V.skeumorph,
+    "io.higherkindness" %% "skeuomorph" % V.skeumorph,
     %%("http4s-dsl", V.http4s),
     %%("http4s-blaze-server", V.http4s),
     %%("http4s-circe", V.http4s),
@@ -130,15 +130,15 @@ lazy val commonSettings = Seq(
     %%("doobie-core", V.doobie),
     %%("doobie-postgres", V.doobie),
     %%("doobie-hikari", V.doobie),
-    "com.beachape" %% "enumeratum" % V.enumeratum,
-    "com.beachape" %% "enumeratum-circe" % V.enumeratumCirce,
-    "org.flywaydb" % "flyway-core" % V.flyway,
+    "com.beachape"                    %% "enumeratum" % V.enumeratum,
+    "com.beachape"                    %% "enumeratum-circe" % V.enumeratumCirce,
+    "org.flywaydb"                    % "flyway-core" % V.flyway,
     %%("specs2-core", V.specs2)       % Test,
     %%("specs2-scalacheck", V.specs2) % Test,
     %%("doobie-specs2", V.doobie)     % Test,
-    "io.chrisdavenport"  %% "cats-scalacheck" % V.catsScalacheck % Test,
-    "io.chrisdavenport"  %% "testcontainers-specs2" % "0.1.0"    % Test,
-    "org.testcontainers" % "postgresql"             % "1.11.3"   % Test
+    "io.chrisdavenport"               %% "cats-scalacheck" % V.catsScalacheck % Test,
+    "io.chrisdavenport"               %% "testcontainers-specs2" % "0.1.0" % Test,
+    "org.testcontainers"              % "postgresql" % "1.11.3" % Test
   ),
   orgScriptTaskListSetting := List(
     (clean in Global).asRunnableItemFull,
@@ -173,16 +173,16 @@ lazy val commonSettings = Seq(
 //Settings
 lazy val clientSettings = Seq(
   libraryDependencies ++= Seq(
-    "com.pepegar" %% "hammock-core" % V.hammock,
+    "com.pepegar" %% "hammock-core"            % V.hammock,
     "com.pepegar" %% "hammock-asynchttpclient" % V.hammock,
-    "com.pepegar" %% "hammock-circe" % V.hammock
+    "com.pepegar" %% "hammock-circe"           % V.hammock
   )
 )
 
 lazy val serverSettings = Seq(
   parallelExecution in Test := false,
   libraryDependencies ++= Seq(
-    "org.slf4j" % "slf4j-simple" % "1.7.26",
+    "org.slf4j"         % "slf4j-simple"     % "1.7.26",
     "io.chrisdavenport" %% "cats-scalacheck" % V.catsScalacheck % Test
   )
 )

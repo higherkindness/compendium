@@ -52,14 +52,15 @@ object RootService {
       case GET -> Root / "protocol" / id =>
         for {
           protocol <- CompendiumService[F].recoverProtocol(id)
-          resp     <- protocol.fold(NotFound())(Ok(_))
+          resp     <- protocol.fold(NotFound())(mp => Ok(mp.protocol))
         } yield resp
 
-      case GET -> Root / "protocol" / protocolName / "generate" :? TargetQueryParam(
-            target) =>
+      case GET -> Root / "protocol" / protocolName / "generate" :? TargetQueryParam(target) =>
         CompendiumService[F]
           .parseProtocol(protocolName, target)
-          .flatMap(_ => NotImplemented()) // delete toString
+          .flatMap(
+            _.fold(pe => InternalServerError(pe.msg), mp => Ok(mp.protocol.raw))
+          )
 
     }
   }

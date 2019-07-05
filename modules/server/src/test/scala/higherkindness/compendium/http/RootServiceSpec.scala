@@ -30,7 +30,7 @@ object RootServiceSpec extends Specification with ScalaCheck {
 
   sequential
 
-  private val dummyProtocol: Protocol = Protocol("")
+  private val dummyProtocol: MetaProtocol = MetaProtocol(IdlNames.Avro, Protocol(""))
 
   "GET /protocol/id" >> {
     "If successs returns a valid protocol and status code" >> {
@@ -68,7 +68,7 @@ object RootServiceSpec extends Specification with ScalaCheck {
 
       val request: Request[IO] =
         Request[IO](method = Method.POST, uri = Uri(path = s"/protocol/test"))
-          .withEntity(dummyProtocol)
+          .withEntity(dummyProtocol.protocol)
 
       val response: IO[Response[IO]] =
         RootService.rootRouteService[IO].orNotFound(request)
@@ -81,7 +81,7 @@ object RootServiceSpec extends Specification with ScalaCheck {
 
       val request: Request[IO] =
         Request[IO](method = Method.POST, uri = Uri(path = s"/protocol/$id"))
-          .withEntity(dummyProtocol)
+          .withEntity(dummyProtocol.protocol)
 
       val response: IO[Response[IO]] =
         RootService.rootRouteService[IO].orNotFound(request)
@@ -99,7 +99,7 @@ object RootServiceSpec extends Specification with ScalaCheck {
 
         val request: Request[IO] =
           Request[IO](method = Method.POST, uri = Uri(path = s"/protocol/$id"))
-            .withEntity(dummyProtocol)
+            .withEntity(dummyProtocol.protocol)
 
         val response: IO[Response[IO]] =
           RootService.rootRouteService[IO].orNotFound(request)

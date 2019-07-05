@@ -19,7 +19,7 @@ package higherkindness.compendium.core
 import cats.effect.Sync
 import cats.implicits._
 import higherkindness.compendium.db.DBService
-import higherkindness.compendium.models.{MetaProtocol, MetaProtocolDB, Protocol, Target}
+import higherkindness.compendium.models.{MetaProtocol, Protocol, Target}
 import higherkindness.compendium.models.parserModels.ParserResult
 import higherkindness.compendium.parser.ProtocolParserService
 import higherkindness.compendium.storage.Storage

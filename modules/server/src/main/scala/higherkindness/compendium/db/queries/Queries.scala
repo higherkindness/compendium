@@ -19,6 +19,7 @@ package higherkindness.compendium.db.queries
 import doobie._
 import doobie.implicits.toSqlInterpolator
 import higherkindness.compendium.models.MetaProtocolDB
+import metas._
 
 object Queries {
 
@@ -34,7 +35,7 @@ object Queries {
           ON CONFLICT DO NOTHING
        """.update
 
-  def selectProtocolById(id:String): Query0[MetaProtocolDB] =
+  def selectProtocolById(id: String): Query0[MetaProtocolDB] =
     sql"""
          SELECT * from protocols WHERE id=$id
        """.query[MetaProtocolDB]

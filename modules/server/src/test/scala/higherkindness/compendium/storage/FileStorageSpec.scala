@@ -20,7 +20,7 @@ import java.io.File
 
 import cats.effect.IO
 import higherkindness.compendium.CompendiumArbitrary._
-import higherkindness.compendium.models.Protocol
+import higherkindness.compendium.models.{MetaProtocol, MetaProtocolDB, Protocol}
 import higherkindness.compendium.models.config.StorageConfig
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
@@ -56,31 +56,33 @@ object FileStorageSpec extends Specification with ScalaCheck with BeforeAfterAll
   sequential
 
   "Store a file" >> {
-    "Successfully stores a file" >> prop { protocol: Protocol =>
+    "Successfully stores a file" >> prop { (metaProtocolDB: MetaProtocolDB, protocol: Protocol) =>
       val storageProtocolFile = storageProtocol("id")
       val io = for {
-        _ <- fileStorage.store("id", protocol)
+        _ <- fileStorage.store(metaProtocolDB.id, protocol)
       } yield storageDirectory.exists && storageProtocolFile.exists
 
       io.unsafeRunSync() should beTrue
     }
 
-    "Successfully stores and recovers a file" >> prop { protocol: Protocol =>
-      val file = for {
-        _ <- fileStorage.store("id", protocol)
-        f <- fileStorage.recover("id")
-      } yield f
+    "Successfully stores and recovers a file" >> prop {
+      (metaProtocoldb: MetaProtocolDB, protocol: Protocol) =>
+        val file = for {
+          _ <- fileStorage.store(metaProtocoldb.id, protocol)
+          f <- fileStorage.recover(metaProtocoldb)
+        } yield f
 
-      file.unsafeRunSync() should beSome(protocol)
+        file.unsafeRunSync() should beSome(MetaProtocol(metaProtocoldb.idlName, protocol))
     }
 
-    "Returns true if there is a file" >> prop { protocol: Protocol =>
-      val file = for {
-        _      <- fileStorage.store("id", protocol)
-        exists <- fileStorage.exists("id")
-      } yield exists
+    "Returns true if there is a file" >> prop {
+      (metaProtocoldb: MetaProtocolDB, protocol: Protocol) =>
+        val file = for {
+          _      <- fileStorage.store(metaProtocoldb.id, protocol)
+          exists <- fileStorage.exists(metaProtocoldb.id)
+        } yield exists
 
-      file.unsafeRunSync() should beTrue
+        file.unsafeRunSync() should beTrue
     }
 
     "Returns false if there is no file" >> {

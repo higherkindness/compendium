@@ -19,6 +19,7 @@ package higherkindness.compendium.core
 import cats.effect.IO
 import higherkindness.compendium.db.DBServiceStub
 import higherkindness.compendium.models.Protocol
+import higherkindness.compendium.parser.{ProtocolParser}
 import higherkindness.compendium.storage.StorageStub
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
@@ -31,17 +32,19 @@ object CompendiumServiceSpec extends Specification with ScalaCheck {
 
   "Store protocol" >> {
     "If it's a valid protocol we store it" >> prop { id: String =>
-      implicit val dbService     = new DBServiceStub(true)
-      implicit val storage       = new StorageStub(Some(dummyProtocol), id)
-      implicit val protocolUtils = new ProtocolUtilsStub(dummyProtocol, true)
+      implicit val dbService          = new DBServiceStub(true)
+      implicit val storage            = new StorageStub(Some(dummyProtocol), id)
+      implicit val protocolUtils      = new ProtocolUtilsStub(dummyProtocol, true)
+      implicit val protoParserService = ProtocolParser.impl[IO]
 
       CompendiumService.impl[IO].storeProtocol(id, dummyProtocol).map(_ => success).unsafeRunSync()
     }
 
     "If it's an invalid protocol we raise an error" >> prop { id: String =>
-      implicit val dbService     = new DBServiceStub(true)
-      implicit val storage       = new StorageStub(Some(dummyProtocol), id)
-      implicit val protocolUtils = new ProtocolUtilsStub(dummyProtocol, false)
+      implicit val dbService          = new DBServiceStub(true)
+      implicit val storage            = new StorageStub(Some(dummyProtocol), id)
+      implicit val protocolUtils      = new ProtocolUtilsStub(dummyProtocol, false)
+      implicit val protoParserService = ProtocolParser.impl[IO]
 
       CompendiumService
         .impl[IO]
@@ -52,9 +55,10 @@ object CompendiumServiceSpec extends Specification with ScalaCheck {
 
   "Recover protocol" >> {
     "Given a identifier we recover the protocol" >> prop { id: String =>
-      implicit val dbService     = new DBServiceStub(true)
-      implicit val storage       = new StorageStub(Some(dummyProtocol), id)
-      implicit val protocolUtils = new ProtocolUtilsStub(dummyProtocol, true)
+      implicit val dbService          = new DBServiceStub(true)
+      implicit val storage            = new StorageStub(Some(dummyProtocol), id)
+      implicit val protocolUtils      = new ProtocolUtilsStub(dummyProtocol, true)
+      implicit val protoParserService = ProtocolParser.impl[IO]
 
       CompendiumService.impl[IO].recoverProtocol(id).unsafeRunSync() === Some(dummyProtocol)
     }
@@ -62,9 +66,10 @@ object CompendiumServiceSpec extends Specification with ScalaCheck {
 
   "Exists protocol" >> {
     "Given a identifier we check if a protocol exists" >> prop { id: String =>
-      implicit val dbService     = new DBServiceStub(true)
-      implicit val storage       = new StorageStub(Some(dummyProtocol), id)
-      implicit val protocolUtils = new ProtocolUtilsStub(dummyProtocol, true)
+      implicit val dbService          = new DBServiceStub(true)
+      implicit val storage            = new StorageStub(Some(dummyProtocol), id)
+      implicit val protocolUtils      = new ProtocolUtilsStub(dummyProtocol, true)
+      implicit val protoParserService = ProtocolParser.impl[IO]
 
       CompendiumService.impl[IO].existsProtocol(id).unsafeRunSync() should beTrue
     }

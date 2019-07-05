@@ -17,26 +17,50 @@
 package higherkindness.compendium.parser
 
 import cats.effect.Sync
+import cats.syntax.functor._
 import cats.syntax.either._
-import higherkindness.compendium.models.{IdlNames, MetaProtocol, Protocol, Target}
+import higherkindness.compendium.models._
 import higherkindness.compendium.models.parserModels._
+import higherkindness.skeuomorph.mu
 import higherkindness.skeuomorph.avro
-import higherkindness.skeuomorph.openapi
-
+import higherkindness.skeuomorph.protobuf.{ParseProto, ProtobufF}
+import qq.droste.data.Mu._
+import org.apache.avro.{Protocol => AvroProtocol}
+import qq.droste.data.Mu
 
 object ProtocolParser {
 
   def impl[F[_]: Sync]: ProtocolParserService[F] = new ProtocolParserService[F] {
 
-    private def skeuomorphParse(mp: MetaProtocol, target: Target): Protocol = (mp.idlName, target) match {
-      case _ if mp.idlName.entryName == target.entryName => mp.protocol
-      case (IdlNames.Protobuf, Target.Avro) => avro.Protocol.fromProto()
-    }
+    import utils._
+
+    private def skeuomorphParse(mp: MetaProtocol, target: Target): F[MetaProtocol] =
+      (mp.idlName, target) match {
+        // (from, to)
+        case _ if mp.idlName.entryName == target.entryName => Sync[F].pure(mp)
+        case (IdlNames.Avro, Target.Mu) =>
+          Sync[F]
+            .delay(
+              mu.print.proto.print(mu.Protocol.fromAvroProtocol(
+                avro.Protocol.fromProto(AvroProtocol.parse(mp.protocol.raw)))))
+            .fmap(p => MetaProtocol.apply(IdlNames.withName(target.entryName), Protocol(p)))
+        case (IdlNames.Protobuf, Target.Mu) =>
+          parseProtobufRaw(mp.protocol.raw) { source =>
+            ParseProto
+              .parseProto[F, Mu[ProtobufF]]
+              .parse(source)
+              .map(mu.Protocol.fromProtobufProto(_))
+              .map(
+                p =>
+                  MetaProtocol(
+                    IdlNames.withName(target.entryName),
+                    Protocol(higherkindness.skeuomorph.mu.print.proto.print(p))))
+          }
+      }
 
     override def parse(protocol: Option[MetaProtocol], target: Target): F[ParserResult] =
-      protocol.fold(
-        Sync[F].pure(ParserError("No Protocol Found").asLeft[Protocol]))(
-        mp => Sync[F].delay(skeuomorphParse(mp, target).asRight[ParserError]))
+      protocol.fold(Sync[F].pure(ParserError("No Protocol Found").asLeft[MetaProtocol]))(mp =>
+        skeuomorphParse(mp, target).map(_.asRight[ParserError]))
   }
 
 }

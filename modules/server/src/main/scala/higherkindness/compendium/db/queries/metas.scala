@@ -14,20 +14,13 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.models
+package higherkindness.compendium.db.queries
 
-import enumeratum._
-import enumeratum.EnumEntry._
+import doobie.util.Meta
+import higherkindness.compendium.models.IdlNames
 
-sealed trait Target extends EnumEntry
+object metas {
 
-object Target extends Enum[Target] {
+  implicit val IdlNamesMeta: Meta[IdlNames] = Meta[String].timap(IdlNames.withName)(_.entryName)
 
-  val values = findValues
-
-  case object Scala    extends Target with Lowercase
-  case object Protobuf extends Target with Lowercase
-  case object Avro     extends Target with Lowercase
-  case object Mu       extends Target with Lowercase
-  case object OpenApi  extends Target with Lowercase
 }

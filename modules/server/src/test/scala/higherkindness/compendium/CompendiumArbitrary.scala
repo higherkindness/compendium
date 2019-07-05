@@ -16,13 +16,21 @@
 
 package higherkindness.compendium
 
-import higherkindness.compendium.models.Protocol
+import higherkindness.compendium.models.{IdlNames, MetaProtocolDB, Protocol}
 import org.scalacheck.{Arbitrary, Gen}
 
 trait CompendiumArbitrary {
 
   implicit val protocolArbitrary: Arbitrary[Protocol] = Arbitrary {
     Gen.alphaNumStr.map(Protocol.apply)
+  }
+
+  implicit val idlNamesArbitrary: Arbitrary[IdlNames] = Arbitrary {
+    Gen.oneOf(IdlNames.values)
+  }
+
+  implicit val metaProtocolArbitrary: Arbitrary[MetaProtocolDB] = Arbitrary {
+    Gen.resultOf(MetaProtocolDB)
   }
 
   implicit val differentIdentifiersArb: Arbitrary[DifferentIdentifiers] = Arbitrary {

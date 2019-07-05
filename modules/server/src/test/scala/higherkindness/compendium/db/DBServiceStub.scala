@@ -17,9 +17,12 @@
 package higherkindness.compendium.db
 
 import cats.effect.IO
+import higherkindness.compendium.models.MetaProtocolDB
 
 class DBServiceStub(val exists: Boolean) extends DBService[IO] {
   override def upsertProtocol(id: String): IO[Unit]    = IO.unit
   override def existsProtocol(id: String): IO[Boolean] = IO.pure(exists)
   override def ping(): IO[Boolean]                     = IO.pure(exists)
+
+  override def selectProtocolBytId(id: String): IO[MetaProtocolDB] = ???
 }
