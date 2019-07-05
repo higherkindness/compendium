@@ -17,10 +17,11 @@
 package higherkindness.compendium.db
 
 import doobie.specs2._
+import higherkindness.compendium.db.MigrationsMode.Metadata
 import higherkindness.compendium.db.queries.Queries
 import org.specs2.specification.Scope
 
-class QueriesSpec extends PGHelper with IOChecker {
+class QueriesSpec extends PGHelper(Metadata) with IOChecker {
 
   "Queries" should {
     "match db model" in new context {

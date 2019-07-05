@@ -19,8 +19,9 @@ package higherkindness.compendium.db
 import cats.effect.IO
 import cats.implicits._
 import higherkindness.compendium.core.refinements.ProtocolId
+import higherkindness.compendium.db.MigrationsMode.Metadata
 
-class PgDBServiceSpec extends PGHelper {
+class PgDBServiceSpec extends PGHelper(Metadata) {
 
   private lazy val pg = PgDBService.impl[IO](transactor)
 

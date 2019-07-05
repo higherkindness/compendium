@@ -17,18 +17,25 @@
 package higherkindness.compendium.migrations
 
 import cats.effect.Sync
-import cats.implicits._
+import cats.syntax.applicativeError._
+import cats.syntax.flatMap._
 import higherkindness.compendium.models.config.PostgresConfig
 import org.flywaydb.core.Flyway
+import org.flywaydb.core.api.Location
 
 object Migrations {
 
-  def makeMigrations[F[_]: Sync](conf: PostgresConfig): F[Int] =
+  def metadataLocation[F[_]: Sync]: F[Location] =
+    Sync[F].delay(new Location("db/migration/metadata"))
+  def dataLocation[F[_]: Sync]: F[Location] = Sync[F].delay(new Location("db/migration/data"))
+
+  def makeMigrations[F[_]: Sync](conf: PostgresConfig, migrations: List[Location]): F[Int] =
     Sync[F]
       .delay {
         Flyway
           .configure()
           .dataSource(conf.jdbcUrl, conf.username, conf.password)
+          .locations(migrations: _*)
           .load()
           .migrate()
       }

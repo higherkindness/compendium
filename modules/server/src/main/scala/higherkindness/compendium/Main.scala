@@ -43,7 +43,8 @@ object CompendiumStreamApp {
       conf <- Stream.eval(
         Sync[F].delay(pureconfig.loadConfigOrThrow[CompendiumConfig]("compendium"))
       )
-      _          <- Stream.eval(Migrations.makeMigrations(conf.postgres))
+      migrations <- Stream.eval(Migrations.metadataLocation)
+      _          <- Stream.eval(Migrations.makeMigrations(conf.postgres, List(migrations)))
       transactor <- Stream.resource(createTransactor(conf.postgres))
       implicit0(storage: Storage[F])                     = FileStorage.impl[F](conf.storage)
       implicit0(dbService: DBService[F])                 = PgDBService.impl[F](transactor)

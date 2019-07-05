@@ -26,7 +26,22 @@ import org.specs2.mutable.Specification
 
 import scala.concurrent.ExecutionContext.global
 
-abstract class PGHelper extends Specification with ForAllTestContainer {
+sealed abstract class MigrationsMode extends Product with Serializable
+
+object MigrationsMode {
+  case object Metadata extends MigrationsMode
+  case object Data     extends MigrationsMode
+}
+
+// PGHelper spins up a fresh postgres container and runs the specified migrations afterwards
+abstract class PGHelper(mode: MigrationsMode) extends Specification with ForAllTestContainer {
+
+  import higherkindness.compendium.db.MigrationsMode.{Data, Metadata}
+
+  private val location = mode match {
+    case Metadata => Migrations.metadataLocation[IO]
+    case Data     => Migrations.dataLocation[IO]
+  }
 
   override lazy val container: PostgreSQLContainer =
     PostgreSQLContainer("postgres:11-alpine")
@@ -49,9 +64,9 @@ abstract class PGHelper extends Specification with ForAllTestContainer {
     )
 
   override def afterStart(): Unit = {
-    Migrations
-      .makeMigrations[IO](conf)
-      .unsafeRunSync()
-    ()
+    (for {
+      migrations <- location
+      _          <- Migrations.makeMigrations[IO](conf, List(migrations))
+    } yield ()).unsafeRunSync()
   }
 }
