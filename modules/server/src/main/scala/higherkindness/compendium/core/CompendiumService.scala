@@ -18,6 +18,7 @@ package higherkindness.compendium.core
 
 import cats.effect.Sync
 import cats.implicits._
+import higherkindness.compendium.core.refinements.ProtocolId
 import higherkindness.compendium.db.DBService
 import higherkindness.compendium.models.{MetaProtocol, Protocol, Target}
 import higherkindness.compendium.models.parserModels.ParserResult
@@ -26,9 +27,9 @@ import higherkindness.compendium.storage.Storage
 
 trait CompendiumService[F[_]] {
 
-  def storeProtocol(id: String, protocol: Protocol): F[Unit]
-  def recoverProtocol(protocolId: String): F[Option[MetaProtocol]]
-  def existsProtocol(protocolId: String): F[Boolean]
+  def storeProtocol(id: ProtocolId, protocol: Protocol): F[Unit]
+  def recoverProtocol(protocolId: ProtocolId): F[Option[MetaProtocol]]
+  def existsProtocol(protocolId: ProtocolId): F[Boolean]
   def parseProtocol(protocolName: String, target: Target): F[ParserResult]
 }
 
@@ -38,17 +39,17 @@ object CompendiumService {
     F] =
     new CompendiumService[F] {
 
-      override def storeProtocol(id: String, protocol: Protocol): F[Unit] =
+      override def storeProtocol(id: ProtocolId, protocol: Protocol): F[Unit] =
         ProtocolUtils[F].validateProtocol(protocol) >>
           DBService[F].upsertProtocol(id) >>
           Storage[F].store(id, protocol)
 
-      override def recoverProtocol(protocolId: String): F[Option[MetaProtocol]] =
+      override def recoverProtocol(protocolId: ProtocolId): F[Option[MetaProtocol]] =
         DBService[F]
           .selectProtocolBytId(protocolId)
           .flatMap(mpdb => Storage[F].recover(mpdb))
 
-      override def existsProtocol(protocolId: String): F[Boolean] =
+      override def existsProtocol(protocolId: ProtocolId): F[Boolean] =
         DBService[F].existsProtocol(protocolId)
 
       override def parseProtocol(protocolName: String, target: Target): F[ParserResult] =

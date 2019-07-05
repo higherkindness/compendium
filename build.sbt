@@ -7,11 +7,11 @@ import sbtorgpolicies.templates.badges._
 
 lazy val V = new {
   val betterMonadicFor: String = "0.3.0"
-  val cats: String             = "1.6.0"
+  val cats: String             = "1.6.1"
   val catsScalacheck: String   = "0.1.1"
   val mouse: String            = "0.20"
   val circe: String            = "0.11.1"
-  val kindProjector: String    = "0.10.1"
+  val kindProjector: String    = "0.10.2"
   val paradise: String         = "2.1.1"
   val scala: String            = "2.12.8"
   val skeumorph: String        = "0.0.10"
@@ -21,9 +21,10 @@ lazy val V = new {
   val http4s: String           = "0.20.1"
   val shapeless: String        = "2.3.3"
   val pureConfig: String       = "0.11.0"
-  val hammock: String          = "0.9.1"
+  val hammock: String          = "0.9.2"
   val doobie: String           = "0.7.0"
   val flyway: String           = "5.2.4"
+  val refined: String          = "0.9.7"
 }
 
 lazy val root = project
@@ -31,7 +32,7 @@ lazy val root = project
   .settings(name := "compendium")
   .settings(commonSettings)
   .settings(noPublishSettings)
-  .aggregate(server, client)
+  .aggregate(server, client, common)
 
 lazy val common = project
   .in(file("modules/common"))
@@ -183,6 +184,8 @@ lazy val serverSettings = Seq(
   parallelExecution in Test := false,
   libraryDependencies ++= Seq(
     "org.slf4j"         % "slf4j-simple"     % "1.7.26",
+    "eu.timepit" %% "refined"            % V.refined,
+    "eu.timepit" %% "refined-scalacheck" % V.refined,
     "io.chrisdavenport" %% "cats-scalacheck" % V.catsScalacheck % Test
   )
 )

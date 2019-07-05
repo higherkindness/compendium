@@ -18,6 +18,7 @@ package higherkindness.compendium.db
 
 import cats.effect.IO
 import cats.implicits._
+import higherkindness.compendium.core.refinements.ProtocolId
 
 class PgDBServiceSpec extends PGHelper {
 
@@ -25,7 +26,7 @@ class PgDBServiceSpec extends PGHelper {
 
   "Postgres Service" should {
     "insert protocol correctly" in {
-      val id: String = "pId"
+      val id: ProtocolId = ProtocolId("pId")
 
       val result: IO[Boolean] =
         pg.upsertProtocol(id) >> pg.existsProtocol(id)
@@ -35,7 +36,7 @@ class PgDBServiceSpec extends PGHelper {
     }
 
     "update protocol correctly" in {
-      val id: String = "pId2"
+      val id: ProtocolId = ProtocolId("pId2")
 
       val result: IO[Boolean] =
         pg.upsertProtocol(id) >> pg.upsertProtocol(id) >> pg.existsProtocol(id)
@@ -44,11 +45,13 @@ class PgDBServiceSpec extends PGHelper {
     }
 
     "return false when the protocol does not exist" in {
-      pg.existsProtocol("p").unsafeRunSync must ===(false)
+      val id: ProtocolId = ProtocolId("p")
+
+      pg.existsProtocol(id).unsafeRunSync must ===(false)
     }
 
     "return true when the protocol exists" in {
-      val id: String = "pId3"
+      val id: ProtocolId = ProtocolId("pId3")
 
       val result: IO[Boolean] =
         pg.upsertProtocol(id) >> pg.existsProtocol(id)

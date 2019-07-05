@@ -20,6 +20,7 @@ import java.io.File
 
 import cats.effect.IO
 import higherkindness.compendium.CompendiumArbitrary._
+import higherkindness.compendium.core.refinements.ProtocolId
 import higherkindness.compendium.models.{MetaProtocol, MetaProtocolDB, Protocol}
 import higherkindness.compendium.models.config.StorageConfig
 import org.specs2.ScalaCheck
@@ -57,7 +58,9 @@ object FileStorageSpec extends Specification with ScalaCheck with BeforeAfterAll
 
   "Store a file" >> {
     "Successfully stores a file" >> prop { (metaProtocolDB: MetaProtocolDB, protocol: Protocol) =>
-      val storageProtocolFile = storageProtocol("id")
+      val id = ProtocolId("id")
+
+      val storageProtocolFile = storageProtocol(id.value)
       val io = for {
         _ <- fileStorage.store(metaProtocolDB.id, protocol)
       } yield storageDirectory.exists && storageProtocolFile.exists
@@ -86,8 +89,10 @@ object FileStorageSpec extends Specification with ScalaCheck with BeforeAfterAll
     }
 
     "Returns false if there is no file" >> {
+      val id = ProtocolId("id")
+
       val out = for {
-        exists <- fileStorage.exists("id")
+        exists <- fileStorage.exists(id)
       } yield exists
 
       out.unsafeRunSync() should beFalse

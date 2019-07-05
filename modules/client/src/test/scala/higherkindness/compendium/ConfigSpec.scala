@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.storage
+package higherkidness.compendium
 
-import higherkindness.compendium.core.refinements.ProtocolId
-import higherkindness.compendium.models.{MetaProtocol, MetaProtocolDB, Protocol}
+import cats.effect.IO
+import higherkindness.compendium.models.config._
+import org.specs2.mutable.Specification
+import pureconfig.generic.auto._
 
-trait Storage[F[_]] {
+class ConfigSpec extends Specification {
 
-  def store(id: ProtocolId, protocol: Protocol): F[Unit]
-  def recover(metaProtocolDB: MetaProtocolDB): F[Option[MetaProtocol]]
-  def exists(id: ProtocolId): F[Boolean]
-}
+  "Config must load properly" >> {
+    IO.delay(pureconfig.loadConfigOrThrow[CompendiumConfig]("compendium"))
+      .attempt
+      .unsafeRunSync() must beRight[CompendiumConfig]
+  }
 
-object Storage {
-  def apply[F[_]](implicit S: Storage[F]): Storage[F] = S
 }

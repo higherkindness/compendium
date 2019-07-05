@@ -18,13 +18,14 @@ package higherkindness.compendium.storage
 
 import cats.effect.IO
 import cats.syntax.apply._
+import higherkindness.compendium.core.refinements.ProtocolId
 import higherkindness.compendium.models.{MetaProtocol, MetaProtocolDB, Protocol}
 import org.specs2.matcher.Matchers
 
-class StorageStub(val proto: Option[Protocol], val identifier: String)
+class StorageStub(val proto: Option[Protocol], val identifier: ProtocolId)
     extends Storage[IO]
     with Matchers {
-  override def store(id: String, protocol: Protocol): IO[Unit] =
+  override def store(id: ProtocolId, protocol: Protocol): IO[Unit] =
     IO {
       proto === Some(protocol)
       id === identifier
@@ -34,6 +35,6 @@ class StorageStub(val proto: Option[Protocol], val identifier: String)
     if (metaProtocol.id == identifier) IO(proto.map(MetaProtocol(metaProtocol.idlName, _)))
     else IO(None)
 
-  override def exists(id: String): IO[Boolean] =
+  override def exists(id: ProtocolId): IO[Boolean] =
     IO(id == identifier)
 }

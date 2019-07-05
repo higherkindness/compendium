@@ -17,8 +17,11 @@
 package higherkindness.compendium.http
 
 import cats.effect.IO
+import higherkindness.compendium.core.refinements.ProtocolId
 import higherkindness.compendium.core.CompendiumServiceStub
 import higherkindness.compendium.models._
+import io.circe.Encoder
+import io.circe.generic.semiauto.deriveEncoder
 import org.http4s.circe.CirceEntityCodec._
 import org.http4s.implicits._
 import org.http4s.{Method, Request, Response, Status, Uri}
@@ -57,12 +60,24 @@ object RootServiceSpec extends Specification with ScalaCheck {
 
       response.map(_.status).unsafeRunSync === Status.NotFound
     }
+
+    "If protocol identifier is malformed returns bad request" >> {
+      implicit val compendiumService = new CompendiumServiceStub(Some(dummyProtocol), true)
+
+      val request: Request[IO] =
+        Request[IO](method = Method.GET, uri = Uri(path = s"/protocol/not_valid@"))
+
+      val response: IO[Response[IO]] =
+        RootService.rootRouteService[IO].orNotFound(request)
+
+      response.map(_.status).unsafeRunSync === Status.BadRequest
+    }
   }
 
   "POST /protocol/" >> {
     "If protocol returns an invalid avro schema returns BadRequest" >> {
       implicit val compendiumService = new CompendiumServiceStub(None, false) {
-        override def storeProtocol(id: String, protocol: Protocol): IO[Unit] =
+        override def storeProtocol(id: ProtocolId, protocol: Protocol): IO[Unit] =
           IO.raiseError[Unit](new org.apache.avro.SchemaParseException(""))
       }
 
@@ -91,6 +106,23 @@ object RootServiceSpec extends Specification with ScalaCheck {
         .map(_.headers.find(_.name == "Location".ci))
         .unsafeRunSync
         .map(_.value) === Some(s"/protocol/$id")
+    }.setGen(Gen.alphaNumStr suchThat (!_.isEmpty))
+
+    "If json is invalid returns a 400 Bad Request" >> prop { id: String =>
+      implicit val compendiumService = new CompendiumServiceStub(None, false)
+
+      case class Malformed(malformed: String)
+
+      implicit val encoder: Encoder[Malformed] = deriveEncoder[Malformed]
+
+      val request: Request[IO] =
+        Request[IO](method = Method.POST, uri = Uri(path = s"/protocol/$id"))
+          .withEntity(Malformed("test"))
+
+      val response: IO[Response[IO]] =
+        RootService.rootRouteService[IO].orNotFound(request)
+
+      response.map(_.status).unsafeRunSync === Status.BadRequest
     }.setGen(Gen.alphaNumStr suchThat (!_.isEmpty))
 
     "If protocol is valid and it was already in compendium returns Ok and the location in the headers" >> prop {

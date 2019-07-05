@@ -17,6 +17,8 @@
 package higherkindness.compendium.core
 
 import cats.effect.IO
+import higherkindness.compendium.CompendiumArbitrary._
+import higherkindness.compendium.core.refinements.ProtocolId
 import higherkindness.compendium.db.DBServiceStub
 import higherkindness.compendium.models.Protocol
 import higherkindness.compendium.parser.{ProtocolParser}
@@ -31,7 +33,7 @@ object CompendiumServiceSpec extends Specification with ScalaCheck {
   private val dummyProtocol: Protocol = Protocol("")
 
   "Store protocol" >> {
-    "If it's a valid protocol we store it" >> prop { id: String =>
+    "If it's a valid protocol we store it" >> prop { id: ProtocolId =>
       implicit val dbService          = new DBServiceStub(true)
       implicit val storage            = new StorageStub(Some(dummyProtocol), id)
       implicit val protocolUtils      = new ProtocolUtilsStub(dummyProtocol, true)
@@ -40,7 +42,7 @@ object CompendiumServiceSpec extends Specification with ScalaCheck {
       CompendiumService.impl[IO].storeProtocol(id, dummyProtocol).map(_ => success).unsafeRunSync()
     }
 
-    "If it's an invalid protocol we raise an error" >> prop { id: String =>
+    "If it's an invalid protocol we raise an error" >> prop { id: ProtocolId =>
       implicit val dbService          = new DBServiceStub(true)
       implicit val storage            = new StorageStub(Some(dummyProtocol), id)
       implicit val protocolUtils      = new ProtocolUtilsStub(dummyProtocol, false)
@@ -54,7 +56,7 @@ object CompendiumServiceSpec extends Specification with ScalaCheck {
   }
 
   "Recover protocol" >> {
-    "Given a identifier we recover the protocol" >> prop { id: String =>
+    "Given a identifier we recover the protocol" >> prop { id: ProtocolId =>
       implicit val dbService          = new DBServiceStub(true)
       implicit val storage            = new StorageStub(Some(dummyProtocol), id)
       implicit val protocolUtils      = new ProtocolUtilsStub(dummyProtocol, true)
@@ -65,7 +67,7 @@ object CompendiumServiceSpec extends Specification with ScalaCheck {
   }
 
   "Exists protocol" >> {
-    "Given a identifier we check if a protocol exists" >> prop { id: String =>
+    "Given a identifier we check if a protocol exists" >> prop { id: ProtocolId =>
       implicit val dbService          = new DBServiceStub(true)
       implicit val storage            = new StorageStub(Some(dummyProtocol), id)
       implicit val protocolUtils      = new ProtocolUtilsStub(dummyProtocol, true)

@@ -18,9 +18,11 @@ package higherkindness.compendium.db
 
 import higherkindness.compendium.models.MetaProtocolDB
 
+import higherkindness.compendium.core.refinements.ProtocolId
+
 trait DBService[F[_]] {
-  def upsertProtocol(id: String): F[Unit]
-  def existsProtocol(id: String): F[Boolean]
+  def upsertProtocol(id: ProtocolId): F[Unit]
+  def existsProtocol(id: ProtocolId): F[Boolean]
   def selectProtocolBytId(id: String): F[MetaProtocolDB]
   def ping(): F[Boolean]
 }
