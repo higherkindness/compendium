@@ -36,7 +36,7 @@ private class PgStorage[F[_]: Bracket[?[_], Throwable]](xa: Transactor[F]) exten
 
 object PgStorage {
 
-  def apply[F[_]: Bracket[?[_], Throwable]](implicit xa: Transactor[F]): Storage[F] =
+  def apply[F[_]: Bracket[?[_], Throwable]](xa: Transactor[F]): Storage[F] =
     new PgStorage(xa)
 
 }
