@@ -54,7 +54,7 @@ object ProtocolParser {
                 p =>
                   MetaProtocol(
                     IdlNames.withName(target.entryName),
-                    Protocol(higherkindness.skeuomorph.mu.print.proto.print(p))))
+                    Protocol(mu.print.proto.print(p))))
           }
       }
 
