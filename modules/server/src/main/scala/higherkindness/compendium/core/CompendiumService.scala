@@ -46,7 +46,7 @@ object CompendiumService {
 
       override def recoverProtocol(protocolId: ProtocolId): F[Option[MetaProtocol]] =
         DBService[F]
-          .selectProtocolBytId(protocolId)
+          .selectProtocolById(protocolId)
           .flatMap(mpdb => Storage[F].recover(mpdb))
 
       override def existsProtocol(protocolId: ProtocolId): F[Boolean] =

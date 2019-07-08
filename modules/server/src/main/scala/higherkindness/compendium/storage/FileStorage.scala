@@ -42,7 +42,6 @@ object FileStorage {
         } yield ()
 
       override def recover(metaProtocolDB: MetaProtocolDB): F[Option[MetaProtocol]] =
-        //override def recover(id: ProtocolId): F[Option[Protocol]] =
         for {
           filename <- Sync[F].catchNonFatal {
             Option(new File(s"${config.path}${File.separator}${metaProtocolDB.id}").listFiles())

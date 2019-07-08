@@ -35,7 +35,7 @@ object PgDBService {
       override def existsProtocol(id: ProtocolId): F[Boolean] =
         Queries.checkIfExistsQ(id.value).unique.transact(xa)
 
-      override def selectProtocolBytId(id: ProtocolId): F[MetaProtocolDB] =
+      override def selectProtocolById(id: ProtocolId): F[MetaProtocolDB] =
         Queries.selectProtocolById(id.value).unique.transact(xa)
 
       override def ping(): F[Boolean] = Queries.checkConnection().unique.transact(xa)

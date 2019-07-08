@@ -17,18 +17,16 @@
 package higherkindness.compendium.db
 
 import cats.effect.IO
-import cats.effect.concurrent.Ref
 import higherkindness.compendium.models.{IdlNames, MetaProtocolDB}
 import higherkindness.compendium.core.refinements.ProtocolId
 
-class DBServiceStub(val exists: Boolean, refProt: Option[Ref[IO, MetaProtocolDB]] = None)
+class DBServiceStub(val exists: Boolean, protocol: Option[MetaProtocolDB] = None)
     extends DBService[IO] {
   override def upsertProtocol(id: ProtocolId, idlNames: IdlNames): IO[Unit] = IO.unit
   override def existsProtocol(id: ProtocolId): IO[Boolean]                  = IO.pure(exists)
   override def ping(): IO[Boolean]                                          = IO.pure(exists)
 
-  override def selectProtocolBytId(id: ProtocolId): IO[MetaProtocolDB] =
-    refProt.fold[IO[MetaProtocolDB]](IO.raiseError(new Throwable("Protocol not found")))(
-      _.get.flatMap(mp =>
-        if (mp.id == id.value) IO(mp) else IO.raiseError(new Throwable("Protocol not found"))))
+  override def selectProtocolById(id: ProtocolId): IO[MetaProtocolDB] =
+    protocol.fold[IO[MetaProtocolDB]](IO.raiseError(new Throwable("Protocol not found")))(mp =>
+      if (mp.id == id.value) IO(mp) else IO.raiseError(new Throwable("Protocol not found")))
 }

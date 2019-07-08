@@ -17,7 +17,6 @@
 package higherkindness.compendium.core
 
 import cats.effect.IO
-import cats.effect.concurrent.Ref
 import cats.syntax.option._
 import higherkindness.compendium.CompendiumArbitrary._
 import higherkindness.compendium.core.refinements.ProtocolId
@@ -64,9 +63,8 @@ object CompendiumServiceSpec extends Specification with ScalaCheck {
 
   "Recover protocol" >> {
     "Given a identifier we recover the protocol" >> prop { id: ProtocolId =>
-      val MetaProtocolRef =
-        Ref.of[IO, MetaProtocolDB](MetaProtocolDB(IdlNames.Avro, id.value)).unsafeRunSync()
-      implicit val dbService          = new DBServiceStub(true, MetaProtocolRef.some)
+      val MetaProtocol                = MetaProtocolDB(IdlNames.Avro, id.value)
+      implicit val dbService          = new DBServiceStub(true, MetaProtocol.some)
       implicit val storage            = new StorageStub(Some(dummyProtocol), id)
       implicit val protocolUtils      = new ProtocolUtilsStub(dummyProtocol, true)
       implicit val protoParserService = ProtocolParser.impl[IO]

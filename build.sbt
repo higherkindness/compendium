@@ -183,12 +183,12 @@ lazy val clientSettings = Seq(
 lazy val serverSettings = Seq(
   parallelExecution in Test := false,
   libraryDependencies ++= Seq(
-    "org.slf4j"         % "slf4j-simple"     % "1.7.26",
-    "eu.timepit" %% "refined"            % V.refined,
-    "eu.timepit" %% "refined-scalacheck" % V.refined,
-    "io.chrisdavenport" %% "cats-scalacheck"     % V.catsScalacheck % Test,
+    "org.slf4j"         % "slf4j-simple"        % "1.7.26",
+    "eu.timepit"        %% "refined"            % V.refined,
+    "eu.timepit"        %% "refined-scalacheck" % V.refined,
+    "io.chrisdavenport" %% "cats-scalacheck"    % V.catsScalacheck % Test,
   )
-) 
+)
 
 lazy val compilerPlugins = Seq(
   libraryDependencies ++= Seq(
