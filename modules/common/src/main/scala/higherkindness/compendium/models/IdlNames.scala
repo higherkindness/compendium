@@ -17,7 +17,7 @@
 package higherkindness.compendium.models
 
 import enumeratum.EnumEntry.Lowercase
-import enumeratum.{EnumEntry, _}
+import enumeratum._
 
 sealed trait IdlNames extends EnumEntry
 
