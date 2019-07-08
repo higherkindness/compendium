@@ -25,7 +25,7 @@ import higherkindness.compendium.models.Protocol
 
 class PgStorageSpec extends PGHelper(Data) {
 
-  private lazy val pgStorage = PgStorage[IO]
+  private lazy val pgStorage = PgStorage[IO](transactor)
 
   "Postgres Storage" should {
 

@@ -55,7 +55,7 @@ abstract class PGHelper(mode: MigrationsMode) extends Specification with ForAllT
 
   implicit lazy val CS: ContextShift[IO] = IO.contextShift(global)
 
-  implicit lazy val transactor: Transactor[IO] =
+  lazy val transactor: Transactor[IO] =
     Transactor.fromDriverManager[IO](
       container.driverClassName,
       container.jdbcUrl,
