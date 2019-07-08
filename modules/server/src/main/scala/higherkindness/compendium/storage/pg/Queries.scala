@@ -25,7 +25,11 @@ import higherkindness.compendium.storage.pg.implicits._
 object Queries {
 
   def storeProtocol(id: ProtocolId, protocol: Protocol): Update0 =
-    sql"""INSERT INTO protocols VALUES ($id, $protocol) ON CONFLICT (id) DO UPDATE SET protocol = EXCLUDED.protocol""".update
+    sql"""
+        INSERT INTO protocols 
+        VALUES ($id, $protocol)
+        ON CONFLICT (id) DO UPDATE SET protocol = EXCLUDED.protocol
+       """.update
 
   def recoverProtocol(id: ProtocolId): Query0[Protocol] =
     sql"""SELECT protocol FROM protocols WHERE id=$id""".query[Protocol]

@@ -24,7 +24,7 @@ import higherkindness.compendium.core.refinements.ProtocolId
 import higherkindness.compendium.models.Protocol
 import higherkindness.compendium.storage.Storage
 
-class PgStorage[F[_]: Bracket[?[_], Throwable]](xa: Transactor[F]) extends Storage[F] {
+private class PgStorage[F[_]: Bracket[?[_], Throwable]](xa: Transactor[F]) extends Storage[F] {
 
   override def store(id: ProtocolId, protocol: Protocol): F[Unit] =
     Queries.storeProtocol(id, protocol).run.void.transact(xa)
