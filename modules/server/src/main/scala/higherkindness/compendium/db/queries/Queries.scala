@@ -18,7 +18,8 @@ package higherkindness.compendium.db.queries
 
 import doobie._
 import doobie.implicits.toSqlInterpolator
-import higherkindness.compendium.models.MetaProtocolDB
+import higherkindness.compendium.models.DBModels.MetaProtocolDB
+import doobie.refined.implicits._
 import metas._
 
 object Queries {

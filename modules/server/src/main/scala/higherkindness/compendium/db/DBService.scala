@@ -16,8 +16,9 @@
 
 package higherkindness.compendium.db
 
-import higherkindness.compendium.models.{IdlNames, MetaProtocolDB}
+import higherkindness.compendium.models.IdlNames
 import higherkindness.compendium.core.refinements.ProtocolId
+import higherkindness.compendium.models.DBModels.MetaProtocolDB
 
 trait DBService[F[_]] {
   def upsertProtocol(id: ProtocolId, idlName: IdlNames): F[Unit]

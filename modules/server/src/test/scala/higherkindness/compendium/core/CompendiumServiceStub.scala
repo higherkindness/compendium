@@ -18,6 +18,7 @@ package higherkindness.compendium.core
 
 import cats.effect.IO
 import higherkindness.compendium.core.refinements.ProtocolId
+import higherkindness.compendium.models.DBModels.MetaProtocol
 import higherkindness.compendium.models.parserModels.ParserResult
 import higherkindness.compendium.models._
 

@@ -17,7 +17,8 @@
 package higherkindness.compendium.storage
 
 import higherkindness.compendium.core.refinements.ProtocolId
-import higherkindness.compendium.models.{MetaProtocol, MetaProtocolDB, Protocol}
+import higherkindness.compendium.models.DBModels.{MetaProtocol, MetaProtocolDB}
+import higherkindness.compendium.models.Protocol
 
 trait Storage[F[_]] {
 

@@ -21,6 +21,7 @@ import higherkindness.compendium.core.refinements.ProtocolId
 import higherkindness.compendium.core.CompendiumServiceStub
 import higherkindness.compendium.models._
 import higherkindness.compendium.CompendiumArbitrary.protocolIdArbitrary
+import higherkindness.compendium.models.DBModels.MetaProtocol
 import io.circe.Encoder
 import io.circe.generic.semiauto.deriveEncoder
 import org.http4s.circe.CirceEntityCodec._
@@ -67,6 +68,20 @@ object RootServiceSpec extends Specification with ScalaCheck {
 
       val request: Request[IO] =
         Request[IO](method = Method.GET, uri = Uri(path = s"/protocol/not_valid@"))
+
+      val response: IO[Response[IO]] =
+        RootService.rootRouteService[IO].orNotFound(request)
+
+      response.map(_.status).unsafeRunSync === Status.BadRequest
+    }
+
+    "If protocol IDL Name is not valid returns a 400 Bad Request" >> {
+      implicit val compendiumService = new CompendiumServiceStub(Some(dummyProtocol), true)
+
+      val request: Request[IO] =
+        Request[IO](
+          method = Method.GET,
+          uri = Uri(path = s"/protocol/not_valid", query = Query.fromString("idlName=asdf")))
 
       val response: IO[Response[IO]] =
         RootService.rootRouteService[IO].orNotFound(request)

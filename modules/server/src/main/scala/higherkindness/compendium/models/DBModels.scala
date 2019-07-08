@@ -16,5 +16,12 @@
 
 package higherkindness.compendium.models
 
-final case class MetaProtocolDB(idlName: IdlNames, id: String)
-final case class MetaProtocol(idlName: IdlNames, protocol: Protocol)
+import higherkindness.compendium.core.refinements.ProtocolId
+
+object DBModels {
+
+  final case class MetaProtocolDB(idlName: IdlNames, id: ProtocolId)
+
+  final case class MetaProtocol(idlName: IdlNames, protocol: Protocol)
+
+}

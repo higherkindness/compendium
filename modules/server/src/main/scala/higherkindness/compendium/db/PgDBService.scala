@@ -22,7 +22,8 @@ import doobie.util.transactor.Transactor
 import doobie.implicits._
 import higherkindness.compendium.core.refinements.ProtocolId
 import higherkindness.compendium.db.queries.Queries
-import higherkindness.compendium.models.{IdlNames, MetaProtocolDB}
+import higherkindness.compendium.models.DBModels.MetaProtocolDB
+import higherkindness.compendium.models.IdlNames
 
 object PgDBService {
 

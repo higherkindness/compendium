@@ -20,7 +20,8 @@ import java.io.File
 
 import cats.effect.IO
 import higherkindness.compendium.CompendiumArbitrary._
-import higherkindness.compendium.core.refinements.{validateProtocolId, ProtocolId}
+import higherkindness.compendium.core.refinements.ProtocolId
+import higherkindness.compendium.models.DBModels.{MetaProtocol, MetaProtocolDB}
 import higherkindness.compendium.models._
 import higherkindness.compendium.models.config.StorageConfig
 import org.specs2.ScalaCheck
@@ -35,7 +36,7 @@ object FileStorageSpec extends Specification with ScalaCheck with BeforeAfterAll
   private[this] lazy val storageConfig: StorageConfig = StorageConfig(s"$basePath/files")
   private[this] lazy val baseDirectory                = new Directory(new File(basePath))
   private[this] lazy val storageDirectory             = new Directory(new File(storageConfig.path))
-  private[this] def storageProtocol(id: String) =
+  private[this] def storageProtocol(id: ProtocolId) =
     new Directory(new File(s"${storageConfig.path}/$id/protocol"))
 
   private[this] lazy val fileStorage: Storage[IO] = FileStorage.impl[IO](storageConfig)
@@ -59,10 +60,10 @@ object FileStorageSpec extends Specification with ScalaCheck with BeforeAfterAll
   "Store a file" >> {
     "Successfully stores a file" >> prop { (metaProtocolDB: MetaProtocolDB, protocol: Protocol) =>
       val storageProtocolFile = storageProtocol(metaProtocolDB.id)
-      val io = for {
-        id <- validateProtocolId[IO](metaProtocolDB.id)(ProtocolIdentifierError)
-        _  <- fileStorage.store(id, protocol)
-      } yield storageDirectory.exists && storageProtocolFile.exists
+
+      val io = fileStorage
+        .store(metaProtocolDB.id, protocol)
+        .map(_ => storageDirectory.exists && storageProtocolFile.exists)
 
       io.unsafeRunSync() should beTrue
     }
@@ -70,9 +71,8 @@ object FileStorageSpec extends Specification with ScalaCheck with BeforeAfterAll
     "Successfully stores and recovers a file" >> prop {
       (metaProtocolDB: MetaProtocolDB, protocol: Protocol) =>
         val file = for {
-          id <- validateProtocolId[IO](metaProtocolDB.id)(ProtocolIdentifierError)
-          _  <- fileStorage.store(id, protocol)
-          f  <- fileStorage.recover(metaProtocolDB)
+          _ <- fileStorage.store(metaProtocolDB.id, protocol)
+          f <- fileStorage.recover(metaProtocolDB)
         } yield f
 
         file.unsafeRunSync() should beSome(MetaProtocol(metaProtocolDB.idlName, protocol))
@@ -81,9 +81,8 @@ object FileStorageSpec extends Specification with ScalaCheck with BeforeAfterAll
     "Returns true if there is a file" >> prop {
       (metaProtocolDB: MetaProtocolDB, protocol: Protocol) =>
         val file = for {
-          id     <- validateProtocolId[IO](metaProtocolDB.id)(ProtocolIdentifierError)
-          _      <- fileStorage.store(id, protocol)
-          exists <- fileStorage.exists(id)
+          _      <- fileStorage.store(metaProtocolDB.id, protocol)
+          exists <- fileStorage.exists(metaProtocolDB.id)
         } yield exists
 
         file.unsafeRunSync() should beTrue

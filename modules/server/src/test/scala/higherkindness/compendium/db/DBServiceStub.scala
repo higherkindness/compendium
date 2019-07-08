@@ -17,8 +17,9 @@
 package higherkindness.compendium.db
 
 import cats.effect.IO
-import higherkindness.compendium.models.{IdlNames, MetaProtocolDB}
+import higherkindness.compendium.models.IdlNames
 import higherkindness.compendium.core.refinements.ProtocolId
+import higherkindness.compendium.models.DBModels.MetaProtocolDB
 
 class DBServiceStub(val exists: Boolean, protocol: Option[MetaProtocolDB] = None)
     extends DBService[IO] {
@@ -28,5 +29,5 @@ class DBServiceStub(val exists: Boolean, protocol: Option[MetaProtocolDB] = None
 
   override def selectProtocolById(id: ProtocolId): IO[MetaProtocolDB] =
     protocol.fold[IO[MetaProtocolDB]](IO.raiseError(new Throwable("Protocol not found")))(mp =>
-      if (mp.id == id.value) IO(mp) else IO.raiseError(new Throwable("Protocol not found")))
+      if (mp.id.value == id.value) IO(mp) else IO.raiseError(new Throwable("Protocol not found")))
 }

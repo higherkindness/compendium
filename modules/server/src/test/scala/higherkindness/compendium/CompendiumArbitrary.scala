@@ -18,7 +18,8 @@ package higherkindness.compendium
 
 import cats.syntax.apply._
 import higherkindness.compendium.core.refinements.ProtocolId
-import higherkindness.compendium.models.{IdlNames, MetaProtocolDB, Protocol}
+import higherkindness.compendium.models.DBModels.MetaProtocolDB
+import higherkindness.compendium.models.{IdlNames, Protocol}
 import org.scalacheck._
 import org.scalacheck.cats.implicits._
 
@@ -42,7 +43,7 @@ trait CompendiumArbitrary {
   }
 
   implicit val metaProtocolArbitrary: Arbitrary[MetaProtocolDB] = Arbitrary {
-    (idlNamesArbitrary.arbitrary, protocolIdArbitrary.arbitrary.map(_.value))
+    (idlNamesArbitrary.arbitrary, protocolIdArbitrary.arbitrary)
       .mapN(MetaProtocolDB.apply)
   }
 

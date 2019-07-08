@@ -17,7 +17,8 @@
 package higherkindness.compendium.parser
 
 import cats.effect.Sync
-import higherkindness.compendium.models.{MetaProtocol, Target}
+import higherkindness.compendium.models.DBModels.MetaProtocol
+import higherkindness.compendium.models.Target
 import higherkindness.compendium.models.parserModels.ParserResult
 
 trait ProtocolParserService[F[_]] {

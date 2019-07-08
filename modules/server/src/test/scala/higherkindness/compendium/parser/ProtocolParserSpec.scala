@@ -18,6 +18,7 @@ package higherkindness.compendium.parser
 
 import cats.effect.IO
 import cats.syntax.option._
+import higherkindness.compendium.models.DBModels.MetaProtocol
 import higherkindness.compendium.models._
 import org.specs2.mutable.Specification
 

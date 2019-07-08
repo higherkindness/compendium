@@ -16,6 +16,8 @@
 
 package higherkindness.compendium.models
 
+import higherkindness.compendium.models.DBModels.MetaProtocol
+
 object parserModels {
 
   final case class ParserError(msg: String)

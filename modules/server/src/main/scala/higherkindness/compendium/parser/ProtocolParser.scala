@@ -19,6 +19,7 @@ package higherkindness.compendium.parser
 import cats.effect.Sync
 import cats.syntax.functor._
 import cats.syntax.either._
+import higherkindness.compendium.models.DBModels.MetaProtocol
 import higherkindness.compendium.models._
 import higherkindness.compendium.models.parserModels._
 import higherkindness.skeuomorph.mu

@@ -20,7 +20,7 @@ import java.io.{File, PrintWriter}
 
 import cats.effect.Sync
 import cats.syntax.flatMap._
-import higherkindness.compendium.models.MetaProtocol
+import higherkindness.compendium.models.DBModels.MetaProtocol
 import higherkindness.skeuomorph.protobuf.ParseProto
 import higherkindness.skeuomorph.protobuf.ParseProto.ProtoSource
 

@@ -21,7 +21,8 @@ import java.io.{File, PrintWriter}
 import cats.effect.Sync
 import cats.implicits._
 import higherkindness.compendium.core.refinements.ProtocolId
-import higherkindness.compendium.models.{MetaProtocol, MetaProtocolDB, Protocol}
+import higherkindness.compendium.models.DBModels.{MetaProtocol, MetaProtocolDB}
+import higherkindness.compendium.models.Protocol
 import higherkindness.compendium.models.config.StorageConfig
 
 object FileStorage {

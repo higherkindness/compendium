@@ -20,7 +20,8 @@ import cats.effect.Sync
 import cats.implicits._
 import higherkindness.compendium.core.refinements.ProtocolId
 import higherkindness.compendium.db.DBService
-import higherkindness.compendium.models.{IdlNames, MetaProtocol, Protocol, Target}
+import higherkindness.compendium.models.DBModels.MetaProtocol
+import higherkindness.compendium.models.{IdlNames, Protocol, Target}
 import higherkindness.compendium.models.parserModels.ParserResult
 import higherkindness.compendium.parser.ProtocolParserService
 import higherkindness.compendium.storage.Storage

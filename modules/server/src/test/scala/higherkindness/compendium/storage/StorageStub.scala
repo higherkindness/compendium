@@ -19,7 +19,8 @@ package higherkindness.compendium.storage
 import cats.effect.IO
 import cats.syntax.apply._
 import higherkindness.compendium.core.refinements.ProtocolId
-import higherkindness.compendium.models.{MetaProtocol, MetaProtocolDB, Protocol}
+import higherkindness.compendium.models.DBModels.{MetaProtocol, MetaProtocolDB}
+import higherkindness.compendium.models.Protocol
 import org.specs2.matcher.Matchers
 
 class StorageStub(val proto: Option[Protocol], val identifier: ProtocolId)
@@ -32,7 +33,7 @@ class StorageStub(val proto: Option[Protocol], val identifier: ProtocolId)
     } *> IO.unit
 
   override def recover(metaProtocol: MetaProtocolDB): IO[Option[MetaProtocol]] =
-    if (metaProtocol.id == identifier.value) IO(proto.map(MetaProtocol(metaProtocol.idlName, _)))
+    if (metaProtocol.id == identifier) IO(proto.map(MetaProtocol(metaProtocol.idlName, _)))
     else IO(None)
 
   override def exists(id: ProtocolId): IO[Boolean] =
