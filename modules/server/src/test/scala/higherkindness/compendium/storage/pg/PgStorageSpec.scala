@@ -17,8 +17,7 @@
 package higherkindness.compendium.storage.pg
 
 import cats.effect.IO
-import cats.syntax.flatMap._
-import cats.syntax.option._
+import cats.implicits._
 import higherkindness.compendium.core.refinements.ProtocolId
 import higherkindness.compendium.db.MigrationsMode.Data
 import higherkindness.compendium.db.PGHelper
