@@ -16,17 +16,17 @@
 
 package higherkindness.compendium.storage.pg
 
-import doobie.util.Meta
+import cats.instances.string._
+import doobie.util.{Get, Put}
 import higherkindness.compendium.core.refinements.ProtocolId
 import higherkindness.compendium.models.Protocol
 
 object implicits {
 
-  implicit val protocolMeta: Meta[Protocol] =
-    Meta[Array[Byte]].timap[Protocol](binProto => Protocol(new String(binProto)))(_.raw.getBytes)
+  implicit val protocolPut: Put[Protocol] = Put[Array[Byte]].contramap(_.raw.getBytes)
+  implicit val protocolGet: Get[Protocol] =
+    Get[Array[Byte]].tmap(protoBin => Protocol(new String(protoBin)))
 
-  // TODO Blows up when retrieving an invalid protocol id
-  implicit val protocolIdMeta: Meta[ProtocolId] =
-    Meta[String].timap[ProtocolId](ProtocolId.from(_).right.get)(_.value)
-
+  implicit val protocolIdPut: Put[ProtocolId] = Put[String].contramap(_.value)
+  implicit val protocolIdGet: Get[ProtocolId] = Get[String].temap(ProtocolId.from)
 }
