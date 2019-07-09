@@ -23,12 +23,12 @@ object Queries {
 
   def checkIfExistsQ(id: String): Query0[Boolean] =
     sql"""
-          SELECT exists (SELECT true FROM protocols WHERE id=$id)
+          SELECT exists (SELECT true FROM metaprotocols WHERE id=$id)
        """.query[Boolean]
 
   def upsertProtocolIdQ(id: String): Update0 =
     sql"""
-          INSERT INTO protocols
+          INSERT INTO metaprotocols
           VALUES ($id)
           ON CONFLICT DO NOTHING
        """.update

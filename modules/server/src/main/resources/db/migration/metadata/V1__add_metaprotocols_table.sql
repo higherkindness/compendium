@@ -1,3 +1,3 @@
-CREATE TABLE protocols (
+CREATE TABLE metaprotocols (
     id VARCHAR PRIMARY KEY
 )
