@@ -60,9 +60,8 @@ object ProtocolParser {
           }
       }
 
-    override def parse(protocol: Option[FullProtocol], target: Target): F[ParserResult] =
-      protocol.fold(Sync[F].pure(ParserError("No Protocol Found").asLeft[FullProtocol]))(mp =>
-        skeuomorphParse(mp, target).map(_.asRight[ParserError]))
+    override def parse(protocol: FullProtocol, target: Target): F[ParserResult] =
+      skeuomorphParse(protocol, target).map(_.asRight[ParserError])
   }
 
 }

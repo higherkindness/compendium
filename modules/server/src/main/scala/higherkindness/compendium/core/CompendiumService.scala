@@ -21,7 +21,7 @@ import cats.implicits._
 import higherkindness.compendium.core.refinements.ProtocolId
 import higherkindness.compendium.db.DBService
 import higherkindness.compendium.models._
-import higherkindness.compendium.models.parserModels.ParserResult
+import higherkindness.compendium.models.parserModels.{ParserError, ParserResult}
 import higherkindness.compendium.parser.ProtocolParserService
 import higherkindness.compendium.storage.Storage
 
@@ -46,7 +46,7 @@ object CompendiumService {
 
       override def recoverProtocol(protocolId: ProtocolId): F[Option[FullProtocol]] =
         DBService[F]
-          .selectProtocolById(protocolId)
+          .selectProtocolMetadataById(protocolId)
           .flatMap {
             case Some(x) => Storage[F].recover(x)
             case _       => Sync[F].delay(None)
@@ -55,11 +55,13 @@ object CompendiumService {
       override def existsProtocol(protocolId: ProtocolId): F[Boolean] =
         DBService[F].existsProtocol(protocolId)
 
-      override def parseProtocol(protocolName: ProtocolId, target: Target): F[ParserResult] =
-        for {
-          protocol       <- recoverProtocol(protocolName)
-          parsedProtocol <- ProtocolParserService[F].parse(protocol, target)
-        } yield parsedProtocol
+      override def parseProtocol(protocolId: ProtocolId, target: Target): F[ParserResult] =
+        recoverProtocol(protocolId).flatMap {
+          case Some(protocol) => ProtocolParserService[F].parse(protocol, target)
+          case _ =>
+            Sync[F].pure(
+              ParserError(s"No Protocol Found with id: $protocolId").asLeft[FullProtocol])
+        }
     }
 
   def apply[F[_]](implicit F: CompendiumService[F]): CompendiumService[F] = F

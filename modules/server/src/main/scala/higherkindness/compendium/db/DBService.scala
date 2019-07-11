@@ -22,7 +22,7 @@ import higherkindness.compendium.core.refinements.ProtocolId
 trait DBService[F[_]] {
   def upsertProtocol(id: ProtocolId, idlName: IdlName): F[Unit]
   def existsProtocol(id: ProtocolId): F[Boolean]
-  def selectProtocolById(id: ProtocolId): F[Option[ProtocolMetadata]]
+  def selectProtocolMetadataById(id: ProtocolId): F[Option[ProtocolMetadata]]
   def ping(): F[Boolean]
 }
 

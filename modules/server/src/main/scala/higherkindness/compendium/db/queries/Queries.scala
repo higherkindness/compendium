@@ -36,7 +36,7 @@ object Queries {
           ON CONFLICT DO NOTHING
        """.update
 
-  def selectProtocolById(id: String): Query0[ProtocolMetadata] =
+  def selectProtocolMetadataById(id: String): Query0[ProtocolMetadata] =
     sql"""
          SELECT * from protocols WHERE id=$id
        """.query[ProtocolMetadata]

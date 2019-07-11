@@ -26,7 +26,7 @@ class DBServiceStub(val exists: Boolean, protocol: Option[ProtocolMetadata] = No
   override def existsProtocol(id: ProtocolId): IO[Boolean]                 = IO.pure(exists)
   override def ping(): IO[Boolean]                                         = IO.pure(exists)
 
-  override def selectProtocolById(id: ProtocolId): IO[Option[ProtocolMetadata]] =
+  override def selectProtocolMetadataById(id: ProtocolId): IO[Option[ProtocolMetadata]] =
     protocol.fold[IO[Option[ProtocolMetadata]]](IO.raiseError(new Throwable("Protocol not found")))(
       mp =>
         if (mp.protocolId == id) IO(protocol)

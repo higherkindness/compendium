@@ -22,7 +22,7 @@ import higherkindness.compendium.models.parserModels.ParserResult
 
 trait ProtocolParserService[F[_]] {
 
-  def parse(protocol: Option[FullProtocol], target: Target): F[ParserResult]
+  def parse(protocol: FullProtocol, target: Target): F[ParserResult]
 }
 
 object ProtocolParserService {

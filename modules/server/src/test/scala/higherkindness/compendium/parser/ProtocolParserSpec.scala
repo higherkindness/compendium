@@ -17,7 +17,6 @@
 package higherkindness.compendium.parser
 
 import cats.effect.IO
-import cats.syntax.option._
 import higherkindness.compendium.core.refinements.ProtocolId
 import higherkindness.compendium.models._
 import org.specs2.mutable.Specification
@@ -30,7 +29,7 @@ class ProtocolParserSpec extends Specification {
 
   "ProtocolParser should parse a simple Avro Schema to Mu" >> {
     val protocolMetadata = ProtocolMetadata(IdlName.Avro, ProtocolId("id"))
-    val fullProtocol     = FullProtocol(protocolMetadata, Protocol(simpleAvroExample)).some
+    val fullProtocol     = FullProtocol(protocolMetadata, Protocol(simpleAvroExample))
 
     parser
       .parse(fullProtocol, Target.Mu)
@@ -40,7 +39,7 @@ class ProtocolParserSpec extends Specification {
 
   "ProtocolParser should parse a simple Protobuf Schema to Mu" >> {
     val protocolMetadata = ProtocolMetadata(IdlName.Avro, ProtocolId("id"))
-    val fullProtocol     = FullProtocol(protocolMetadata, Protocol(simpleAvroExample)).some
+    val fullProtocol     = FullProtocol(protocolMetadata, Protocol(simpleAvroExample))
     parser
       .parse(fullProtocol, Target.Mu)
       .map(_.isRight)
