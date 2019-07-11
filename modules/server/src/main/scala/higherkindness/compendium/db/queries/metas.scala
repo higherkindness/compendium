@@ -17,10 +17,10 @@
 package higherkindness.compendium.db.queries
 
 import doobie.util.Meta
-import higherkindness.compendium.models.IdlNames
+import higherkindness.compendium.models.IdlName
 
 object metas {
 
-  implicit val IdlNamesMeta: Meta[IdlNames] = Meta[String].timap(IdlNames.withName)(_.entryName)
+  implicit val IdlNamesMeta: Meta[IdlName] = Meta[String].timap(IdlName.withName)(_.entryName)
 
 }

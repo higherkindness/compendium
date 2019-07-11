@@ -18,8 +18,7 @@ package higherkindness.compendium
 
 import cats.syntax.apply._
 import higherkindness.compendium.core.refinements.ProtocolId
-import higherkindness.compendium.models.DBModels.MetaProtocolDB
-import higherkindness.compendium.models.{IdlNames, Protocol}
+import higherkindness.compendium.models.{IdlName, Protocol, ProtocolMetadata}
 import org.scalacheck._
 import org.scalacheck.cats.implicits._
 
@@ -38,13 +37,13 @@ trait CompendiumArbitrary {
       .map(id => ProtocolId.unsafeFrom(id.mkString))
   }
 
-  implicit val idlNamesArbitrary: Arbitrary[IdlNames] = Arbitrary {
-    Gen.oneOf(IdlNames.values)
+  implicit val idlNamesArbitrary: Arbitrary[IdlName] = Arbitrary {
+    Gen.oneOf(IdlName.values)
   }
 
-  implicit val metaProtocolArbitrary: Arbitrary[MetaProtocolDB] = Arbitrary {
+  implicit val metaProtocolArbitrary: Arbitrary[ProtocolMetadata] = Arbitrary {
     (idlNamesArbitrary.arbitrary, protocolIdArbitrary.arbitrary)
-      .mapN(MetaProtocolDB.apply)
+      .mapN(ProtocolMetadata.apply)
   }
 
   implicit val differentIdentifiersArb: Arbitrary[DifferentIdentifiers] = Arbitrary {

@@ -21,7 +21,6 @@ import java.io.File
 import cats.effect.IO
 import higherkindness.compendium.CompendiumArbitrary._
 import higherkindness.compendium.core.refinements.ProtocolId
-import higherkindness.compendium.models.DBModels.{MetaProtocol, MetaProtocolDB}
 import higherkindness.compendium.models._
 import higherkindness.compendium.models.config.StorageConfig
 import org.specs2.ScalaCheck
@@ -58,31 +57,32 @@ object FileStorageSpec extends Specification with ScalaCheck with BeforeAfterAll
   sequential
 
   "Store a file" >> {
-    "Successfully stores a file" >> prop { (metaProtocolDB: MetaProtocolDB, protocol: Protocol) =>
-      val storageProtocolFile = storageProtocol(metaProtocolDB.id)
+    "Successfully stores a file" >> prop {
+      (protocolMetadata: ProtocolMetadata, protocol: Protocol) =>
+        val storageProtocolFile = storageProtocol(protocolMetadata.protocolId)
 
-      val io = fileStorage
-        .store(metaProtocolDB.id, protocol)
-        .map(_ => storageDirectory.exists && storageProtocolFile.exists)
+        val io = fileStorage
+          .store(protocolMetadata.protocolId, protocol)
+          .map(_ => storageDirectory.exists && storageProtocolFile.exists)
 
-      io.unsafeRunSync() should beTrue
+        io.unsafeRunSync() should beTrue
     }
 
     "Successfully stores and recovers a file" >> prop {
-      (metaProtocolDB: MetaProtocolDB, protocol: Protocol) =>
+      (protocolMetadata: ProtocolMetadata, protocol: Protocol) =>
         val file = for {
-          _ <- fileStorage.store(metaProtocolDB.id, protocol)
-          f <- fileStorage.recover(metaProtocolDB)
+          _ <- fileStorage.store(protocolMetadata.protocolId, protocol)
+          f <- fileStorage.recover(protocolMetadata)
         } yield f
 
-        file.unsafeRunSync() should beSome(MetaProtocol(metaProtocolDB.idlName, protocol))
+        file.unsafeRunSync() should beSome(FullProtocol(protocolMetadata, protocol))
     }
 
     "Returns true if there is a file" >> prop {
-      (metaProtocolDB: MetaProtocolDB, protocol: Protocol) =>
+      (protocolMetadata: ProtocolMetadata, protocol: Protocol) =>
         val file = for {
-          _      <- fileStorage.store(metaProtocolDB.id, protocol)
-          exists <- fileStorage.exists(metaProtocolDB.id)
+          _      <- fileStorage.store(protocolMetadata.protocolId, protocol)
+          exists <- fileStorage.exists(protocolMetadata.protocolId)
         } yield exists
 
         file.unsafeRunSync() should beTrue

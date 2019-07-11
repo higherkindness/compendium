@@ -16,14 +16,13 @@
 
 package higherkindness.compendium.db
 
-import higherkindness.compendium.models.IdlNames
+import higherkindness.compendium.models.{IdlName, ProtocolMetadata}
 import higherkindness.compendium.core.refinements.ProtocolId
-import higherkindness.compendium.models.DBModels.MetaProtocolDB
 
 trait DBService[F[_]] {
-  def upsertProtocol(id: ProtocolId, idlName: IdlNames): F[Unit]
+  def upsertProtocol(id: ProtocolId, idlName: IdlName): F[Unit]
   def existsProtocol(id: ProtocolId): F[Boolean]
-  def selectProtocolById(id: ProtocolId): F[MetaProtocolDB]
+  def selectProtocolById(id: ProtocolId): F[Option[ProtocolMetadata]]
   def ping(): F[Boolean]
 }
 

@@ -17,13 +17,12 @@
 package higherkindness.compendium.storage
 
 import higherkindness.compendium.core.refinements.ProtocolId
-import higherkindness.compendium.models.DBModels.{MetaProtocol, MetaProtocolDB}
-import higherkindness.compendium.models.Protocol
+import higherkindness.compendium.models._
 
 trait Storage[F[_]] {
 
   def store(id: ProtocolId, protocol: Protocol): F[Unit]
-  def recover(metaProtocolDB: MetaProtocolDB): F[Option[MetaProtocol]]
+  def recover(ProtocolMetadata: ProtocolMetadata): F[Option[FullProtocol]]
   def exists(id: ProtocolId): F[Boolean]
 }
 

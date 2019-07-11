@@ -18,10 +18,4 @@ package higherkindness.compendium.models
 
 import higherkindness.compendium.core.refinements.ProtocolId
 
-object DBModels {
-
-  final case class MetaProtocolDB(idlName: IdlNames, id: ProtocolId)
-
-  final case class MetaProtocol(idlName: IdlNames, protocol: Protocol)
-
-}
+case class ProtocolMetadata(idlName: IdlName, protocolId: ProtocolId)

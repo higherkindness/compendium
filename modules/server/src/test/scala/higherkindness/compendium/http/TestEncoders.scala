@@ -14,19 +14,14 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.parser
+package higherkindness.compendium.http
 
-import cats.effect.Sync
-import higherkindness.compendium.models.{FullProtocol, Target}
-import higherkindness.compendium.models.parserModels.ParserResult
+import higherkindness.compendium.models.Protocol
+import io.circe.ObjectEncoder
+import io.circe.generic.semiauto.deriveEncoder
 
-trait ProtocolParserService[F[_]] {
+object TestEncoders {
 
-  def parse(protocol: Option[FullProtocol], target: Target): F[ParserResult]
-}
-
-object ProtocolParserService {
-
-  def apply[F[_]: Sync](implicit F: ProtocolParserService[F]): ProtocolParserService[F] = F
+  implicit val protocolEncoder: ObjectEncoder[Protocol] = deriveEncoder[Protocol]
 
 }

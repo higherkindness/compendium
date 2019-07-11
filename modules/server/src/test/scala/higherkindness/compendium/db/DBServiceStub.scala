@@ -17,17 +17,18 @@
 package higherkindness.compendium.db
 
 import cats.effect.IO
-import higherkindness.compendium.models.IdlNames
+import higherkindness.compendium.models.{IdlName, ProtocolMetadata}
 import higherkindness.compendium.core.refinements.ProtocolId
-import higherkindness.compendium.models.DBModels.MetaProtocolDB
 
-class DBServiceStub(val exists: Boolean, protocol: Option[MetaProtocolDB] = None)
+class DBServiceStub(val exists: Boolean, protocol: Option[ProtocolMetadata] = None)
     extends DBService[IO] {
-  override def upsertProtocol(id: ProtocolId, idlNames: IdlNames): IO[Unit] = IO.unit
-  override def existsProtocol(id: ProtocolId): IO[Boolean]                  = IO.pure(exists)
-  override def ping(): IO[Boolean]                                          = IO.pure(exists)
+  override def upsertProtocol(id: ProtocolId, idlNames: IdlName): IO[Unit] = IO.unit
+  override def existsProtocol(id: ProtocolId): IO[Boolean]                 = IO.pure(exists)
+  override def ping(): IO[Boolean]                                         = IO.pure(exists)
 
-  override def selectProtocolById(id: ProtocolId): IO[MetaProtocolDB] =
-    protocol.fold[IO[MetaProtocolDB]](IO.raiseError(new Throwable("Protocol not found")))(mp =>
-      if (mp.id.value == id.value) IO(mp) else IO.raiseError(new Throwable("Protocol not found")))
+  override def selectProtocolById(id: ProtocolId): IO[Option[ProtocolMetadata]] =
+    protocol.fold[IO[Option[ProtocolMetadata]]](IO.raiseError(new Throwable("Protocol not found")))(
+      mp =>
+        if (mp.protocolId == id) IO(protocol)
+        else IO.raiseError(new Throwable("Protocol not found")))
 }

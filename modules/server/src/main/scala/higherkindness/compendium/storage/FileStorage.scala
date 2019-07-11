@@ -21,8 +21,7 @@ import java.io.{File, PrintWriter}
 import cats.effect.Sync
 import cats.implicits._
 import higherkindness.compendium.core.refinements.ProtocolId
-import higherkindness.compendium.models.DBModels.{MetaProtocol, MetaProtocolDB}
-import higherkindness.compendium.models.Protocol
+import higherkindness.compendium.models.{FullProtocol, Protocol, ProtocolMetadata}
 import higherkindness.compendium.models.config.StorageConfig
 
 object FileStorage {
@@ -42,10 +41,12 @@ object FileStorage {
           }
         } yield ()
 
-      override def recover(metaProtocolDB: MetaProtocolDB): F[Option[MetaProtocol]] =
+      override def recover(protocolMetadata: ProtocolMetadata): F[Option[FullProtocol]] =
         for {
           filename <- Sync[F].catchNonFatal {
-            Option(new File(s"${config.path}${File.separator}${metaProtocolDB.id}").listFiles())
+            Option(
+              new File(s"${config.path}${File.separator}${protocolMetadata.protocolId}")
+                .listFiles())
               .fold(Option.empty[String])(_.headOption.map(_.getAbsolutePath))
           }
           source <- Sync[F].catchNonFatal { filename.map(scala.io.Source.fromFile) }
@@ -56,7 +57,7 @@ object FileStorage {
               }
             }
           }
-        } yield protocol.map(MetaProtocol(metaProtocolDB.idlName, _))
+        } yield protocol.map(FullProtocol(protocolMetadata, _))
 
       override def exists(id: ProtocolId): F[Boolean] =
         Sync[F].catchNonFatal(new File(s"${config.path}${File.separator}$id")).map(_.exists)

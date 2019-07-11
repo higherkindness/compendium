@@ -20,7 +20,7 @@ import java.io.{File, PrintWriter}
 
 import cats.effect.Sync
 import cats.syntax.flatMap._
-import higherkindness.compendium.models.DBModels.MetaProtocol
+import higherkindness.compendium.models.FullProtocol
 import higherkindness.skeuomorph.protobuf.ParseProto
 import higherkindness.skeuomorph.protobuf.ParseProto.ProtoSource
 
@@ -29,7 +29,7 @@ import scala.util.Random
 object utils {
 
   def parseProtobufRaw[F[_]: Sync](raw: String)(
-      f: ProtoSource => F[MetaProtocol]): F[MetaProtocol] = {
+      f: ProtoSource => F[FullProtocol]): F[FullProtocol] = {
 
     val fileName = s"${Random.alphanumeric}.proto"
     val path     = "/tmp"

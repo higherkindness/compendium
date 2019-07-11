@@ -19,7 +19,7 @@ package higherkindness.compendium.db
 import cats.effect.IO
 import cats.implicits._
 import higherkindness.compendium.core.refinements.ProtocolId
-import higherkindness.compendium.models.IdlNames
+import higherkindness.compendium.models.IdlName
 
 class PgDBServiceSpec extends PGHelper {
 
@@ -27,8 +27,8 @@ class PgDBServiceSpec extends PGHelper {
 
   "Postgres Service" should {
     "insert protocol correctly" in {
-      val id: ProtocolId    = ProtocolId("pId")
-      val idlName: IdlNames = IdlNames.Avro
+      val id: ProtocolId   = ProtocolId("pId")
+      val idlName: IdlName = IdlName.Avro
 
       val result: IO[Boolean] =
         pg.upsertProtocol(id, idlName) >> pg.existsProtocol(id)
@@ -38,8 +38,8 @@ class PgDBServiceSpec extends PGHelper {
     }
 
     "update protocol correctly" in {
-      val id: ProtocolId    = ProtocolId("pId2")
-      val idlName: IdlNames = IdlNames.Avro
+      val id: ProtocolId   = ProtocolId("pId2")
+      val idlName: IdlName = IdlName.Avro
 
       val result: IO[Boolean] =
         pg.upsertProtocol(id, idlName) >> pg.upsertProtocol(id, idlName) >> pg.existsProtocol(id)
@@ -54,8 +54,8 @@ class PgDBServiceSpec extends PGHelper {
     }
 
     "return true when the protocol exists" in {
-      val id: ProtocolId    = ProtocolId("pId3")
-      val idlName: IdlNames = IdlNames.Avro
+      val id: ProtocolId   = ProtocolId("pId3")
+      val idlName: IdlName = IdlName.Avro
 
       val result: IO[Boolean] =
         pg.upsertProtocol(id, idlName) >> pg.existsProtocol(id)

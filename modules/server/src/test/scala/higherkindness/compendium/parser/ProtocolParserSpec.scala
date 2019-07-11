@@ -18,7 +18,7 @@ package higherkindness.compendium.parser
 
 import cats.effect.IO
 import cats.syntax.option._
-import higherkindness.compendium.models.DBModels.MetaProtocol
+import higherkindness.compendium.core.refinements.ProtocolId
 import higherkindness.compendium.models._
 import org.specs2.mutable.Specification
 
@@ -29,18 +29,20 @@ class ProtocolParserSpec extends Specification {
   val parser = ProtocolParser.impl[IO]
 
   "ProtocolParser should parse a simple Avro Schema to Mu" >> {
-    val metaProtocol = MetaProtocol(IdlNames.Avro, Protocol(simpleAvroExample)).some
+    val protocolMetadata = ProtocolMetadata(IdlName.Avro, ProtocolId("id"))
+    val fullProtocol     = FullProtocol(protocolMetadata, Protocol(simpleAvroExample)).some
 
     parser
-      .parse(metaProtocol, Target.Mu)
+      .parse(fullProtocol, Target.Mu)
       .map(_.isRight)
       .unsafeRunSync()
   }
 
   "ProtocolParser should parse a simple Protobuf Schema to Mu" >> {
-    val metaProtocol = MetaProtocol(IdlNames.Protobuf, Protocol(simpleProtobufExample)).some
+    val protocolMetadata = ProtocolMetadata(IdlName.Avro, ProtocolId("id"))
+    val fullProtocol     = FullProtocol(protocolMetadata, Protocol(simpleAvroExample)).some
     parser
-      .parse(metaProtocol, Target.Mu)
+      .parse(fullProtocol, Target.Mu)
       .map(_.isRight)
       .unsafeRunSync()
   }

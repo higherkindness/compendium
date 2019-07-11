@@ -18,8 +18,8 @@ package higherkindness.compendium.db.queries
 
 import doobie._
 import doobie.implicits.toSqlInterpolator
-import higherkindness.compendium.models.DBModels.MetaProtocolDB
 import doobie.refined.implicits._
+import higherkindness.compendium.models.ProtocolMetadata
 import metas._
 
 object Queries {
@@ -32,14 +32,14 @@ object Queries {
   def upsertProtocolIdQ(id: String, idl_name: String): Update0 =
     sql"""
           INSERT INTO protocols (id, idl_name)
-          VALUES ($id, $idl_name)
+          VALUES ($id, $idl_name::idl)
           ON CONFLICT DO NOTHING
        """.update
 
-  def selectProtocolById(id: String): Query0[MetaProtocolDB] =
+  def selectProtocolById(id: String): Query0[ProtocolMetadata] =
     sql"""
          SELECT * from protocols WHERE id=$id
-       """.query[MetaProtocolDB]
+       """.query[ProtocolMetadata]
 
   def checkConnection(): Query0[Boolean] =
     sql"SELECT exists (SELECT 1)".query[Boolean]

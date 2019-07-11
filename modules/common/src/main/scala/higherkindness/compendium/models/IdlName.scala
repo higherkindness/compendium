@@ -19,13 +19,14 @@ package higherkindness.compendium.models
 import enumeratum.EnumEntry.Lowercase
 import enumeratum._
 
-sealed trait IdlNames extends EnumEntry
+sealed trait IdlName extends EnumEntry
 
-object IdlNames extends Enum[IdlNames] with CirceEnum[IdlNames] {
+object IdlName extends Enum[IdlName] with CirceEnum[IdlName] {
   val values = findValues
 
-  case object Avro     extends IdlNames with Lowercase
-  case object Protobuf extends IdlNames with Lowercase
-  case object Mu       extends IdlNames with Lowercase
-  case object OpenApi  extends IdlNames with Lowercase
+  case object Avro     extends IdlName with Lowercase
+  case object Protobuf extends IdlName with Lowercase
+  case object Mu       extends IdlName with Lowercase
+  case object OpenApi  extends IdlName with Lowercase
+  case object Scala    extends IdlName with Lowercase
 }

@@ -21,7 +21,6 @@ import higherkindness.compendium.core.refinements.ProtocolId
 import higherkindness.compendium.core.CompendiumServiceStub
 import higherkindness.compendium.models._
 import higherkindness.compendium.CompendiumArbitrary.protocolIdArbitrary
-import higherkindness.compendium.models.DBModels.MetaProtocol
 import io.circe.Encoder
 import io.circe.generic.semiauto.deriveEncoder
 import org.http4s.circe.CirceEntityCodec._
@@ -33,13 +32,17 @@ import org.specs2.mutable.Specification
 
 object RootServiceSpec extends Specification with ScalaCheck {
 
+  import TestEncoders._
+
   sequential
 
-  private val dummyProtocol: MetaProtocol = MetaProtocol(IdlNames.Avro, Protocol(""))
+  private val dummyProtocol: ProtocolId => FullProtocol = (pid: ProtocolId) =>
+    FullProtocol(ProtocolMetadata(IdlName.Avro, pid), Protocol(""))
 
   "GET /protocol/id" >> {
     "If successs returns a valid protocol and status code" >> {
-      implicit val compendiumService = new CompendiumServiceStub(Some(dummyProtocol), true)
+      implicit val compendiumService =
+        new CompendiumServiceStub(Some(dummyProtocol(ProtocolId("id"))), true)
 
       val request: Request[IO] =
         Request[IO](method = Method.GET, uri = Uri(path = s"/protocol/my.proto"))
@@ -48,7 +51,7 @@ object RootServiceSpec extends Specification with ScalaCheck {
         RootService.rootRouteService[IO].orNotFound(request)
 
       response.map(_.status).unsafeRunSync === Status.Ok
-      response.flatMap(_.as[Protocol]).unsafeRunSync === dummyProtocol.protocol
+      response.flatMap(_.as[Protocol]).unsafeRunSync === dummyProtocol(ProtocolId("id")).protocol
     }
 
     "If protocol not found returns not found" >> {
@@ -64,7 +67,8 @@ object RootServiceSpec extends Specification with ScalaCheck {
     }
 
     "If protocol identifier is malformed returns bad request" >> {
-      implicit val compendiumService = new CompendiumServiceStub(Some(dummyProtocol), true)
+      implicit val compendiumService =
+        new CompendiumServiceStub(Some(dummyProtocol(ProtocolId("id"))), true)
 
       val request: Request[IO] =
         Request[IO](method = Method.GET, uri = Uri(path = s"/protocol/not_valid@"))
@@ -76,7 +80,8 @@ object RootServiceSpec extends Specification with ScalaCheck {
     }
 
     "If protocol IDL Name is not valid returns a 400 Bad Request" >> {
-      implicit val compendiumService = new CompendiumServiceStub(Some(dummyProtocol), true)
+      implicit val compendiumService =
+        new CompendiumServiceStub(Some(dummyProtocol(ProtocolId("id"))), true)
 
       val request: Request[IO] =
         Request[IO](
@@ -96,7 +101,7 @@ object RootServiceSpec extends Specification with ScalaCheck {
         override def storeProtocol(
             id: ProtocolId,
             protocol: Protocol,
-            idlNames: IdlNames): IO[Unit] =
+            idlNames: IdlName): IO[Unit] =
           IO.raiseError[Unit](new org.apache.avro.SchemaParseException(""))
       }
 
@@ -104,7 +109,7 @@ object RootServiceSpec extends Specification with ScalaCheck {
         Request[IO](
           method = Method.POST,
           uri = Uri(path = s"/protocol/test", query = Query.fromString("idlName=avro")))
-          .withEntity(dummyProtocol.protocol)
+          .withEntity(dummyProtocol(ProtocolId("id")).protocol)
 
       val response: IO[Response[IO]] =
         RootService.rootRouteService[IO].orNotFound(request)
@@ -120,7 +125,7 @@ object RootServiceSpec extends Specification with ScalaCheck {
           Request[IO](
             method = Method.POST,
             uri = Uri(path = s"/protocol/${id.value}", query = Query.fromString("idlName=avro")))
-            .withEntity(dummyProtocol.protocol)
+            .withEntity(dummyProtocol(id).protocol)
 
         val response: IO[Response[IO]] =
           RootService.rootRouteService[IO].orNotFound(request)
@@ -159,7 +164,7 @@ object RootServiceSpec extends Specification with ScalaCheck {
           Request[IO](
             method = Method.POST,
             uri = Uri(path = s"/protocol/${id.value}", query = Query.fromString("idlName=avro")))
-            .withEntity(dummyProtocol.protocol)
+            .withEntity(dummyProtocol(id).protocol)
 
         val response: IO[Response[IO]] =
           RootService.rootRouteService[IO].orNotFound(request)

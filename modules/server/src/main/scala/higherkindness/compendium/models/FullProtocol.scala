@@ -14,19 +14,6 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.parser
+package higherkindness.compendium.models
 
-import cats.effect.Sync
-import higherkindness.compendium.models.{FullProtocol, Target}
-import higherkindness.compendium.models.parserModels.ParserResult
-
-trait ProtocolParserService[F[_]] {
-
-  def parse(protocol: Option[FullProtocol], target: Target): F[ParserResult]
-}
-
-object ProtocolParserService {
-
-  def apply[F[_]: Sync](implicit F: ProtocolParserService[F]): ProtocolParserService[F] = F
-
-}
+case class FullProtocol(metadata: ProtocolMetadata, protocol: Protocol)

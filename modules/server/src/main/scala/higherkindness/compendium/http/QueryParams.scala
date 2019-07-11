@@ -16,7 +16,7 @@
 
 package higherkindness.compendium.http
 
-import higherkindness.compendium.models.{IdlNames, Target}
+import higherkindness.compendium.models.{IdlName, Target}
 import org.http4s.QueryParamDecoder
 import org.http4s.dsl.impl.QueryParamDecoderMatcher
 
@@ -27,9 +27,9 @@ object QueryParams {
 
   object TargetQueryParam extends QueryParamDecoderMatcher[Target]("target")
 
-  implicit val queryIdlDecoderQueryParam: QueryParamDecoder[IdlNames] =
-    QueryParamDecoder[String].map(IdlNames.withName)
+  implicit val queryIdlDecoderQueryParam: QueryParamDecoder[IdlName] =
+    QueryParamDecoder[String].map(IdlName.withName)
 
-  object IdlQueryParam extends QueryParamDecoderMatcher[IdlNames]("idlName")
+  object IdlQueryParam extends QueryParamDecoderMatcher[IdlName]("idlName")
 
 }
