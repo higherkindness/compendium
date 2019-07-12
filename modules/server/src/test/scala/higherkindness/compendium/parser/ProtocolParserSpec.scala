@@ -32,7 +32,7 @@ class ProtocolParserSpec extends Specification {
     val fullProtocol     = FullProtocol(protocolMetadata, Protocol(simpleAvroExample))
 
     parser
-      .parse(fullProtocol, Target.Mu)
+      .parse(fullProtocol, IdlName.Mu)
       .map(_.isRight)
       .unsafeRunSync()
   }
@@ -41,7 +41,7 @@ class ProtocolParserSpec extends Specification {
     val protocolMetadata = ProtocolMetadata(IdlName.Avro, ProtocolId("id"))
     val fullProtocol     = FullProtocol(protocolMetadata, Protocol(simpleAvroExample))
     parser
-      .parse(fullProtocol, Target.Mu)
+      .parse(fullProtocol, IdlName.Mu)
       .map(_.isRight)
       .unsafeRunSync()
   }

@@ -34,11 +34,11 @@ object ProtocolParser {
 
     import utils._
 
-    private def skeuomorphParse(fp: FullProtocol, target: Target): F[FullProtocol] =
+    private def skeuomorphParse(fp: FullProtocol, target: IdlName): F[FullProtocol] =
       (fp.metadata.idlName, target) match {
         // (from, to)
         case _ if fp.metadata.idlName.entryName == target.entryName => Sync[F].pure(fp)
-        case (IdlName.Avro, Target.Mu) =>
+        case (IdlName.Avro, IdlName.Mu) =>
           Sync[F]
             .delay(
               mu.print.proto.print(mu.Protocol.fromAvroProtocol(
@@ -46,7 +46,7 @@ object ProtocolParser {
             .fmap(p =>
               FullProtocol
                 .apply(fp.metadata.copy(idlName = IdlName.withName(target.entryName)), Protocol(p)))
-        case (IdlName.Protobuf, Target.Mu) =>
+        case (IdlName.Protobuf, IdlName.Mu) =>
           parseProtobufRaw(fp.protocol.raw) { source =>
             ParseProto
               .parseProto[F, Mu[ProtobufF]]
@@ -60,7 +60,7 @@ object ProtocolParser {
           }
       }
 
-    override def parse(protocol: FullProtocol, target: Target): F[ParserResult] =
+    override def parse(protocol: FullProtocol, target: IdlName): F[ParserResult] =
       skeuomorphParse(protocol, target).map(_.asRight[ParserError])
   }
 

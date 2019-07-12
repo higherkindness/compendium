@@ -30,7 +30,7 @@ trait CompendiumService[F[_]] {
   def storeProtocol(id: ProtocolId, protocol: Protocol, idlName: IdlName): F[Unit]
   def recoverProtocol(protocolId: ProtocolId): F[Option[FullProtocol]]
   def existsProtocol(protocolId: ProtocolId): F[Boolean]
-  def parseProtocol(protocolName: ProtocolId, target: Target): F[ParserResult]
+  def parseProtocol(protocolName: ProtocolId, target: IdlName): F[ParserResult]
 }
 
 object CompendiumService {
@@ -55,7 +55,7 @@ object CompendiumService {
       override def existsProtocol(protocolId: ProtocolId): F[Boolean] =
         DBService[F].existsProtocol(protocolId)
 
-      override def parseProtocol(protocolId: ProtocolId, target: Target): F[ParserResult] =
+      override def parseProtocol(protocolId: ProtocolId, target: IdlName): F[ParserResult] =
         recoverProtocol(protocolId).flatMap {
           case Some(protocol) => ProtocolParserService[F].parse(protocol, target)
           case _ =>
