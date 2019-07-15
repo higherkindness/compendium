@@ -17,10 +17,12 @@
 package higherkindness.compendium.core
 
 import cats.effect.IO
+import cats.syntax.option._
 import higherkindness.compendium.CompendiumArbitrary._
 import higherkindness.compendium.core.refinements.ProtocolId
 import higherkindness.compendium.db.DBServiceStub
-import higherkindness.compendium.models.Protocol
+import higherkindness.compendium.models.{IdlName, Protocol, ProtocolMetadata}
+import higherkindness.compendium.parser.ProtocolParser
 import higherkindness.compendium.storage.StorageStub
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
@@ -30,43 +32,54 @@ object CompendiumServiceSpec extends Specification with ScalaCheck {
   sequential
 
   private val dummyProtocol: Protocol = Protocol("")
+  private val dummyIdlName: IdlName   = IdlName.Mu
 
   "Store protocol" >> {
     "If it's a valid protocol we store it" >> prop { id: ProtocolId =>
-      implicit val dbService     = new DBServiceStub(true)
-      implicit val storage       = new StorageStub(Some(dummyProtocol), id)
-      implicit val protocolUtils = new ProtocolUtilsStub(dummyProtocol, true)
-
-      CompendiumService.impl[IO].storeProtocol(id, dummyProtocol).map(_ => success).unsafeRunSync()
-    }
-
-    "If it's an invalid protocol we raise an error" >> prop { id: ProtocolId =>
-      implicit val dbService     = new DBServiceStub(true)
-      implicit val storage       = new StorageStub(Some(dummyProtocol), id)
-      implicit val protocolUtils = new ProtocolUtilsStub(dummyProtocol, false)
+      implicit val dbService          = new DBServiceStub(true)
+      implicit val storage            = new StorageStub(Some(dummyProtocol), id)
+      implicit val protocolUtils      = new ProtocolUtilsStub(dummyProtocol, true)
+      implicit val protoParserService = ProtocolParser.impl[IO]
 
       CompendiumService
         .impl[IO]
-        .storeProtocol(id, dummyProtocol)
+        .storeProtocol(id, dummyProtocol, dummyIdlName)
+        .map(_ => success)
+        .unsafeRunSync()
+    }
+
+    "If it's an invalid protocol we raise an error" >> prop { id: ProtocolId =>
+      implicit val dbService          = new DBServiceStub(true)
+      implicit val storage            = new StorageStub(Some(dummyProtocol), id)
+      implicit val protocolUtils      = new ProtocolUtilsStub(dummyProtocol, false)
+      implicit val protoParserService = ProtocolParser.impl[IO]
+
+      CompendiumService
+        .impl[IO]
+        .storeProtocol(id, dummyProtocol, dummyIdlName)
         .unsafeRunSync must throwA[org.apache.avro.SchemaParseException]
     }
   }
 
   "Recover protocol" >> {
     "Given a identifier we recover the protocol" >> prop { id: ProtocolId =>
-      implicit val dbService     = new DBServiceStub(true)
-      implicit val storage       = new StorageStub(Some(dummyProtocol), id)
-      implicit val protocolUtils = new ProtocolUtilsStub(dummyProtocol, true)
+      val protocolMetadata            = ProtocolMetadata(IdlName.Avro, id)
+      implicit val dbService          = new DBServiceStub(true, protocolMetadata.some)
+      implicit val storage            = new StorageStub(Some(dummyProtocol), id)
+      implicit val protocolUtils      = new ProtocolUtilsStub(dummyProtocol, true)
+      implicit val protoParserService = ProtocolParser.impl[IO]
 
-      CompendiumService.impl[IO].recoverProtocol(id).unsafeRunSync() === Some(dummyProtocol)
+      CompendiumService.impl[IO].recoverProtocol(id).unsafeRunSync().map(_.protocol) === Some(
+        dummyProtocol)
     }
   }
 
   "Exists protocol" >> {
     "Given a identifier we check if a protocol exists" >> prop { id: ProtocolId =>
-      implicit val dbService     = new DBServiceStub(true)
-      implicit val storage       = new StorageStub(Some(dummyProtocol), id)
-      implicit val protocolUtils = new ProtocolUtilsStub(dummyProtocol, true)
+      implicit val dbService          = new DBServiceStub(true)
+      implicit val storage            = new StorageStub(Some(dummyProtocol), id)
+      implicit val protocolUtils      = new ProtocolUtilsStub(dummyProtocol, true)
+      implicit val protoParserService = ProtocolParser.impl[IO]
 
       CompendiumService.impl[IO].existsProtocol(id).unsafeRunSync() should beTrue
     }

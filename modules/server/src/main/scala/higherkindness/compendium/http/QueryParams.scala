@@ -16,15 +16,15 @@
 
 package higherkindness.compendium.http
 
-import higherkindness.compendium.models.Target
+import higherkindness.compendium.models.IdlName
 import org.http4s.QueryParamDecoder
 import org.http4s.dsl.impl.QueryParamDecoderMatcher
 
 object QueryParams {
 
-  implicit val queryTargetDecoderQueryParam: QueryParamDecoder[Target] =
-    QueryParamDecoder[String].map(_ => Target.Scala)
+  implicit val queryIdlDecoderQueryParam: QueryParamDecoder[IdlName] =
+    QueryParamDecoder[String].map(IdlName.withName)
 
-  object TargetQueryParam extends QueryParamDecoderMatcher[Target]("target")
-
+  object TargetQueryParam extends QueryParamDecoderMatcher[IdlName]("target")
+  object IdlQueryParam    extends QueryParamDecoderMatcher[IdlName]("idlName")
 }

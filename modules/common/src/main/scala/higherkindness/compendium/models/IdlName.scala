@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.db
+package higherkindness.compendium.models
 
-import higherkindness.compendium.models.{IdlName, ProtocolMetadata}
-import higherkindness.compendium.core.refinements.ProtocolId
+import enumeratum.EnumEntry.Lowercase
+import enumeratum._
 
-trait DBService[F[_]] {
-  def upsertProtocol(id: ProtocolId, idlName: IdlName): F[Unit]
-  def existsProtocol(id: ProtocolId): F[Boolean]
-  def selectProtocolMetadataById(id: ProtocolId): F[Option[ProtocolMetadata]]
-  def ping(): F[Boolean]
-}
+sealed trait IdlName extends EnumEntry
 
-object DBService {
-  def apply[F[_]](implicit F: DBService[F]): DBService[F] = F
+object IdlName extends Enum[IdlName] with CirceEnum[IdlName] {
+  val values = findValues
+
+  case object Avro     extends IdlName with Lowercase
+  case object Protobuf extends IdlName with Lowercase
+  case object Mu       extends IdlName with Lowercase
+  case object OpenApi  extends IdlName with Lowercase
+  case object Scala    extends IdlName with Lowercase
 }

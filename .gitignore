@@ -30,5 +30,6 @@ project/target
 # metals
 .metals/
 project/.bloop/
+.bloop/
 
 .DS_Store

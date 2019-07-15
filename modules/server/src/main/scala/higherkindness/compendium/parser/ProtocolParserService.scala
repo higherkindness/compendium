@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.db
+package higherkindness.compendium.parser
 
-import higherkindness.compendium.models.{IdlName, ProtocolMetadata}
-import higherkindness.compendium.core.refinements.ProtocolId
+import cats.effect.Sync
+import higherkindness.compendium.models.{FullProtocol, IdlName}
+import higherkindness.compendium.models.parserModels.ParserResult
 
-trait DBService[F[_]] {
-  def upsertProtocol(id: ProtocolId, idlName: IdlName): F[Unit]
-  def existsProtocol(id: ProtocolId): F[Boolean]
-  def selectProtocolMetadataById(id: ProtocolId): F[Option[ProtocolMetadata]]
-  def ping(): F[Boolean]
+trait ProtocolParserService[F[_]] {
+
+  def parse(protocol: FullProtocol, target: IdlName): F[ParserResult]
 }
 
-object DBService {
-  def apply[F[_]](implicit F: DBService[F]): DBService[F] = F
+object ProtocolParserService {
+
+  def apply[F[_]: Sync](implicit F: ProtocolParserService[F]): ProtocolParserService[F] = F
+
 }

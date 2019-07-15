@@ -22,17 +22,21 @@ import doobie.util.transactor.Transactor
 import doobie.implicits._
 import higherkindness.compendium.core.refinements.ProtocolId
 import higherkindness.compendium.db.queries.Queries
+import higherkindness.compendium.models.{IdlName, ProtocolMetadata}
 
 object PgDBService {
 
   def impl[F[_]: Async](xa: Transactor[F]): DBService[F] =
     new DBService[F] {
 
-      override def upsertProtocol(id: ProtocolId): F[Unit] =
-        Queries.upsertProtocolIdQ(id.value).run.void.transact(xa)
+      override def upsertProtocol(id: ProtocolId, idlName: IdlName): F[Unit] =
+        Queries.upsertProtocolIdQ(id.value, idlName.entryName).run.void.transact(xa)
 
       override def existsProtocol(id: ProtocolId): F[Boolean] =
         Queries.checkIfExistsQ(id.value).unique.transact(xa)
+
+      override def selectProtocolMetadataById(id: ProtocolId): F[Option[ProtocolMetadata]] =
+        Queries.selectProtocolMetadataById(id.value).option.transact(xa)
 
       override def ping(): F[Boolean] = Queries.checkConnection().unique.transact(xa)
     }
