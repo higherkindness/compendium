@@ -46,7 +46,7 @@ trait CompendiumClient {
    * @param identifier the protocol identifier
    * @return a client for that protocol and target
    */
-  def generateClient(target: Target, identifier: String): IO[String]
+  def generateClient(target: IdlName, identifier: String): IO[String]
 }
 
 object CompendiumClient {
@@ -92,7 +92,7 @@ object CompendiumClient {
         } yield out
       }
 
-      override def generateClient(target: Target, identifier: String): IO[String] = IO("")
+      override def generateClient(target: IdlName, identifier: String): IO[String] = IO("")
 
       private def asError(
           request: Free[HttpF, HttpResponse],

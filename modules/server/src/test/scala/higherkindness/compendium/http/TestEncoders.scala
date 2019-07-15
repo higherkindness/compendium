@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.db
+package higherkindness.compendium.http
 
-import higherkindness.compendium.models.{IdlName, ProtocolMetadata}
-import higherkindness.compendium.core.refinements.ProtocolId
+import higherkindness.compendium.models.Protocol
+import io.circe.ObjectEncoder
+import io.circe.generic.semiauto.deriveEncoder
 
-trait DBService[F[_]] {
-  def upsertProtocol(id: ProtocolId, idlName: IdlName): F[Unit]
-  def existsProtocol(id: ProtocolId): F[Boolean]
-  def selectProtocolMetadataById(id: ProtocolId): F[Option[ProtocolMetadata]]
-  def ping(): F[Boolean]
-}
+object TestEncoders {
 
-object DBService {
-  def apply[F[_]](implicit F: DBService[F]): DBService[F] = F
+  implicit val protocolEncoder: ObjectEncoder[Protocol] = deriveEncoder[Protocol]
+
 }

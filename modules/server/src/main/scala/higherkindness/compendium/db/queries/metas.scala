@@ -14,18 +14,13 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.db
+package higherkindness.compendium.db.queries
 
-import higherkindness.compendium.models.{IdlName, ProtocolMetadata}
-import higherkindness.compendium.core.refinements.ProtocolId
+import doobie.util.Meta
+import higherkindness.compendium.models.IdlName
 
-trait DBService[F[_]] {
-  def upsertProtocol(id: ProtocolId, idlName: IdlName): F[Unit]
-  def existsProtocol(id: ProtocolId): F[Boolean]
-  def selectProtocolMetadataById(id: ProtocolId): F[Option[ProtocolMetadata]]
-  def ping(): F[Boolean]
-}
+object metas {
 
-object DBService {
-  def apply[F[_]](implicit F: DBService[F]): DBService[F] = F
+  implicit val IdlNamesMeta: Meta[IdlName] = Meta[String].timap(IdlName.withName)(_.entryName)
+
 }
