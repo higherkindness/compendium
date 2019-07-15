@@ -28,12 +28,14 @@ private class PgStorage[F[_]: Bracket[?[_], Throwable]](xa: Transactor[F]) exten
 
   override def store(id: ProtocolId, protocol: Protocol): F[Unit] =
     Queries.storeProtocol(id, protocol).run.void.transact(xa)
+
   override def recover(metadata: ProtocolMetadata): F[Option[FullProtocol]] =
     Queries
       .recoverProtocol(metadata.protocolId)
       .option
       .map(_.map(FullProtocol(metadata, _)))
       .transact(xa)
+
   override def exists(id: ProtocolId): F[Boolean] =
     Queries.protocolExists(id).unique.transact(xa)
 }
