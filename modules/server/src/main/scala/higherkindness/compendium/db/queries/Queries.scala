@@ -31,14 +31,14 @@ object Queries {
 
   def upsertProtocolIdQ(id: String, idl_name: String): Update0 =
     sql"""
-          INSERT INTO protocols (id, idl_name)
+          INSERT INTO metaprotocols (id, idl_name)
           VALUES ($id, $idl_name::idl)
           ON CONFLICT DO NOTHING
        """.update
 
   def selectProtocolMetadataById(id: String): Query0[ProtocolMetadata] =
     sql"""
-         SELECT * from protocols WHERE id=$id
+         SELECT * from metaprotocols WHERE id=$id
        """.query[ProtocolMetadata]
 
   def checkConnection(): Query0[Boolean] =

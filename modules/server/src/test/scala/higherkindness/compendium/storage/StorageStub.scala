@@ -31,8 +31,8 @@ class StorageStub(val proto: Option[Protocol], val identifier: ProtocolId)
       id === identifier
     } *> IO.unit
 
-  override def recover(metaProtocol: ProtocolMetadata): IO[Option[FullProtocol]] =
-    if (metaProtocol.protocolId == identifier) IO(proto.map(FullProtocol(metaProtocol, _)))
+  override def recover(metadata: ProtocolMetadata): IO[Option[FullProtocol]] =
+    if (metadata.protocolId == identifier) IO(proto.map(FullProtocol(metadata, _)))
     else IO(None)
 
   override def exists(id: ProtocolId): IO[Boolean] =

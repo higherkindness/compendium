@@ -21,15 +21,19 @@ import cats.syntax.functor._
 import doobie.implicits._
 import doobie.util.transactor.Transactor
 import higherkindness.compendium.core.refinements.ProtocolId
-import higherkindness.compendium.models.Protocol
+import higherkindness.compendium.models.{FullProtocol, Protocol, ProtocolMetadata}
 import higherkindness.compendium.storage.Storage
 
 private class PgStorage[F[_]: Bracket[?[_], Throwable]](xa: Transactor[F]) extends Storage[F] {
 
   override def store(id: ProtocolId, protocol: Protocol): F[Unit] =
     Queries.storeProtocol(id, protocol).run.void.transact(xa)
-  override def recover(id: ProtocolId): F[Option[Protocol]] =
-    Queries.recoverProtocol(id).option.transact(xa)
+  override def recover(metadata: ProtocolMetadata): F[Option[FullProtocol]] =
+    Queries
+      .recoverProtocol(metadata.protocolId)
+      .option
+      .map(_.map(FullProtocol(metadata, _)))
+      .transact(xa)
   override def exists(id: ProtocolId): F[Boolean] =
     Queries.protocolExists(id).unique.transact(xa)
 }

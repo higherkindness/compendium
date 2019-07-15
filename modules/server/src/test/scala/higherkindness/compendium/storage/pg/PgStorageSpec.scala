@@ -21,7 +21,7 @@ import cats.implicits._
 import higherkindness.compendium.core.refinements.ProtocolId
 import higherkindness.compendium.db.MigrationsMode.Data
 import higherkindness.compendium.db.PGHelper
-import higherkindness.compendium.models.Protocol
+import higherkindness.compendium.models.{FullProtocol, IdlName, Protocol, ProtocolMetadata}
 
 class PgStorageSpec extends PGHelper(Data) {
 
@@ -30,24 +30,31 @@ class PgStorageSpec extends PGHelper(Data) {
   "Postgres Storage" should {
 
     "insert protocol correctly" in {
-      val id    = ProtocolId("p1")
-      val proto = Protocol("the new protocol content")
+      val id        = ProtocolId("p1")
+      val metadata  = ProtocolMetadata(IdlName.Avro, id)
+      val proto     = Protocol("the new protocol content")
+      val fullProto = FullProtocol(metadata, proto)
 
-      val result: IO[Option[Protocol]] = pgStorage.store(id, proto) >> pgStorage.recover(id)
+      val result: IO[Option[FullProtocol]] = pgStorage.store(id, proto) >> pgStorage.recover(
+        metadata)
 
-      result.unsafeRunSync must ===(proto.some)
+      result.unsafeRunSync must ===(fullProto.some)
 
     }
 
     "update protocol correctly" in {
-      val id     = ProtocolId("proto1")
-      val proto1 = Protocol("The protocol one content")
-      val proto2 = Protocol("The protocol two content")
+      val id        = ProtocolId("proto1")
+      val metadata  = ProtocolMetadata(IdlName.Mu, id)
+      val proto1    = Protocol("The protocol one content")
+      val proto2    = Protocol("The protocol two content")
+      val fullProto = FullProtocol(metadata, proto2)
 
-      val result: IO[Option[Protocol]] = pgStorage.store(id, proto1) >> pgStorage.store(id, proto2) >> pgStorage
-        .recover(id)
+      val result: IO[Option[FullProtocol]] = pgStorage.store(id, proto1) >> pgStorage.store(
+        id,
+        proto2) >> pgStorage
+        .recover(metadata)
 
-      result.unsafeRunSync must ===(proto2.some)
+      result.unsafeRunSync must ===(fullProto.some)
     }
 
     "return false when the protocol does not exist" in {
