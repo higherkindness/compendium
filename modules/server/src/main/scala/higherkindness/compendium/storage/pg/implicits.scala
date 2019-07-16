@@ -14,25 +14,19 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.db
+package higherkindness.compendium.storage.pg
 
-import doobie.specs2._
-import higherkindness.compendium.db.MigrationsMode.Metadata
-import higherkindness.compendium.db.queries.Queries
-import org.specs2.specification.Scope
+import cats.instances.string._
+import doobie.util.{Get, Put}
+import higherkindness.compendium.core.refinements.ProtocolId
+import higherkindness.compendium.models.Protocol
 
-class QueriesSpec extends PGHelper(Metadata) with IOChecker {
+object implicits {
 
-  "Queries" should {
-    "match db model" in new context {
-      check(Queries.checkIfExistsQ(protocolId))
-      check(Queries.upsertProtocolIdQ(protocolId, idlName))
-    }
-  }
+  implicit val protocolPut: Put[Protocol] = Put[Array[Byte]].contramap(_.raw.getBytes)
+  implicit val protocolGet: Get[Protocol] =
+    Get[Array[Byte]].tmap(protoBin => Protocol(new String(protoBin)))
 
-  trait context extends Scope {
-    val protocolId: String = "my.test.protocol.id"
-    val idlName: String    = "Protobuf"
-  }
-
+  implicit val protocolIdPut: Put[ProtocolId] = Put[String].contramap(_.value)
+  implicit val protocolIdGet: Get[ProtocolId] = Get[String].temap(ProtocolId.from)
 }
