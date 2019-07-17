@@ -17,14 +17,72 @@
 package higherkidness.compendium
 
 import cats.effect.IO
+import com.typesafe.config.ConfigFactory
 import higherkindness.compendium.models.config._
 import org.specs2.mutable.Specification
 import pureconfig.generic.auto._
 
 class ConfigSpec extends Specification {
 
-  "Config must load properly" >> {
-    IO.delay(pureconfig.loadConfigOrThrow[CompendiumServerConfig]("compendium"))
+  private def configWithStorageBlock(storageBlock: String): String =
+    s"""
+      |http {
+      |  port = 8080
+      |  host = "0.0.0.0"
+      |}
+      |
+      |protocols {
+      |  $storageBlock
+      |}
+      |
+      |metadata {
+      |  storage {
+      |    jdbc-url = ""
+      |    username = "postgres"
+      |    password = "postgres"
+      |    driver = "org.postgresql.Driver"
+      |  }
+      |}
+    """.stripMargin
+
+  "Config must load properly with protocols file storage config" >> {
+
+    val storageBlock = """
+                         |storage {
+                         |  # Choose storage type for protocol data
+                         |  # Options: FILE, DATABASE
+                         |  storage-type = "FILE"
+                         |  # Path to folder where protocol contents will be stored
+                         |  path = "/tmp/files"
+                         |}
+                       """.stripMargin
+
+    val config = configWithStorageBlock(storageBlock)
+
+    IO.delay(
+        pureconfig.loadConfigOrThrow[CompendiumServerConfig](ConfigFactory.parseString(config)))
+      .attempt
+      .unsafeRunSync() must beRight[CompendiumServerConfig]
+  }
+
+  "Config must load properly with protocols database storage config" >> {
+
+    val storageBlock = """
+                         |storage {
+                         |  # Choose storage type for protocol data
+                         |  # Options: FILE, DATABASE
+                         |  storage-type = "DATABASE"
+                         |  jdbc-url = ""
+                         |  username = "postgres"
+                         |  password = "postgres"
+                         |  driver = "org.postgresql.Driver"
+                         |}
+                       """.stripMargin
+
+    val config = configWithStorageBlock(storageBlock)
+
+    IO.delay(
+        pureconfig.loadConfigOrThrow[CompendiumServerConfig](ConfigFactory.parseString(config)))
       .attempt
       .unsafeRunSync() must beRight[CompendiumServerConfig]
   }
