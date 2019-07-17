@@ -18,9 +18,7 @@ package higherkindness.compendium.models.config
 
 import java.nio.file.Path
 
-import cats.effect.Sync
 import com.zaxxer.hikari.HikariConfig
-import higherkindness.compendium.storage.Storage
 import pureconfig.generic.FieldCoproductHint
 
 import scala.concurrent.duration.FiniteDuration
@@ -28,8 +26,6 @@ import scala.concurrent.duration.FiniteDuration
 sealed abstract class StorageConfig extends Product with Serializable
 
 object StorageConfig {
-  def retrieveStorage[F[_]: Sync](storageConfig: StorageConfig): Storage[F] = ???
-
   implicit val fieldHinter = new FieldCoproductHint[StorageConfig]("storage-type") {
     override def fieldValue(name: String): String =
       name.dropRight("StorageConfig".length).toUpperCase
