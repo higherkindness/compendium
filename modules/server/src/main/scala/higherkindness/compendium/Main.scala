@@ -17,7 +17,7 @@
 package higherkindness.compendium
 
 import cats.effect._
-import cats.syntax.functor._
+import cats.implicits._
 import doobie.hikari.HikariTransactor
 import doobie.util.ExecutionContexts
 import doobie.util.transactor.Transactor
@@ -30,6 +30,7 @@ import higherkindness.compendium.models.config._
 import higherkindness.compendium.parser.{ProtocolParser, ProtocolParserService}
 import higherkindness.compendium.storage._
 import org.http4s.server.Router
+import pureconfig.module.catseffect._
 import pureconfig.generic.auto._
 
 object Main extends IOApp {
@@ -41,13 +42,11 @@ object CompendiumStreamApp {
 
   def stream[F[_]: ConcurrentEffect: Timer: ContextShift]: Stream[F, ExitCode] =
     for {
-      conf <- Stream.eval(
-        Sync[F].delay(pureconfig.loadConfigOrThrow[CompendiumConfig]("compendium"))
-      )
+      conf       <- Stream.eval(loadConfigF[F, CompendiumServerConfig]("compendium"))
       migrations <- Stream.eval(Migrations.metadataLocation)
-      _          <- Stream.eval(Migrations.makeMigrations(conf.postgres, List(migrations)))
-      transactor <- Stream.resource(createTransactor(conf.postgres))
-      implicit0(storage: Storage[F])                      = FileStorage.impl[F](conf.storage)
+      _          <- Stream.eval(Migrations.makeMigrations(conf.metadata.storage, List(migrations)))
+      transactor <- Stream.resource(createTransactor(conf.metadata.storage))
+      implicit0(storage: Storage[F])                      = StorageConfig.retrieveStorage[F](conf.protocols.storage)
       implicit0(dbService: DBService[F])                  = PgDBService.impl[F](transactor)
       implicit0(utils: ProtocolUtils[F])                  = ProtocolUtils.impl[F]
       implicit0(protocolParser: ProtocolParserService[F]) = ProtocolParser.impl[F]
@@ -59,13 +58,13 @@ object CompendiumStreamApp {
     } yield code
 
   private def createTransactor[F[_]: Async: ContextShift](
-      conf: PostgresConfig
+      conf: DatabaseStorageConfig
   ): Resource[F, Transactor[F]] =
     for {
       ce <- ExecutionContexts.fixedThreadPool[F](10)
       te <- ExecutionContexts.cachedThreadPool[F]
       xa <- HikariTransactor.fromHikariConfig[F](
-        PostgresConfig.getHikariConfig(conf),
+        DatabaseStorageConfig.getHikariConfig(conf),
         ce,
         te
       )

@@ -20,7 +20,7 @@ import cats.effect._
 import com.dimafeng.testcontainers.PostgreSQLContainer
 import doobie.util.transactor.Transactor
 import higherkindness.compendium.migrations.Migrations
-import higherkindness.compendium.models.config.PostgresConfig
+import higherkindness.compendium.models.config.DatabaseStorageConfig
 import io.chrisdavenport.testcontainersspecs2.ForAllTestContainer
 import org.specs2.mutable.Specification
 
@@ -46,7 +46,7 @@ abstract class PGHelper(mode: MigrationsMode) extends Specification with ForAllT
   override lazy val container: PostgreSQLContainer =
     PostgreSQLContainer("postgres:11-alpine")
 
-  private lazy val conf: PostgresConfig = PostgresConfig(
+  private lazy val conf: DatabaseStorageConfig = DatabaseStorageConfig(
     container.jdbcUrl,
     container.username,
     container.password,

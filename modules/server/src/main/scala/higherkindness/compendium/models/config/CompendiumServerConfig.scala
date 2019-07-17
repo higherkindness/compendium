@@ -14,19 +14,13 @@
  * limitations under the License.
  */
 
-package higherkidness.compendium
+package higherkindness.compendium.models.config
 
-import cats.effect.IO
-import higherkindness.compendium.models.config._
-import org.specs2.mutable.Specification
-import pureconfig.generic.auto._
+final case class CompendiumServerConfig(
+    http: HttpConfig,
+    protocols: CompendiumProtocolConfig,
+    metadata: CompendiumMetadataConfig)
 
-class ConfigSpec extends Specification {
+final case class CompendiumProtocolConfig(storage: StorageConfig)
 
-  "Config must load properly" >> {
-    IO.delay(pureconfig.loadConfigOrThrow[CompendiumServerConfig]("compendium"))
-      .attempt
-      .unsafeRunSync() must beRight[CompendiumServerConfig]
-  }
-
-}
+final case class CompendiumMetadataConfig(storage: DatabaseStorageConfig)
