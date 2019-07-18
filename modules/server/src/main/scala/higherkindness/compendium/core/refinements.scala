@@ -16,8 +16,6 @@
 
 package higherkindness.compendium.core
 
-import cats.effect.Sync
-import cats.syntax.either._
 import eu.timepit.refined._
 import eu.timepit.refined.api.{Refined, RefinedTypeOps}
 import eu.timepit.refined.boolean.{And, AnyOf}
@@ -37,11 +35,4 @@ object refinements {
   type ProtocolId = String Refined ProtocolIdConstraints
 
   object ProtocolId extends RefinedTypeOps[ProtocolId, String]
-
-  def validateProtocolId[F[_]: Sync](value: String)(
-      liftIntoThrowable: String => Throwable): F[ProtocolId] = {
-    val refinement = refineV[ProtocolIdConstraints](value).leftMap(liftIntoThrowable)
-
-    Sync[F].fromEither(refinement)
-  }
 }

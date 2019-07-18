@@ -38,13 +38,12 @@ object RootService {
     import f._
 
     HttpRoutes.of[F] {
-      case req @ POST -> Root / "protocol" / id :? IdlQueryParam(idlName) =>
+      case req @ POST -> Root / "protocol" / ProtocolId(protocolId) :? IdlQueryParam(idlName) =>
         (for {
-          protocol   <- req.as[Protocol]
-          protocolId <- validateProtocolId(id)(ProtocolIdentifierError)
-          exists     <- CompendiumService[F].existsProtocol(protocolId)
-          _          <- CompendiumService[F].storeProtocol(protocolId, protocol, idlName)
-          resp       <- exists.fold(Ok(), Created())
+          protocol <- req.as[Protocol]
+          exists   <- CompendiumService[F].existsProtocol(protocolId)
+          _        <- CompendiumService[F].storeProtocol(protocolId, protocol, idlName)
+          resp     <- exists.fold(Ok(), Created())
         } yield resp.putHeaders(Location(req.uri.withPath(s"${req.uri.path}")))).recoverWith {
           case e: org.apache.avro.SchemaParseException => BadRequest(ErrorResponse(e.getMessage))
           case e: org.http4s.InvalidMessageBodyFailure => BadRequest(ErrorResponse(e.getMessage))
@@ -52,19 +51,18 @@ object RootService {
           case _                                       => InternalServerError()
         }
 
-      case GET -> Root / "protocol" / id =>
+      case GET -> Root / "protocol" / ProtocolId(protocolId) =>
         (for {
-          protocolId <- validateProtocolId(id)(ProtocolIdentifierError)
-          protocol   <- CompendiumService[F].recoverProtocol(protocolId)
-          resp       <- protocol.fold(NotFound())(mp => Ok(mp.protocol))
+          protocol <- CompendiumService[F].recoverProtocol(protocolId)
+          resp     <- protocol.fold(NotFound())(mp => Ok(mp.protocol))
         } yield resp).recoverWith {
           case idError: ProtocolIdentifierError => BadRequest(ErrorResponse(idError.message))
           case _                                => InternalServerError()
         }
 
-      case GET -> Root / "protocol" / id / "generate" :? TargetQueryParam(target) =>
+      case GET -> Root / "protocol" / ProtocolId(protocolId) / "generate" :? TargetQueryParam(
+            target) =>
         (for {
-          protocolId   <- validateProtocolId(id)(ProtocolIdentifierError)
           parserResult <- CompendiumService[F].parseProtocol(protocolId, target)
           resp         <- parserResult.fold(pe => InternalServerError(pe.msg), mp => Ok(mp.protocol.raw))
         } yield resp).recoverWith {

@@ -66,7 +66,7 @@ object RootServiceSpec extends Specification with ScalaCheck {
       response.map(_.status).unsafeRunSync === Status.NotFound
     }
 
-    "If protocol identifier is malformed returns bad request" >> {
+    "If protocol identifier is malformed returns not found" >> {
       implicit val compendiumService =
         new CompendiumServiceStub(Some(dummyProtocol(ProtocolId("id"))), true)
 
@@ -76,22 +76,7 @@ object RootServiceSpec extends Specification with ScalaCheck {
       val response: IO[Response[IO]] =
         RootService.rootRouteService[IO].orNotFound(request)
 
-      response.map(_.status).unsafeRunSync === Status.BadRequest
-    }
-
-    "If protocol IDL Name is not valid returns a 400 Bad Request" >> {
-      implicit val compendiumService =
-        new CompendiumServiceStub(Some(dummyProtocol(ProtocolId("id"))), true)
-
-      val request: Request[IO] =
-        Request[IO](
-          method = Method.GET,
-          uri = Uri(path = s"/protocol/not_valid", query = Query.fromString("idlName=asdf")))
-
-      val response: IO[Response[IO]] =
-        RootService.rootRouteService[IO].orNotFound(request)
-
-      response.map(_.status).unsafeRunSync === Status.BadRequest
+      response.map(_.status).unsafeRunSync === Status.NotFound
     }
   }
 
@@ -135,6 +120,36 @@ object RootServiceSpec extends Specification with ScalaCheck {
           .map(_.headers.find(_.name == "Location".ci))
           .unsafeRunSync
           .map(_.value) === Some(s"/protocol/$id?idlName=avro")
+    }
+
+    "If protocol identifier is malformed returns not found" >> {
+      implicit val compendiumService =
+        new CompendiumServiceStub(Some(dummyProtocol(ProtocolId("id"))), true)
+
+      val request: Request[IO] =
+        Request[IO](
+          method = Method.POST,
+          uri = Uri(path = s"/protocol/not_valid@", query = Query.fromString("idlName=avro")))
+
+      val response: IO[Response[IO]] =
+        RootService.rootRouteService[IO].orNotFound(request)
+
+      response.map(_.status).unsafeRunSync === Status.NotFound
+    }
+
+    "If protocol IDL Name is not valid returns a 400 Bad Request" >> {
+      implicit val compendiumService =
+        new CompendiumServiceStub(Some(dummyProtocol(ProtocolId("id"))), true)
+
+      val request: Request[IO] =
+        Request[IO](
+          method = Method.POST,
+          uri = Uri(path = s"/protocol/id", query = Query("idlName" -> Option("asdf"))))
+
+      val response: IO[Response[IO]] =
+        RootService.rootRouteService[IO].orNotFound(request)
+
+      response.map(_.status).unsafeRunSync === Status.BadRequest
     }
 
     "If json is invalid returns a 400 Bad Request" >> prop { id: ProtocolId =>

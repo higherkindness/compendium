@@ -16,13 +16,12 @@
 
 package higherkindness.compendium.core
 
-import cats.effect.IO
+import cats.syntax.either._
 import higherkindness.compendium.core.refinements._
 import higherkindness.compendium.models.ProtocolIdentifierError
-import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
 
-object CompendiumRefinementsSpec extends Specification with ScalaCheck {
+object CompendiumRefinementsSpec extends Specification {
 
   sequential
 
@@ -30,25 +29,29 @@ object CompendiumRefinementsSpec extends Specification with ScalaCheck {
     "Returns a valid protocol id if refining was successful" >> {
       val rawProtocolId = "super-domain.proto"
 
-      val refine = validateProtocolId[IO](rawProtocolId)(new Exception(_))
+      val refine = ProtocolId.from(rawProtocolId)
 
-      refine.unsafeRunSync() === ProtocolId("super-domain.proto")
+      refine must beRight(ProtocolId("super-domain.proto"))
     }
 
-    "Returns a given exception if refining was unsuccessful due to invalid chars" >> {
+    "Returns an error if refining was unsuccessful due to invalid chars" >> {
       val rawProtocolId = "invalid_dom@in"
 
-      val refine = validateProtocolId[IO](rawProtocolId)(ProtocolIdentifierError)
+      val err = ProtocolIdentifierError("err")
 
-      refine.unsafeRunSync() must throwA[ProtocolIdentifierError]
+      val refine = ProtocolId.from(rawProtocolId).leftMap(_ => err)
+
+      refine must beLeft(err)
     }
 
-    "Returns a given exception if refining was unsuccessful due to very long size" >> {
+    "Returns an error if refining was unsuccessful due to very long size" >> {
       val rawProtocolId = (1 to 10).flatMap(_ => 'a' to 'z').mkString
 
-      val refine = validateProtocolId[IO](rawProtocolId)(ProtocolIdentifierError)
+      val err = ProtocolIdentifierError("err")
 
-      refine.unsafeRunSync() must throwA[ProtocolIdentifierError]
+      val refine = ProtocolId.from(rawProtocolId).leftMap(_ => err)
+
+      refine must beLeft(err)
     }
   }
 
