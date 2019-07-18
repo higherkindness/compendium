@@ -23,8 +23,8 @@ import org.http4s.dsl.impl.QueryParamDecoderMatcher
 object QueryParams {
 
   implicit val queryIdlDecoderQueryParam: QueryParamDecoder[IdlName] =
-    QueryParamDecoder[String].map(IdlName.withName)
+    QueryParamDecoder.fromUnsafeCast[IdlName](qp => IdlName.withName(qp.value))("IdlName")
 
-  object TargetQueryParam extends QueryParamDecoderMatcher[IdlName]("target")
-  object IdlQueryParam    extends QueryParamDecoderMatcher[IdlName]("idlName")
+  object TargetParam  extends QueryParamDecoderMatcher[IdlName]("target")
+  object IdlNameParam extends QueryParamDecoderMatcher[IdlName]("idlName")
 }

@@ -16,12 +16,15 @@
 
 package higherkindness.compendium.core
 
+import cats.effect.Sync
+import cats.syntax.either._
 import eu.timepit.refined._
 import eu.timepit.refined.api.{Refined, RefinedTypeOps}
 import eu.timepit.refined.boolean.{And, AnyOf}
 import eu.timepit.refined.char.LetterOrDigit
 import eu.timepit.refined.collection.{Forall, MaxSize}
 import eu.timepit.refined.generic.Equal
+import higherkindness.compendium.models.ProtocolIdError
 import shapeless.{::, HNil}
 
 object refinements {
@@ -34,5 +37,8 @@ object refinements {
 
   type ProtocolId = String Refined ProtocolIdConstraints
 
-  object ProtocolId extends RefinedTypeOps[ProtocolId, String]
+  object ProtocolId extends RefinedTypeOps[ProtocolId, String] {
+    def parseOrRaise[F[_]: Sync](id: String): F[ProtocolId] =
+      Sync[F].fromEither(ProtocolId.from(id).leftMap(ProtocolIdError))
+  }
 }

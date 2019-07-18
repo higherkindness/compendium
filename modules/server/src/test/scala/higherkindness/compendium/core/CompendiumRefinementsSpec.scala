@@ -18,7 +18,6 @@ package higherkindness.compendium.core
 
 import cats.syntax.either._
 import higherkindness.compendium.core.refinements._
-import higherkindness.compendium.models.ProtocolIdentifierError
 import org.specs2.mutable.Specification
 
 object CompendiumRefinementsSpec extends Specification {
@@ -37,7 +36,7 @@ object CompendiumRefinementsSpec extends Specification {
     "Returns an error if refining was unsuccessful due to invalid chars" >> {
       val rawProtocolId = "invalid_dom@in"
 
-      val err = ProtocolIdentifierError("err")
+      val err = "err"
 
       val refine = ProtocolId.from(rawProtocolId).leftMap(_ => err)
 
@@ -47,7 +46,7 @@ object CompendiumRefinementsSpec extends Specification {
     "Returns an error if refining was unsuccessful due to very long size" >> {
       val rawProtocolId = (1 to 10).flatMap(_ => 'a' to 'z').mkString
 
-      val err = ProtocolIdentifierError("err")
+      val err = "err"
 
       val refine = ProtocolId.from(rawProtocolId).leftMap(_ => err)
 
