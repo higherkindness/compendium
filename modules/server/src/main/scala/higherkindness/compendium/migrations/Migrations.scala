@@ -19,7 +19,7 @@ package higherkindness.compendium.migrations
 import cats.effect.Sync
 import cats.syntax.applicativeError._
 import cats.syntax.flatMap._
-import higherkindness.compendium.models.config.PostgresConfig
+import higherkindness.compendium.models.config.DatabaseStorageConfig
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.Location
 
@@ -29,7 +29,7 @@ object Migrations {
     Sync[F].delay(new Location("db/migration/metadata"))
   def dataLocation[F[_]: Sync]: F[Location] = Sync[F].delay(new Location("db/migration/data"))
 
-  def makeMigrations[F[_]: Sync](conf: PostgresConfig, migrations: List[Location]): F[Int] =
+  def makeMigrations[F[_]: Sync](conf: DatabaseStorageConfig, migrations: List[Location]): F[Int] =
     Sync[F]
       .delay {
         Flyway

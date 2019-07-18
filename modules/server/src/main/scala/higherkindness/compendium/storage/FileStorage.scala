@@ -22,11 +22,11 @@ import cats.effect.Sync
 import cats.implicits._
 import higherkindness.compendium.core.refinements.ProtocolId
 import higherkindness.compendium.models.{FullProtocol, Protocol, ProtocolMetadata}
-import higherkindness.compendium.models.config.StorageConfig
+import higherkindness.compendium.models.config.FileStorageConfig
 
 object FileStorage {
 
-  implicit def impl[F[_]: Sync](config: StorageConfig): Storage[F] =
+  implicit def impl[F[_]: Sync](config: FileStorageConfig): Storage[F] =
     new Storage[F] {
 
       override def store(id: ProtocolId, protocol: Protocol): F[Unit] =

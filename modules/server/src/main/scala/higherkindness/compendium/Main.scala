@@ -17,7 +17,7 @@
 package higherkindness.compendium
 
 import cats.effect._
-import cats.syntax.functor._
+import cats.implicits._
 import doobie.hikari.HikariTransactor
 import doobie.util.ExecutionContexts
 import doobie.util.transactor.Transactor
@@ -29,7 +29,9 @@ import higherkindness.compendium.migrations.Migrations
 import higherkindness.compendium.models.config._
 import higherkindness.compendium.parser.{ProtocolParser, ProtocolParserService}
 import higherkindness.compendium.storage._
+import higherkindness.compendium.storage.pg.PgStorage
 import org.http4s.server.Router
+import pureconfig.module.catseffect._
 import pureconfig.generic.auto._
 
 object Main extends IOApp {
@@ -41,14 +43,12 @@ object CompendiumStreamApp {
 
   def stream[F[_]: ConcurrentEffect: Timer: ContextShift]: Stream[F, ExitCode] =
     for {
-      conf <- Stream.eval(
-        Sync[F].delay(pureconfig.loadConfigOrThrow[CompendiumConfig]("compendium"))
-      )
-      migrations <- Stream.eval(Migrations.metadataLocation)
-      _          <- Stream.eval(Migrations.makeMigrations(conf.postgres, List(migrations)))
-      transactor <- Stream.resource(createTransactor(conf.postgres))
-      implicit0(storage: Storage[F])                      = FileStorage.impl[F](conf.storage)
-      implicit0(dbService: DBService[F])                  = PgDBService.impl[F](transactor)
+      conf                           <- Stream.eval(loadConfigF[F, CompendiumServerConfig]("compendium"))
+      migrations                     <- Stream.eval(Migrations.metadataLocation)
+      _                              <- Stream.eval(Migrations.makeMigrations(conf.metadata.storage, List(migrations)))
+      implicit0(storage: Storage[F]) <- Stream.resource(initStorage[F](conf.protocols.storage))
+      metadataTransactor             <- Stream.resource(createTransactor(conf.metadata.storage))
+      implicit0(dbService: DBService[F])                  = PgDBService.impl[F](metadataTransactor)
       implicit0(utils: ProtocolUtils[F])                  = ProtocolUtils.impl[F]
       implicit0(protocolParser: ProtocolParserService[F]) = ProtocolParser.impl[F]
       implicit0(compendiumService: CompendiumService[F])  = CompendiumService.impl[F]
@@ -58,17 +58,19 @@ object CompendiumStreamApp {
       code <- CompendiumServerStream.serverStream(conf.http, app)
     } yield code
 
+  private def initStorage[F[_]: Async: ContextShift](
+      storageConfig: StorageConfig): Resource[F, Storage[F]] =
+    storageConfig match {
+      case fsc: FileStorageConfig      => Resource.pure(FileStorage.impl[F](fsc))
+      case dbsc: DatabaseStorageConfig => createTransactor(dbsc).map(PgStorage[F])
+    }
+
   private def createTransactor[F[_]: Async: ContextShift](
-      conf: PostgresConfig
-  ): Resource[F, Transactor[F]] =
+      conf: DatabaseStorageConfig): Resource[F, Transactor[F]] =
     for {
       ce <- ExecutionContexts.fixedThreadPool[F](10)
       te <- ExecutionContexts.cachedThreadPool[F]
-      xa <- HikariTransactor.fromHikariConfig[F](
-        PostgresConfig.getHikariConfig(conf),
-        ce,
-        te
-      )
+      xa <- HikariTransactor
+        .fromHikariConfig[F](DatabaseStorageConfig.getHikariConfig(conf), ce, te)
     } yield xa
-
 }

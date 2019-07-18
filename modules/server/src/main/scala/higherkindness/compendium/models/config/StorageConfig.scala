@@ -16,19 +16,25 @@
 
 package higherkindness.compendium.models.config
 
+import java.nio.file.Path
+
 import com.zaxxer.hikari.HikariConfig
+import pureconfig.generic.FieldCoproductHint
 
 import scala.concurrent.duration.FiniteDuration
 
-final case class CompendiumConfig(
-    http: HttpConfig,
-    storage: StorageConfig,
-    postgres: PostgresConfig
-)
+sealed abstract class StorageConfig extends Product with Serializable
 
-final case class StorageConfig(path: String)
+object StorageConfig {
+  implicit val fieldHinter = new FieldCoproductHint[StorageConfig]("storage-type") {
+    override def fieldValue(name: String): String =
+      name.dropRight("StorageConfig".length).toUpperCase
+  }
+}
 
-final case class PostgresConfig(
+final case class FileStorageConfig(path: Path) extends StorageConfig
+
+final case class DatabaseStorageConfig(
     jdbcUrl: String,
     username: String,
     password: String,
@@ -38,11 +44,11 @@ final case class PostgresConfig(
     maxLifetime: Option[FiniteDuration] = None,
     minimumIdle: Option[Int] = None,
     maximumPoolSize: Option[Int] = None
-)
+) extends StorageConfig
 
-object PostgresConfig {
+object DatabaseStorageConfig {
 
-  def getHikariConfig(c: PostgresConfig): HikariConfig = {
+  def getHikariConfig(c: DatabaseStorageConfig): HikariConfig = {
 
     val hikariConfig: HikariConfig = new HikariConfig()
 
