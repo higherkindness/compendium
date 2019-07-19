@@ -17,10 +17,11 @@
 package higherkindness.compendium
 
 import cats.syntax.apply._
-import higherkindness.compendium.core.refinements.ProtocolId
+import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
 import higherkindness.compendium.models.{IdlName, Protocol, ProtocolMetadata}
 import org.scalacheck._
 import org.scalacheck.cats.implicits._
+import eu.timepit.refined.scalacheck.numeric._
 
 trait CompendiumArbitrary {
 
@@ -42,7 +43,10 @@ trait CompendiumArbitrary {
   }
 
   implicit val metaProtocolArbitrary: Arbitrary[ProtocolMetadata] = Arbitrary {
-    (protocolIdArbitrary.arbitrary, idlNamesArbitrary.arbitrary)
+    (
+      protocolIdArbitrary.arbitrary,
+      idlNamesArbitrary.arbitrary,
+      Arbitrary.arbitrary[ProtocolVersion])
       .mapN(ProtocolMetadata.apply)
   }
 

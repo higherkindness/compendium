@@ -45,7 +45,7 @@ object FileStorage {
         for {
           filename <- Sync[F].catchNonFatal {
             Option(
-              new File(s"${config.path}${File.separator}${protocolMetadata.protocolId}")
+              new File(s"${config.path}${File.separator}${protocolMetadata.id}")
                 .listFiles())
               .fold(Option.empty[String])(_.headOption.map(_.getAbsolutePath))
           }

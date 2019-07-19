@@ -62,15 +62,17 @@ object CompendiumServiceSpec extends Specification with ScalaCheck {
   }
 
   "Recover protocol" >> {
-    "Given a identifier we recover the protocol" >> prop { id: ProtocolId =>
-      val protocolMetadata            = ProtocolMetadata(id, IdlName.Avro)
-      implicit val dbService          = new DBServiceStub(true, protocolMetadata.some)
-      implicit val storage            = new StorageStub(Some(dummyProtocol), id)
+    "Given a identifier we recover the protocol" >> prop { metadata: ProtocolMetadata =>
+      implicit val dbService          = new DBServiceStub(true, metadata.some)
+      implicit val storage            = new StorageStub(Some(dummyProtocol), metadata.id)
       implicit val protocolUtils      = new ProtocolUtilsStub(dummyProtocol, true)
       implicit val protoParserService = ProtocolParser.impl[IO]
 
-      CompendiumService.impl[IO].recoverProtocol(id).unsafeRunSync().map(_.protocol) === Some(
-        dummyProtocol)
+      CompendiumService
+        .impl[IO]
+        .recoverProtocol(metadata.id)
+        .unsafeRunSync()
+        .map(_.protocol) === Some(dummyProtocol)
     }
   }
 

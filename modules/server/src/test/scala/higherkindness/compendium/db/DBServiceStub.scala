@@ -29,6 +29,6 @@ class DBServiceStub(val exists: Boolean, protocol: Option[ProtocolMetadata] = No
   override def selectProtocolMetadataById(id: ProtocolId): IO[Option[ProtocolMetadata]] =
     protocol.fold[IO[Option[ProtocolMetadata]]](IO.raiseError(new Throwable("Protocol not found")))(
       mp =>
-        if (mp.protocolId == id) IO(protocol)
+        if (mp.id == id) IO(protocol)
         else IO.raiseError(new Throwable("Protocol not found")))
 }

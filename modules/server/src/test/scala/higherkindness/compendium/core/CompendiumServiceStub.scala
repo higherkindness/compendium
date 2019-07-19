@@ -21,7 +21,7 @@ import higherkindness.compendium.core.refinements.ProtocolId
 import higherkindness.compendium.models.parserModels.ParserResult
 import higherkindness.compendium.models._
 
-class CompendiumServiceStub(val protocolOpt: Option[FullProtocol], exists: Boolean)
+class CompendiumServiceStub(protocolOpt: Option[FullProtocol], exists: Boolean)
     extends CompendiumService[IO] {
   override def storeProtocol(id: ProtocolId, protocol: Protocol, idlName: IdlName): IO[Unit] =
     IO.unit
@@ -29,4 +29,9 @@ class CompendiumServiceStub(val protocolOpt: Option[FullProtocol], exists: Boole
   override def existsProtocol(protocolId: ProtocolId): IO[Boolean]       = IO(exists)
 
   override def parseProtocol(protocolId: ProtocolId, target: IdlName): IO[ParserResult] = ???
+}
+
+object CompendiumServiceStub {
+  def apply(protocolOpt: Option[FullProtocol], exists: Boolean): CompendiumServiceStub =
+    new CompendiumServiceStub(protocolOpt, exists)
 }

@@ -31,7 +31,7 @@ private class PgStorage[F[_]: Bracket[?[_], Throwable]](xa: Transactor[F]) exten
 
   override def recover(metadata: ProtocolMetadata): F[Option[FullProtocol]] =
     Queries
-      .recoverProtocol(metadata.protocolId)
+      .recoverProtocol(metadata.id)
       .option
       .map(_.map(FullProtocol(metadata, _)))
       .transact(xa)

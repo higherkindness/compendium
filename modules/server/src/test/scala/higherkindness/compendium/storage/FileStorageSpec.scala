@@ -61,10 +61,10 @@ object FileStorageSpec extends Specification with ScalaCheck with BeforeAfterAll
   "Store a file" >> {
     "Successfully stores a file" >> prop {
       (protocolMetadata: ProtocolMetadata, protocol: Protocol) =>
-        val storageProtocolFile = storageProtocol(protocolMetadata.protocolId)
+        val storageProtocolFile = storageProtocol(protocolMetadata.id)
 
         val io = fileStorage
-          .store(protocolMetadata.protocolId, protocol)
+          .store(protocolMetadata.id, protocol)
           .map(_ => storageDirectory.exists && storageProtocolFile.exists)
 
         io.unsafeRunSync() should beTrue
@@ -73,7 +73,7 @@ object FileStorageSpec extends Specification with ScalaCheck with BeforeAfterAll
     "Successfully stores and recovers a file" >> prop {
       (protocolMetadata: ProtocolMetadata, protocol: Protocol) =>
         val file = for {
-          _ <- fileStorage.store(protocolMetadata.protocolId, protocol)
+          _ <- fileStorage.store(protocolMetadata.id, protocol)
           f <- fileStorage.recover(protocolMetadata)
         } yield f
 
@@ -83,8 +83,8 @@ object FileStorageSpec extends Specification with ScalaCheck with BeforeAfterAll
     "Returns true if there is a file" >> prop {
       (protocolMetadata: ProtocolMetadata, protocol: Protocol) =>
         val file = for {
-          _      <- fileStorage.store(protocolMetadata.protocolId, protocol)
-          exists <- fileStorage.exists(protocolMetadata.protocolId)
+          _      <- fileStorage.store(protocolMetadata.id, protocol)
+          exists <- fileStorage.exists(protocolMetadata.id)
         } yield exists
 
         file.unsafeRunSync() should beTrue

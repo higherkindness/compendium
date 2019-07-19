@@ -18,7 +18,7 @@ package higherkindness.compendium.storage.pg
 
 import cats.effect.IO
 import cats.implicits._
-import higherkindness.compendium.core.refinements.ProtocolId
+import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
 import higherkindness.compendium.db.MigrationsMode.Data
 import higherkindness.compendium.db.PGHelper
 import higherkindness.compendium.models.{FullProtocol, IdlName, Protocol, ProtocolMetadata}
@@ -31,7 +31,7 @@ class PgStorageSpec extends PGHelper(Data) {
 
     "insert protocol correctly" in {
       val id        = ProtocolId("p1")
-      val metadata  = ProtocolMetadata(id, IdlName.Avro)
+      val metadata  = ProtocolMetadata(id, IdlName.Avro, ProtocolVersion(1))
       val proto     = Protocol("the new protocol content")
       val fullProto = FullProtocol(metadata, proto)
 
@@ -44,7 +44,7 @@ class PgStorageSpec extends PGHelper(Data) {
 
     "update protocol correctly" in {
       val id        = ProtocolId("proto1")
-      val metadata  = ProtocolMetadata(id, IdlName.Mu)
+      val metadata  = ProtocolMetadata(id, IdlName.Mu, ProtocolVersion(1))
       val proto1    = Protocol("The protocol one content")
       val proto2    = Protocol("The protocol two content")
       val fullProto = FullProtocol(metadata, proto2)
