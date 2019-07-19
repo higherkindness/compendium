@@ -18,9 +18,9 @@ package higherkindness.compendium.db
 
 import cats.effect.IO
 import cats.implicits._
-import higherkindness.compendium.core.refinements.ProtocolId
+import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
 import higherkindness.compendium.db.MigrationsMode.Metadata
-import higherkindness.compendium.models.IdlName
+import higherkindness.compendium.models.{IdlName, ProtocolMetadata}
 
 class PgDBServiceSpec extends PGHelper(Metadata) {
 
@@ -31,10 +31,12 @@ class PgDBServiceSpec extends PGHelper(Metadata) {
       val id: ProtocolId   = ProtocolId("pId")
       val idlName: IdlName = IdlName.Avro
 
-      val result: IO[Boolean] =
-        pg.upsertProtocol(id, idlName) >> pg.existsProtocol(id)
+      val result: IO[Option[ProtocolMetadata]] =
+        pg.upsertProtocol(id, idlName) >> pg.selectProtocolMetadataById(id)
 
-      result.unsafeRunSync must ===(true)
+      val expected = ProtocolMetadata(id, idlName, ProtocolVersion(1))
+
+      result.unsafeRunSync must ===(Some(expected))
 
     }
 
@@ -42,10 +44,13 @@ class PgDBServiceSpec extends PGHelper(Metadata) {
       val id: ProtocolId   = ProtocolId("pId2")
       val idlName: IdlName = IdlName.Avro
 
-      val result: IO[Boolean] =
-        pg.upsertProtocol(id, idlName) >> pg.upsertProtocol(id, idlName) >> pg.existsProtocol(id)
+      val result: IO[Option[ProtocolMetadata]] =
+        pg.upsertProtocol(id, idlName) >> pg.upsertProtocol(id, idlName) >> pg
+          .selectProtocolMetadataById(id)
 
-      result.unsafeRunSync must ===(true)
+      val expected = ProtocolMetadata(id, idlName, ProtocolVersion(2))
+
+      result.unsafeRunSync must ===(Some(expected))
     }
 
     "return false when the protocol does not exist" in {

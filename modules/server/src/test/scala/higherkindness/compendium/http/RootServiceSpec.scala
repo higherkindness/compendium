@@ -86,8 +86,8 @@ object RootServiceSpec extends Specification with ScalaCheck {
         override def storeProtocol(
             id: ProtocolId,
             protocol: Protocol,
-            idlNames: IdlName): IO[Unit] =
-          IO.raiseError[Unit](new org.apache.avro.SchemaParseException(""))
+            idlNames: IdlName): IO[ProtocolVersion] =
+          IO.raiseError[ProtocolVersion](new org.apache.avro.SchemaParseException(""))
       }
 
       val request: Request[IO] =

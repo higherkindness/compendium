@@ -18,7 +18,7 @@ package higherkindness.compendium.core
 
 import cats.effect.Sync
 import cats.implicits._
-import higherkindness.compendium.core.refinements.ProtocolId
+import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
 import higherkindness.compendium.db.DBService
 import higherkindness.compendium.models._
 import higherkindness.compendium.models.parserModels.{ParserError, ParserResult}
@@ -27,7 +27,7 @@ import higherkindness.compendium.storage.Storage
 
 trait CompendiumService[F[_]] {
 
-  def storeProtocol(id: ProtocolId, protocol: Protocol, idlName: IdlName): F[Unit]
+  def storeProtocol(id: ProtocolId, protocol: Protocol, idlName: IdlName): F[ProtocolVersion]
   def recoverProtocol(protocolId: ProtocolId): F[Option[FullProtocol]]
   def existsProtocol(protocolId: ProtocolId): F[Boolean]
   def parseProtocol(protocolName: ProtocolId, target: IdlName): F[ParserResult]
@@ -35,14 +35,19 @@ trait CompendiumService[F[_]] {
 
 object CompendiumService {
 
-  implicit def impl[F[_]: Sync: Storage: DBService: ProtocolUtils: ProtocolParserService](): CompendiumService[
+  implicit def impl[F[_]: Sync: Storage: DBService: ProtocolUtils: ProtocolParserService]: CompendiumService[
     F] =
     new CompendiumService[F] {
 
-      override def storeProtocol(id: ProtocolId, protocol: Protocol, idlName: IdlName): F[Unit] =
-        ProtocolUtils[F].validateProtocol(protocol) >>
-          DBService[F].upsertProtocol(id, idlName) >>
-          Storage[F].store(id, protocol)
+      override def storeProtocol(
+          id: ProtocolId,
+          protocol: Protocol,
+          idlName: IdlName): F[ProtocolVersion] =
+        for {
+          _       <- ProtocolUtils[F].validateProtocol(protocol)
+          version <- DBService[F].upsertProtocol(id, idlName)
+          _       <- Storage[F].store(id, protocol)
+        } yield version
 
       override def recoverProtocol(protocolId: ProtocolId): F[Option[FullProtocol]] =
         DBService[F]

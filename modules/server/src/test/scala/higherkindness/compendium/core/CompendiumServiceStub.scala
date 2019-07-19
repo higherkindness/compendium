@@ -17,14 +17,17 @@
 package higherkindness.compendium.core
 
 import cats.effect.IO
-import higherkindness.compendium.core.refinements.ProtocolId
+import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
 import higherkindness.compendium.models.parserModels.ParserResult
 import higherkindness.compendium.models._
 
 class CompendiumServiceStub(protocolOpt: Option[FullProtocol], exists: Boolean)
     extends CompendiumService[IO] {
-  override def storeProtocol(id: ProtocolId, protocol: Protocol, idlName: IdlName): IO[Unit] =
-    IO.unit
+  override def storeProtocol(
+      id: ProtocolId,
+      protocol: Protocol,
+      idlName: IdlName): IO[ProtocolVersion] =
+    IO.pure(protocolOpt.map(_.metadata.version).getOrElse(ProtocolVersion(1)))
   override def recoverProtocol(id: ProtocolId): IO[Option[FullProtocol]] = IO(protocolOpt)
   override def existsProtocol(protocolId: ProtocolId): IO[Boolean]       = IO(exists)
 

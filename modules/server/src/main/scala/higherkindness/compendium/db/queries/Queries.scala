@@ -31,9 +31,10 @@ object Queries {
 
   def upsertProtocolIdQ(id: String, idl_name: String): Update0 =
     sql"""
-          INSERT INTO metaprotocols (id, idl_name)
-          VALUES ($id, $idl_name::idl)
-          ON CONFLICT DO NOTHING
+          INSERT INTO metaprotocols (id, idl_name, version)
+          VALUES ($id, $idl_name::idl, 1)
+          ON CONFLICT (id) DO UPDATE SET version = metaprotocols.version + 1
+          RETURNING version
        """.update
 
   def selectProtocolMetadataById(id: String): Query0[ProtocolMetadata] =
