@@ -42,7 +42,7 @@ trait CompendiumArbitrary {
   }
 
   implicit val metaProtocolArbitrary: Arbitrary[ProtocolMetadata] = Arbitrary {
-    (idlNamesArbitrary.arbitrary, protocolIdArbitrary.arbitrary)
+    (protocolIdArbitrary.arbitrary, idlNamesArbitrary.arbitrary)
       .mapN(ProtocolMetadata.apply)
   }
 

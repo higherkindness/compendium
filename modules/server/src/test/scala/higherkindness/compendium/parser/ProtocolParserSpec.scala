@@ -28,7 +28,7 @@ class ProtocolParserSpec extends Specification {
   val parser = ProtocolParser.impl[IO]
 
   "ProtocolParser should parse a simple Avro Schema to Mu" >> {
-    val protocolMetadata = ProtocolMetadata(IdlName.Avro, ProtocolId("id"))
+    val protocolMetadata = ProtocolMetadata(ProtocolId("id"), IdlName.Avro)
     val fullProtocol     = FullProtocol(protocolMetadata, Protocol(simpleAvroExample))
 
     parser
@@ -38,7 +38,7 @@ class ProtocolParserSpec extends Specification {
   }
 
   "ProtocolParser should parse a simple Protobuf Schema to Mu" >> {
-    val protocolMetadata = ProtocolMetadata(IdlName.Avro, ProtocolId("id"))
+    val protocolMetadata = ProtocolMetadata(ProtocolId("id"), IdlName.Avro)
     val fullProtocol     = FullProtocol(protocolMetadata, Protocol(simpleAvroExample))
     parser
       .parse(fullProtocol, IdlName.Mu)

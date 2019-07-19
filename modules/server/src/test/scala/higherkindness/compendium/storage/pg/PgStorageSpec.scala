@@ -31,7 +31,7 @@ class PgStorageSpec extends PGHelper(Data) {
 
     "insert protocol correctly" in {
       val id        = ProtocolId("p1")
-      val metadata  = ProtocolMetadata(IdlName.Avro, id)
+      val metadata  = ProtocolMetadata(id, IdlName.Avro)
       val proto     = Protocol("the new protocol content")
       val fullProto = FullProtocol(metadata, proto)
 
@@ -44,7 +44,7 @@ class PgStorageSpec extends PGHelper(Data) {
 
     "update protocol correctly" in {
       val id        = ProtocolId("proto1")
-      val metadata  = ProtocolMetadata(IdlName.Mu, id)
+      val metadata  = ProtocolMetadata(id, IdlName.Mu)
       val proto1    = Protocol("The protocol one content")
       val proto2    = Protocol("The protocol two content")
       val fullProto = FullProtocol(metadata, proto2)

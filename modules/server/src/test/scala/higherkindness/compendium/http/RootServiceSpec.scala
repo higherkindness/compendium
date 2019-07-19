@@ -37,7 +37,7 @@ object RootServiceSpec extends Specification with ScalaCheck {
   sequential
 
   private val dummyProtocol: ProtocolId => FullProtocol = (pid: ProtocolId) =>
-    FullProtocol(ProtocolMetadata(IdlName.Avro, pid), Protocol(""))
+    FullProtocol(ProtocolMetadata(pid, IdlName.Avro), Protocol(""))
 
   "GET /protocol/id" >> {
     "If successs returns a valid protocol and status code" >> {

@@ -18,4 +18,4 @@ package higherkindness.compendium.models
 
 import higherkindness.compendium.core.refinements.ProtocolId
 
-case class ProtocolMetadata(idlName: IdlName, protocolId: ProtocolId)
+case class ProtocolMetadata(protocolId: ProtocolId, idlName: IdlName)
