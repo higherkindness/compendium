@@ -32,9 +32,9 @@ trait CompendiumArbitrary {
   implicit val protocolIdArbitrary: Arbitrary[ProtocolId] = Arbitrary {
     Gen
       .nonEmptyListOf(
-        Gen.oneOf(Gen.alphaNumChar, Gen.const('-'), Gen.const('.'))
+        Gen.frequency(95 -> Gen.alphaNumChar, 4 -> Gen.const('-'), 1 -> Gen.const('.'))
       )
-      .suchThat(_.length > 10)
+      .suchThat(id => id.length > 10 && id.length < 200)
       .map(id => ProtocolId.unsafeFrom(id.mkString))
   }
 
@@ -46,7 +46,7 @@ trait CompendiumArbitrary {
     (
       protocolIdArbitrary.arbitrary,
       idlNamesArbitrary.arbitrary,
-      Arbitrary.arbitrary[ProtocolVersion])
+      Arbitrary.arbitrary[ProtocolVersion].filter(_.value < 100000))
       .mapN(ProtocolMetadata.apply)
   }
 

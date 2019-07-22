@@ -21,7 +21,7 @@ import java.nio.file.Paths
 
 import cats.effect.IO
 import higherkindness.compendium.CompendiumArbitrary._
-import higherkindness.compendium.core.refinements.ProtocolId
+import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
 import higherkindness.compendium.models._
 import higherkindness.compendium.models.config.FileStorageConfig
 import org.specs2.ScalaCheck
@@ -34,11 +34,11 @@ object FileStorageSpec extends Specification with ScalaCheck with BeforeAfterAll
 
   private[this] lazy val basePath: String = "/tmp/filespec"
   private[this] lazy val storageConfig: FileStorageConfig = FileStorageConfig(
-    Paths.get(s"$basePath/files"))
+    Paths.get(s"$basePath"))
   private[this] lazy val baseDirectory    = new Directory(new File(basePath))
   private[this] lazy val storageDirectory = new Directory(new File(storageConfig.path.toUri))
-  private[this] def storageProtocol(id: ProtocolId) =
-    new Directory(new File(s"${storageConfig.path}/$id/protocol"))
+  private[this] def storageProtocol(id: ProtocolId, version: ProtocolVersion) =
+    new Directory(new File(s"$basePath${File.separator}${FileStorage.buildFilename(id, version)}"))
 
   private[this] lazy val fileStorage: Storage[IO] = FileStorage.impl[IO](storageConfig)
 
@@ -60,7 +60,7 @@ object FileStorageSpec extends Specification with ScalaCheck with BeforeAfterAll
 
   "Store a file" >> {
     "Successfully stores a file" >> prop { (metadata: ProtocolMetadata, protocol: Protocol) =>
-      val storageProtocolFile = storageProtocol(metadata.id)
+      val storageProtocolFile = storageProtocol(metadata.id, metadata.version)
 
       val io = fileStorage
         .store(metadata.id, metadata.version, protocol)

@@ -16,7 +16,7 @@
 
 package higherkindness.compendium.storage
 
-import java.io.{File, PrintWriter}
+import java.io.{File, FilenameFilter, PrintWriter}
 
 import cats.effect.Sync
 import cats.implicits._
@@ -26,41 +26,55 @@ import higherkindness.compendium.models.config.FileStorageConfig
 
 object FileStorage {
 
+  /**
+   * File pattern should match `{protocol identifier}_{version}.{extension}` where:
+   *
+   * - protocol identifier should comply with
+   * [[higherkindness.compendium.core.refinements.ProtocolId]] predicates
+   * - version should be a positive zero-leftpadded five digits version number like 00001
+   * - extension is `protocol`
+   */
+  private[storage] def buildFilename(id: ProtocolId, version: ProtocolVersion): String =
+    s"${id.value}_${f"${version.value}%05d"}.protocol"
+
   implicit def impl[F[_]: Sync](config: FileStorageConfig): Storage[F] =
     new Storage[F] {
 
-      override def store(id: ProtocolId, version: ProtocolVersion, protocol: Protocol): F[Unit] =
+      override def store(id: ProtocolId, version: ProtocolVersion, protocol: Protocol): F[Unit] = {
+        val filename = buildFilename(id, version)
+        val path     = s"${config.path}${File.separator}$filename"
+
         for {
-          _ <- Sync[F].catchNonFatal(new File(s"${config.path}${File.separator}$id").mkdirs())
-          file <- Sync[F].catchNonFatal(
-            new File(s"${config.path}${File.separator}$id${File.separator}protocol"))
+          _    <- Sync[F].catchNonFatal(new File(config.path.toUri).mkdirs)
+          file <- Sync[F].catchNonFatal(new File(path))
           _ <- Sync[F].catchNonFatal {
             val printWriter = new PrintWriter(file)
             printWriter.write(protocol.raw)
             printWriter.close()
           }
         } yield ()
+      }
 
-      override def recover(protocolMetadata: ProtocolMetadata): F[Option[FullProtocol]] =
+      override def recover(protocolMetadata: ProtocolMetadata): F[Option[FullProtocol]] = {
+        val filename = buildFilename(protocolMetadata.id, protocolMetadata.version)
+        val file     = new File(s"${config.path}${File.separator}$filename")
+        def checkFile(exists: Boolean): Option[File] =
+          Option(exists).filter(identity).map(_ => file)
+
         for {
-          filename <- Sync[F].catchNonFatal {
-            Option(
-              new File(s"${config.path}${File.separator}${protocolMetadata.id}")
-                .listFiles())
-              .fold(Option.empty[String])(_.headOption.map(_.getAbsolutePath))
-          }
-          source <- Sync[F].catchNonFatal { filename.map(scala.io.Source.fromFile) }
-          protocol <- Sync[F].catchNonFatal {
-            source.flatMap { s =>
-              filename.map { _ =>
-                Protocol(s.mkString)
-              }
-            }
-          }
-        } yield protocol.map(FullProtocol(protocolMetadata, _))
+          maybeFile   <- Sync[F].catchNonFatal(file.exists).map(checkFile)
+          maybeSource <- Sync[F].catchNonFatal(maybeFile.map(scala.io.Source.fromFile))
+          maybeProto  <- Sync[F].catchNonFatal(maybeSource.map(source => Protocol(source.mkString)))
+        } yield maybeProto.map(FullProtocol(protocolMetadata, _))
+      }
 
-      override def exists(id: ProtocolId): F[Boolean] =
-        Sync[F].catchNonFatal(new File(s"${config.path}${File.separator}$id")).map(_.exists)
+      override def exists(id: ProtocolId): F[Boolean] = {
+        val filter = new FilenameFilter {
+          override def accept(dir: File, name: String): Boolean = name.startsWith(id.value)
+        }
+
+        Sync[F].catchNonFatal(new File(s"${config.path}").listFiles(filter)).map(_.nonEmpty)
+      }
     }
 
 }
