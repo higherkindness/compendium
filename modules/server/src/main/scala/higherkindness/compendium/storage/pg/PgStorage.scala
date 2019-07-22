@@ -20,14 +20,14 @@ import cats.effect.Bracket
 import cats.syntax.functor._
 import doobie.implicits._
 import doobie.util.transactor.Transactor
-import higherkindness.compendium.core.refinements.ProtocolId
+import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
 import higherkindness.compendium.models.{FullProtocol, Protocol, ProtocolMetadata}
 import higherkindness.compendium.storage.Storage
 
 private class PgStorage[F[_]: Bracket[?[_], Throwable]](xa: Transactor[F]) extends Storage[F] {
 
-  override def store(id: ProtocolId, protocol: Protocol): F[Unit] =
-    Queries.storeProtocol(id, protocol).run.void.transact(xa)
+  override def store(id: ProtocolId, version: ProtocolVersion, protocol: Protocol): F[Unit] =
+    Queries.storeProtocol(id, version, protocol).run.void.transact(xa)
 
   override def recover(metadata: ProtocolMetadata): F[Option[FullProtocol]] =
     Queries

@@ -19,7 +19,6 @@ package higherkindness.compendium.core
 import cats.effect.IO
 import cats.syntax.option._
 import higherkindness.compendium.CompendiumArbitrary._
-import higherkindness.compendium.core.refinements.ProtocolId
 import higherkindness.compendium.db.DBServiceStub
 import higherkindness.compendium.models.{IdlName, Protocol, ProtocolMetadata}
 import higherkindness.compendium.parser.ProtocolParser
@@ -35,28 +34,28 @@ object CompendiumServiceSpec extends Specification with ScalaCheck {
   private val dummyIdlName: IdlName   = IdlName.Mu
 
   "Store protocol" >> {
-    "If it's a valid protocol we store it" >> prop { id: ProtocolId =>
+    "If it's a valid protocol we store it" >> prop { metadata: ProtocolMetadata =>
       implicit val dbService          = new DBServiceStub(true)
-      implicit val storage            = new StorageStub(Some(dummyProtocol), id)
+      implicit val storage            = new StorageStub(Some(dummyProtocol), metadata.id, metadata.version)
       implicit val protocolUtils      = new ProtocolUtilsStub(dummyProtocol, true)
       implicit val protoParserService = ProtocolParser.impl[IO]
 
       CompendiumService
         .impl[IO]
-        .storeProtocol(id, dummyProtocol, dummyIdlName)
+        .storeProtocol(metadata.id, dummyProtocol, dummyIdlName)
         .map(_ => success)
         .unsafeRunSync()
     }
 
-    "If it's an invalid protocol we raise an error" >> prop { id: ProtocolId =>
+    "If it's an invalid protocol we raise an error" >> prop { metadata: ProtocolMetadata =>
       implicit val dbService          = new DBServiceStub(true)
-      implicit val storage            = new StorageStub(Some(dummyProtocol), id)
+      implicit val storage            = new StorageStub(Some(dummyProtocol), metadata.id, metadata.version)
       implicit val protocolUtils      = new ProtocolUtilsStub(dummyProtocol, false)
       implicit val protoParserService = ProtocolParser.impl[IO]
 
       CompendiumService
         .impl[IO]
-        .storeProtocol(id, dummyProtocol, dummyIdlName)
+        .storeProtocol(metadata.id, dummyProtocol, dummyIdlName)
         .unsafeRunSync must throwA[org.apache.avro.SchemaParseException]
     }
   }
@@ -64,7 +63,7 @@ object CompendiumServiceSpec extends Specification with ScalaCheck {
   "Recover protocol" >> {
     "Given a identifier we recover the protocol" >> prop { metadata: ProtocolMetadata =>
       implicit val dbService          = new DBServiceStub(true, metadata.some)
-      implicit val storage            = new StorageStub(Some(dummyProtocol), metadata.id)
+      implicit val storage            = new StorageStub(Some(dummyProtocol), metadata.id, metadata.version)
       implicit val protocolUtils      = new ProtocolUtilsStub(dummyProtocol, true)
       implicit val protoParserService = ProtocolParser.impl[IO]
 
@@ -77,13 +76,13 @@ object CompendiumServiceSpec extends Specification with ScalaCheck {
   }
 
   "Exists protocol" >> {
-    "Given a identifier we check if a protocol exists" >> prop { id: ProtocolId =>
+    "Given a identifier we check if a protocol exists" >> prop { metadata: ProtocolMetadata =>
       implicit val dbService          = new DBServiceStub(true)
-      implicit val storage            = new StorageStub(Some(dummyProtocol), id)
+      implicit val storage            = new StorageStub(Some(dummyProtocol), metadata.id, metadata.version)
       implicit val protocolUtils      = new ProtocolUtilsStub(dummyProtocol, true)
       implicit val protoParserService = ProtocolParser.impl[IO]
 
-      CompendiumService.impl[IO].existsProtocol(id).unsafeRunSync() should beTrue
+      CompendiumService.impl[IO].existsProtocol(metadata.id).unsafeRunSync() should beTrue
     }
   }
 

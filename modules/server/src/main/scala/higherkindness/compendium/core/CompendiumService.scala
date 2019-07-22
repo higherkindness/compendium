@@ -71,7 +71,7 @@ object CompendiumService {
         for {
           _       <- ProtocolUtils[F].validateProtocol(protocol)
           version <- DBService[F].upsertProtocol(id, idlName)
-          _       <- Storage[F].store(id, protocol)
+          _       <- Storage[F].store(id, version, protocol)
         } yield version
 
       override def recoverProtocol(protocolId: ProtocolId): F[Option[FullProtocol]] =

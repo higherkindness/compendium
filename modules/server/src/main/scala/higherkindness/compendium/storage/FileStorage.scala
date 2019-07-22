@@ -20,7 +20,7 @@ import java.io.{File, PrintWriter}
 
 import cats.effect.Sync
 import cats.implicits._
-import higherkindness.compendium.core.refinements.ProtocolId
+import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
 import higherkindness.compendium.models.{FullProtocol, Protocol, ProtocolMetadata}
 import higherkindness.compendium.models.config.FileStorageConfig
 
@@ -29,7 +29,7 @@ object FileStorage {
   implicit def impl[F[_]: Sync](config: FileStorageConfig): Storage[F] =
     new Storage[F] {
 
-      override def store(id: ProtocolId, protocol: Protocol): F[Unit] =
+      override def store(id: ProtocolId, version: ProtocolVersion, protocol: Protocol): F[Unit] =
         for {
           _ <- Sync[F].catchNonFatal(new File(s"${config.path}${File.separator}$id").mkdirs())
           file <- Sync[F].catchNonFatal(

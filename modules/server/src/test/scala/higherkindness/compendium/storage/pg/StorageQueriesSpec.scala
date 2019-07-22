@@ -14,25 +14,29 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.db
+package higherkindness.compendium.storage.pg
 
 import doobie.specs2._
-import higherkindness.compendium.db.MigrationsMode.Metadata
-import higherkindness.compendium.db.queries.Queries
+import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
+import higherkindness.compendium.db.MigrationsMode.Data
+import higherkindness.compendium.db.PGHelper
+import higherkindness.compendium.models.Protocol
 import org.specs2.specification.Scope
 
-class QueriesSpec extends PGHelper(Metadata) with IOChecker {
+class StorageQueriesSpec extends PGHelper(Data) with IOChecker {
 
-  "Queries" should {
+  "StorageQueries" should {
     "match db model" in new context {
-      check(Queries.checkIfExistsQ(protocolId))
-      check(Queries.upsertProtocolIdQ(protocolId, idlName))
+      check(Queries.protocolExists(protocolId))
+      check(Queries.storeProtocol(protocolId, version, protocol))
+      check(Queries.recoverProtocol(protocolId))
     }
   }
 
   trait context extends Scope {
-    val protocolId: String = "my.test.protocol.id"
-    val idlName: String    = "Protobuf"
+    val protocolId = ProtocolId("my.test.protocol.id")
+    val version    = ProtocolVersion(1)
+    val protocol   = Protocol("Raw protocol content")
   }
 
 }
