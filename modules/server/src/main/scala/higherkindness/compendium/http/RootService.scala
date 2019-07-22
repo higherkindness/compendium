@@ -51,8 +51,6 @@ object RootService {
         }
 
       case GET -> Root / "protocol" / id :? ProtoVersion(versionParam) =>
-        println(s"Received ${versionParam}")
-
         def recoverProtocol(id: ProtocolId): F[Option[FullProtocol]] =
           versionParam.fold(CompendiumService[F].recoverProtocol(id)) { versionValidated =>
             val validation =
