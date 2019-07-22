@@ -17,12 +17,10 @@
 package higherkindness.compendium.http
 
 import cats.effect.Sync
-import cats.syntax.applicativeError._
-import cats.syntax.flatMap._
-import cats.syntax.functor._
+import cats.syntax.all._
 import higherkindness.compendium.core.CompendiumService
 import higherkindness.compendium.core.refinements._
-import higherkindness.compendium.http.QueryParams.{IdlNameParam, TargetParam}
+import higherkindness.compendium.http.QueryParams.{IdlNameParam, ProtoVersion, TargetParam}
 import higherkindness.compendium.models._
 import mouse.all._
 import org.http4s.HttpRoutes
@@ -52,14 +50,26 @@ object RootService {
           case _                                       => InternalServerError()
         }
 
-      case GET -> Root / "protocol" / id =>
+      case GET -> Root / "protocol" / id :? ProtoVersion(versionParam) =>
+        println(s"Received ${versionParam}")
+
+        def recoverProtocol(id: ProtocolId): F[Option[FullProtocol]] =
+          versionParam.fold(CompendiumService[F].recoverProtocol(id)) { versionValidated =>
+            val validation =
+              versionValidated.leftMap(errs => ProtocolVersionError(errs.toList.mkString(",")))
+            Sync[F]
+              .fromValidated(validation)
+              .flatMap(CompendiumService[F].recoverProtocolVersion(id, _))
+          }
+
         (for {
           protocolId <- ProtocolId.parseOrRaise(id)
-          protocol   <- CompendiumService[F].recoverProtocol(protocolId)
+          protocol   <- recoverProtocol(protocolId)
           resp       <- protocol.fold(NotFound())(mp => Ok(mp.protocol))
         } yield resp).recoverWith {
-          case idError: ProtocolIdError => BadRequest(idError.message)
-          case _                        => InternalServerError()
+          case idError: ProtocolIdError           => BadRequest(idError.message)
+          case versionError: ProtocolVersionError => BadRequest(versionError.message)
+          case _                                  => InternalServerError()
         }
 
       case GET -> Root / "protocol" / id / "generate" :? TargetParam(target) =>

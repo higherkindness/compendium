@@ -32,6 +32,15 @@ class CompendiumServiceStub(protocolOpt: Option[FullProtocol], exists: Boolean)
   override def existsProtocol(protocolId: ProtocolId): IO[Boolean]       = IO(exists)
 
   override def parseProtocol(protocolId: ProtocolId, target: IdlName): IO[ParserResult] = ???
+
+  override def recoverProtocolVersion(
+      id: ProtocolId,
+      version: ProtocolVersion): IO[Option[FullProtocol]] = recoverProtocol(id)
+
+  override def parseProtocolVersion(
+      id: ProtocolId,
+      version: ProtocolVersion,
+      target: IdlName): IO[ParserResult] = parseProtocol(id, target)
 }
 
 object CompendiumServiceStub {
