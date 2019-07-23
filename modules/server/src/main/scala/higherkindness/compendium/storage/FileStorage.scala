@@ -70,7 +70,7 @@ object FileStorage {
 
       override def exists(id: ProtocolId): F[Boolean] = {
         val filter = new FilenameFilter {
-          override def accept(dir: File, name: String): Boolean = name.startsWith(id.value)
+          override def accept(dir: File, name: String): Boolean = name.startsWith(s"${id.value}_")
         }
 
         Sync[F].catchNonFatal(new File(s"${config.path}").listFiles(filter)).map(_.nonEmpty)
