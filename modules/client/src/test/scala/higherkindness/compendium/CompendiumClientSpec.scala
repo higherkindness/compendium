@@ -40,7 +40,8 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
   private[this] def asEntityJson[T: io.circe.Encoder](t: T): Entity =
     Entity.StringEntity(t.asJson.toString, ContentType.`application/json`)
 
-  def interp(identifier: String, target: IdlName)(implicit S: Sync[IO]) = new InterpTrans[IO] {
+  def interp(identifier: String, target: IdlName, version: Option[Int] = None)(
+      implicit S: Sync[IO]) = new InterpTrans[IO] {
 
     val trans: HttpF ~> IO = new (HttpF ~> IO) {
       private def response(entity: Entity): HttpResponse =
@@ -53,6 +54,13 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
             response(asEntityJson(dummyProtocol))
           }
 
+        case Get(HttpRequest(uri, _, _))
+            if uri.path.equalsIgnoreCase(
+              s"/v0/protocol/$identifier?version=${version.getOrElse(0)}") =>
+          S.catchNonFatal {
+            response(asEntityJson(dummyProtocol))
+          }
+
         case Get(HttpRequest(uri, _, _)) if uri.path.equalsIgnoreCase(s"/v0/protocol/error") =>
           S.catchNonFatal {
             response(Entity.EmptyEntity).copy(status = Status.InternalServerError)
@@ -60,7 +68,7 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
 
         case Get(HttpRequest(uri, _, _))
             if uri.path.equalsIgnoreCase(
-              s"/v0/protocol/$identifier/generate/?target=${target.toString}") =>
+              s"/v0/protocol/$identifier/generate?target=${target.toString}") =>
           S.catchNonFatal {
             response(Entity.StringEntity(uri.path)).copy(status = Status.NotImplemented)
           }
@@ -103,14 +111,24 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
 
       implicit val terp = interp("proto1", IdlName.Scala)
 
-      CompendiumClient().recoverProtocol("proto1").unsafeRunSync() should beSome(dummyProtocol)
+      CompendiumClient().recoverProtocol("proto1", None).unsafeRunSync() should beSome(
+        dummyProtocol)
+    }
+
+    "Given a valid identifier with version returns a protocol" >> {
+      val version = Option(1)
+
+      implicit val terp = interp("proto1", IdlName.Scala, version)
+
+      CompendiumClient().recoverProtocol("proto1", version).unsafeRunSync() should beSome(
+        dummyProtocol)
     }
 
     "Given an invalid identifier returns no protocol" >> {
 
       implicit val terp = interp("proto1", IdlName.Scala)
 
-      CompendiumClient().recoverProtocol("proto2").unsafeRunSync() should beNone
+      CompendiumClient().recoverProtocol("proto2", None).unsafeRunSync() should beNone
     }
 
     "Given an identifier returns a internal server error" >> {
@@ -118,7 +136,7 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
       implicit val terp = interp("proto1", IdlName.Scala)
 
       CompendiumClient()
-        .recoverProtocol("error")
+        .recoverProtocol("error", None)
         .unsafeRunSync() must throwA[higherkindness.compendium.models.UnknownError]
     }
   }
