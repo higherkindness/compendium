@@ -18,7 +18,7 @@ package higherkindness.compendium.core
 
 import cats.effect.Sync
 import cats.implicits._
-import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
+import higherkindness.compendium.core.refinements._
 import higherkindness.compendium.db.DBService
 import higherkindness.compendium.models._
 import higherkindness.compendium.models.parserModels.{ParserError, ParserResult}

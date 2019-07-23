@@ -46,7 +46,7 @@ object RootService {
         } yield resp.putHeaders(Location(req.uri.withPath(s"${req.uri.path}")))).recoverWith {
           case e: org.apache.avro.SchemaParseException => BadRequest(ErrorResponse(e.getMessage))
           case e: org.http4s.InvalidMessageBodyFailure => BadRequest(ErrorResponse(e.getMessage))
-          case idError: ProtocolIdError                => BadRequest(idError.message)
+          case e: ProtocolIdError                      => BadRequest(ErrorResponse(e.message))
           case _                                       => InternalServerError()
         }
 
@@ -65,8 +65,8 @@ object RootService {
           protocol   <- recoverProtocol(protocolId)
           resp       <- protocol.fold(NotFound())(mp => Ok(mp.protocol))
         } yield resp).recoverWith {
-          case idError: ProtocolIdError           => BadRequest(idError.message)
-          case versionError: ProtocolVersionError => BadRequest(versionError.message)
+          case id: ProtocolIdError                => BadRequest(ErrorMessage(e.message))
+          case e: ProtocolVersionError            => BadRequest(ErrorMessage(e.message))
           case _                                  => InternalServerError()
         }
 
@@ -76,7 +76,7 @@ object RootService {
           parserResult <- CompendiumService[F].parseProtocol(protocolId, target)
           resp         <- parserResult.fold(pe => InternalServerError(pe.msg), mp => Ok(mp.protocol.raw))
         } yield resp).recoverWith {
-          case idError: ProtocolIdError => BadRequest(idError.message)
+          case e: ProtocolIdError       => BadRequest(ErrorMessage(e.message))
           case _                        => InternalServerError()
         }
     }
