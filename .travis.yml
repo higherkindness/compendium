@@ -4,7 +4,7 @@ jobs:
       sudo: false
       language: scala
       jdk:
-        - oraclejdk8
+        - openjdk8
       scala:
         - 2.12.8
       before_cache:
