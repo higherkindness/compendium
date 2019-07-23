@@ -5,7 +5,7 @@ COPY project project
 COPY build.sbt .
 RUN sbt update
 COPY . .
-RUN sbt $PROJECT/universal:packageBin
+RUN sbt $PROJECT/universal:packageZipTarball
 
 FROM openjdk:8u212-jre-slim
 ARG VERSION
@@ -13,6 +13,6 @@ ARG PROJECT
 ENV version=$VERSION
 ENV name=compendium-$PROJECT
 COPY --from=builder /build/modules/$PROJECT/target/universal/. .
-RUN unzip -o ./${name}-$VERSION.zip
+RUN tar -zxvf ./${name}-$VERSION.tgz
 RUN chmod +x ${name}-$VERSION/bin/$name
 ENTRYPOINT ${name}-$version/bin/$name
