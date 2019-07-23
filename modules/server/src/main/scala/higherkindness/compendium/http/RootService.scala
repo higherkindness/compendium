@@ -65,9 +65,9 @@ object RootService {
           protocol   <- recoverProtocol(protocolId)
           resp       <- protocol.fold(NotFound())(mp => Ok(mp.protocol))
         } yield resp).recoverWith {
-          case id: ProtocolIdError                => BadRequest(ErrorMessage(e.message))
-          case e: ProtocolVersionError            => BadRequest(ErrorMessage(e.message))
-          case _                                  => InternalServerError()
+          case e: ProtocolIdError      => BadRequest(ErrorResponse(e.message))
+          case e: ProtocolVersionError => BadRequest(ErrorResponse(e.message))
+          case _                       => InternalServerError()
         }
 
       case GET -> Root / "protocol" / id / "generate" :? TargetParam(target) =>
@@ -76,8 +76,8 @@ object RootService {
           parserResult <- CompendiumService[F].parseProtocol(protocolId, target)
           resp         <- parserResult.fold(pe => InternalServerError(pe.msg), mp => Ok(mp.protocol.raw))
         } yield resp).recoverWith {
-          case e: ProtocolIdError       => BadRequest(ErrorMessage(e.message))
-          case _                        => InternalServerError()
+          case e: ProtocolIdError => BadRequest(ErrorResponse(e.message))
+          case _                  => InternalServerError()
         }
     }
   }
