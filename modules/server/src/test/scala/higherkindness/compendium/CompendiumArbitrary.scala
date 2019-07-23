@@ -21,7 +21,6 @@ import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
 import higherkindness.compendium.models.{IdlName, Protocol, ProtocolMetadata}
 import org.scalacheck._
 import org.scalacheck.cats.implicits._
-import eu.timepit.refined.scalacheck.numeric._
 
 trait CompendiumArbitrary {
 
@@ -34,8 +33,7 @@ trait CompendiumArbitrary {
       .nonEmptyListOf(
         Gen.frequency(95 -> Gen.alphaNumChar, 4 -> Gen.const('-'), 1 -> Gen.const('.'))
       )
-      .suchThat(id => id.length > 10 && id.length < 200)
-      .map(id => ProtocolId.unsafeFrom(id.mkString))
+      .map(id => ProtocolId.unsafeFrom(id.mkString.take(200)))
   }
 
   implicit val idlNamesArbitrary: Arbitrary[IdlName] = Arbitrary {
@@ -46,8 +44,8 @@ trait CompendiumArbitrary {
     (
       protocolIdArbitrary.arbitrary,
       idlNamesArbitrary.arbitrary,
-      Arbitrary.arbitrary[ProtocolVersion].filter(_.value < 100000))
-      .mapN(ProtocolMetadata.apply)
+      Gen.choose(1, 99999).map(ProtocolVersion.unsafeFrom)
+    ).mapN(ProtocolMetadata.apply)
   }
 
   implicit val differentIdentifiersArb: Arbitrary[DifferentIdentifiers] = Arbitrary {
