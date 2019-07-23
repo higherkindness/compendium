@@ -28,14 +28,12 @@ import higherkindness.compendium.storage.Storage
 trait CompendiumService[F[_]] {
 
   def storeProtocol(id: ProtocolId, protocol: Protocol, idlName: IdlName): F[ProtocolVersion]
-  def recoverProtocol(protocolId: ProtocolId): F[Option[FullProtocol]]
-  def recoverProtocolVersion(id: ProtocolId, version: ProtocolVersion): F[Option[FullProtocol]]
-  def existsProtocol(protocolId: ProtocolId): F[Boolean]
-  def parseProtocol(protocolName: ProtocolId, target: IdlName): F[ParserResult]
-  def parseProtocolVersion(
+  def recoverProtocol(id: ProtocolId, version: Option[ProtocolVersion]): F[Option[FullProtocol]]
+  def existsProtocol(id: ProtocolId): F[Boolean]
+  def transformProtocol(
       id: ProtocolId,
-      version: ProtocolVersion,
-      target: IdlName): F[ParserResult]
+      target: IdlName,
+      version: Option[ProtocolVersion]): F[ParserResult]
 }
 
 object CompendiumService {
@@ -43,26 +41,6 @@ object CompendiumService {
   implicit def impl[F[_]: Sync: Storage: DBService: ProtocolUtils: ProtocolParserService]: CompendiumService[
     F] =
     new CompendiumService[F] {
-
-      private def getProtocol(
-          id: ProtocolId,
-          maybeVersion: Option[ProtocolVersion] = None): F[Option[FullProtocol]] =
-        for {
-          maybeMetadata <- DBService[F].selectProtocolMetadataById(id)
-          maybeProto <- maybeMetadata.flatTraverse(metadata =>
-            Storage[F].recover(maybeVersion.fold(metadata)(version =>
-              metadata.copy(version = version))))
-        } yield maybeProto
-
-      private def transformProtocol(
-          id: ProtocolId,
-          target: IdlName,
-          maybeVersion: Option[ProtocolVersion] = None): F[ParserResult] =
-        for {
-          maybeProto  <- getProtocol(id, maybeVersion)
-          maybeResult <- maybeProto.traverse(ProtocolParserService[F].parse(_, target))
-        } yield
-          maybeResult.getOrElse(ParserError(s"No Protocol Found with id: $id").asLeft[FullProtocol])
 
       override def storeProtocol(
           id: ProtocolId,
@@ -74,23 +52,27 @@ object CompendiumService {
           _       <- Storage[F].store(id, version, protocol)
         } yield version
 
-      override def recoverProtocol(protocolId: ProtocolId): F[Option[FullProtocol]] =
-        getProtocol(protocolId)
-
-      override def recoverProtocolVersion(
+      override def recoverProtocol(
           id: ProtocolId,
-          version: ProtocolVersion): F[Option[FullProtocol]] = getProtocol(id, Some(version))
+          version: Option[ProtocolVersion]): F[Option[FullProtocol]] =
+        for {
+          maybeMetadata <- DBService[F].selectProtocolMetadataById(id)
+          maybeProto <- maybeMetadata.flatTraverse(metadata =>
+            Storage[F].recover(version.fold(metadata)(version => metadata.copy(version = version))))
+        } yield maybeProto
 
-      override def existsProtocol(protocolId: ProtocolId): F[Boolean] =
-        DBService[F].existsProtocol(protocolId)
+      override def existsProtocol(id: ProtocolId): F[Boolean] =
+        DBService[F].existsProtocol(id)
 
-      override def parseProtocol(protocolId: ProtocolId, target: IdlName): F[ParserResult] =
-        transformProtocol(protocolId, target)
-
-      override def parseProtocolVersion(
+      override def transformProtocol(
           id: ProtocolId,
-          version: ProtocolVersion,
-          target: IdlName): F[ParserResult] = transformProtocol(id, target, Option(version))
+          target: IdlName,
+          version: Option[ProtocolVersion]): F[ParserResult] =
+        for {
+          maybeProto  <- recoverProtocol(id, version)
+          maybeResult <- maybeProto.traverse(ProtocolParserService[F].parse(_, target))
+        } yield
+          maybeResult.getOrElse(ParserError(s"No Protocol Found with id: $id").asLeft[FullProtocol])
     }
 
   def apply[F[_]](implicit F: CompendiumService[F]): CompendiumService[F] = F
