@@ -17,12 +17,10 @@
 package higherkindness.compendium.http
 
 import cats.effect.Sync
-import cats.syntax.applicativeError._
-import cats.syntax.flatMap._
-import cats.syntax.functor._
+import cats.syntax.all._
 import higherkindness.compendium.core.CompendiumService
 import higherkindness.compendium.core.refinements._
-import higherkindness.compendium.http.QueryParams.{IdlQueryParam, TargetQueryParam}
+import higherkindness.compendium.http.QueryParams.{IdlNameParam, ProtoVersion, TargetParam}
 import higherkindness.compendium.models._
 import mouse.all._
 import org.http4s.HttpRoutes
@@ -38,38 +36,48 @@ object RootService {
     import f._
 
     HttpRoutes.of[F] {
-      case req @ POST -> Root / "protocol" / id :? IdlQueryParam(idlName) =>
+      case req @ POST -> Root / "protocol" / id :? IdlNameParam(idlName) =>
         (for {
           protocol   <- req.as[Protocol]
-          protocolId <- validateProtocolId(id)(ProtocolIdentifierError)
+          protocolId <- ProtocolId.parseOrRaise(id)
           exists     <- CompendiumService[F].existsProtocol(protocolId)
           _          <- CompendiumService[F].storeProtocol(protocolId, protocol, idlName)
           resp       <- exists.fold(Ok(), Created())
         } yield resp.putHeaders(Location(req.uri.withPath(s"${req.uri.path}")))).recoverWith {
           case e: org.apache.avro.SchemaParseException => BadRequest(ErrorResponse(e.getMessage))
           case e: org.http4s.InvalidMessageBodyFailure => BadRequest(ErrorResponse(e.getMessage))
-          case idError: ProtocolIdentifierError        => BadRequest(ErrorResponse(idError.message))
+          case e: ProtocolIdError                      => BadRequest(ErrorResponse(e.message))
           case _                                       => InternalServerError()
         }
 
-      case GET -> Root / "protocol" / id =>
+      case GET -> Root / "protocol" / id :? ProtoVersion(versionParam) =>
+        def recoverProtocol(id: ProtocolId): F[Option[FullProtocol]] =
+          versionParam.fold(CompendiumService[F].recoverProtocol(id)) { versionValidated =>
+            val validation =
+              versionValidated.leftMap(errs => ProtocolVersionError(errs.toList.mkString(",")))
+            Sync[F]
+              .fromValidated(validation)
+              .flatMap(CompendiumService[F].recoverProtocolVersion(id, _))
+          }
+
         (for {
-          protocolId <- validateProtocolId(id)(ProtocolIdentifierError)
-          protocol   <- CompendiumService[F].recoverProtocol(protocolId)
+          protocolId <- ProtocolId.parseOrRaise(id)
+          protocol   <- recoverProtocol(protocolId)
           resp       <- protocol.fold(NotFound())(mp => Ok(mp.protocol))
         } yield resp).recoverWith {
-          case idError: ProtocolIdentifierError => BadRequest(ErrorResponse(idError.message))
-          case _                                => InternalServerError()
+          case e: ProtocolIdError      => BadRequest(ErrorResponse(e.message))
+          case e: ProtocolVersionError => BadRequest(ErrorResponse(e.message))
+          case _                       => InternalServerError()
         }
 
-      case GET -> Root / "protocol" / id / "generate" :? TargetQueryParam(target) =>
+      case GET -> Root / "protocol" / id / "generate" :? TargetParam(target) =>
         (for {
-          protocolId   <- validateProtocolId(id)(ProtocolIdentifierError)
+          protocolId   <- ProtocolId.parseOrRaise(id)
           parserResult <- CompendiumService[F].parseProtocol(protocolId, target)
           resp         <- parserResult.fold(pe => InternalServerError(pe.msg), mp => Ok(mp.protocol.raw))
         } yield resp).recoverWith {
-          case idError: ProtocolIdentifierError => BadRequest(ErrorResponse(idError.message))
-          case _                                => InternalServerError()
+          case e: ProtocolIdError => BadRequest(ErrorResponse(e.message))
+          case _                  => InternalServerError()
         }
     }
   }

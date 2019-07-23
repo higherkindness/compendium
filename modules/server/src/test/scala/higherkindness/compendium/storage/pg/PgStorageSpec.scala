@@ -18,7 +18,7 @@ package higherkindness.compendium.storage.pg
 
 import cats.effect.IO
 import cats.implicits._
-import higherkindness.compendium.core.refinements.ProtocolId
+import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
 import higherkindness.compendium.db.MigrationsMode.Data
 import higherkindness.compendium.db.PGHelper
 import higherkindness.compendium.models.{FullProtocol, IdlName, Protocol, ProtocolMetadata}
@@ -31,12 +31,13 @@ class PgStorageSpec extends PGHelper(Data) {
 
     "insert protocol correctly" in {
       val id        = ProtocolId("p1")
-      val metadata  = ProtocolMetadata(IdlName.Avro, id)
+      val version   = ProtocolVersion(1)
+      val metadata  = ProtocolMetadata(id, IdlName.Avro, version)
       val proto     = Protocol("the new protocol content")
       val fullProto = FullProtocol(metadata, proto)
 
-      val result: IO[Option[FullProtocol]] = pgStorage.store(id, proto) >> pgStorage.recover(
-        metadata)
+      val result: IO[Option[FullProtocol]] = pgStorage.store(id, version, proto) >> pgStorage
+        .recover(metadata)
 
       result.unsafeRunSync must ===(fullProto.some)
 
@@ -44,14 +45,15 @@ class PgStorageSpec extends PGHelper(Data) {
 
     "update protocol correctly" in {
       val id        = ProtocolId("proto1")
-      val metadata  = ProtocolMetadata(IdlName.Mu, id)
+      val version1  = ProtocolVersion(1)
+      val version2  = ProtocolVersion(2)
       val proto1    = Protocol("The protocol one content")
       val proto2    = Protocol("The protocol two content")
+      val metadata  = ProtocolMetadata(id, IdlName.Mu, version2)
       val fullProto = FullProtocol(metadata, proto2)
 
-      val result: IO[Option[FullProtocol]] = pgStorage.store(id, proto1) >> pgStorage.store(
-        id,
-        proto2) >> pgStorage
+      val result: IO[Option[FullProtocol]] = pgStorage.store(id, version1, proto1) >> pgStorage
+        .store(id, version2, proto2) >> pgStorage
         .recover(metadata)
 
       result.unsafeRunSync must ===(fullProto.some)
@@ -64,10 +66,11 @@ class PgStorageSpec extends PGHelper(Data) {
     }
 
     "return true when the protocol exists" in {
-      val id    = ProtocolId("pId3")
-      val proto = Protocol("Another protocol")
+      val id      = ProtocolId("pId3")
+      val version = ProtocolVersion(1)
+      val proto   = Protocol("Another protocol")
 
-      val result: IO[Boolean] = pgStorage.store(id, proto) >> pgStorage.exists(id)
+      val result: IO[Boolean] = pgStorage.store(id, version, proto) >> pgStorage.exists(id)
 
       result.unsafeRunSync must ===(true)
     }

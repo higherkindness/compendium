@@ -16,12 +16,12 @@
 
 package higherkindness.compendium.storage
 
-import higherkindness.compendium.core.refinements.ProtocolId
+import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
 import higherkindness.compendium.models._
 
 trait Storage[F[_]] {
 
-  def store(id: ProtocolId, protocol: Protocol): F[Unit]
+  def store(id: ProtocolId, version: ProtocolVersion, protocol: Protocol): F[Unit]
   def recover(metadata: ProtocolMetadata): F[Option[FullProtocol]]
   def exists(id: ProtocolId): F[Boolean]
 }

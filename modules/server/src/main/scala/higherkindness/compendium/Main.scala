@@ -61,7 +61,7 @@ object CompendiumStreamApp {
   private def initStorage[F[_]: Async: ContextShift](
       storageConfig: StorageConfig): Resource[F, Storage[F]] =
     storageConfig match {
-      case fsc: FileStorageConfig      => Resource.pure(FileStorage.impl[F](fsc))
+      case fsc: FileStorageConfig      => Resource.pure(FileStorage[F](fsc))
       case dbsc: DatabaseStorageConfig => createTransactor(dbsc).map(PgStorage[F])
     }
 

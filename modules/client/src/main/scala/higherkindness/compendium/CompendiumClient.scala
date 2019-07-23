@@ -18,6 +18,7 @@ package higherkindness.compendium
 
 import cats.effect.IO
 import cats.free.Free
+import cats.implicits._
 import hammock._
 import hammock.circe.implicits._
 import higherkindness.compendium.models._
@@ -36,9 +37,10 @@ trait CompendiumClient {
   /** Retrieve a Protocol by its id
    *
    * @param identifier the protocol identifier
+   * @param version optional protocol version number
    * @return a protocol
    */
-  def recoverProtocol(identifier: String): IO[Option[Protocol]]
+  def recoverProtocol(identifier: String, version: Option[Int]): IO[Option[Protocol]]
 
   /** Generates a client for a target and a protocol by its identifier
    *
@@ -54,7 +56,8 @@ object CompendiumClient {
   def apply()(implicit interp: InterpTrans[IO], clientConfig: CompendiumConfig): CompendiumClient =
     new CompendiumClient {
 
-      val baseUrl: String = s"http://${clientConfig.http.host}:${clientConfig.http.port}"
+      val baseUrl: String          = s"http://${clientConfig.http.host}:${clientConfig.http.port}"
+      val versionParamName: String = "version"
 
       override def storeProtocol(identifier: String, protocol: Protocol): IO[Int] = {
         val request =
@@ -75,9 +78,13 @@ object CompendiumClient {
         } yield status.code
       }
 
-      override def recoverProtocol(identifier: String): IO[Option[Protocol]] = {
-        val request: Free[HttpF, HttpResponse] = Hammock
-          .request(Method.GET, uri"$baseUrl/v0/protocol/$identifier", Map())
+      override def recoverProtocol(
+          identifier: String,
+          version: Option[Int]): IO[Option[Protocol]] = {
+        val versionParam = version.fold("")(v => s"?$versionParamName=${v.show}")
+        val uri          = uri"$baseUrl/v0/protocol/$identifier$versionParam"
+
+        val request: Free[HttpF, HttpResponse] = Hammock.request(Method.GET, uri, Map())
 
         for {
           status <- request.map(_.status).exec[IO]

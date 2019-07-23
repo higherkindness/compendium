@@ -21,7 +21,7 @@ import java.nio.file.Paths
 
 import cats.effect.IO
 import higherkindness.compendium.CompendiumArbitrary._
-import higherkindness.compendium.core.refinements.ProtocolId
+import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
 import higherkindness.compendium.models._
 import higherkindness.compendium.models.config.FileStorageConfig
 import org.specs2.ScalaCheck
@@ -34,13 +34,13 @@ object FileStorageSpec extends Specification with ScalaCheck with BeforeAfterAll
 
   private[this] lazy val basePath: String = "/tmp/filespec"
   private[this] lazy val storageConfig: FileStorageConfig = FileStorageConfig(
-    Paths.get(s"$basePath/files"))
+    Paths.get(s"$basePath"))
   private[this] lazy val baseDirectory    = new Directory(new File(basePath))
   private[this] lazy val storageDirectory = new Directory(new File(storageConfig.path.toUri))
-  private[this] def storageProtocol(id: ProtocolId) =
-    new Directory(new File(s"${storageConfig.path}/$id/protocol"))
+  private[this] def storageProtocol(id: ProtocolId, version: ProtocolVersion) =
+    new Directory(new File(s"$basePath${File.separator}${FileStorage.buildFilename(id, version)}"))
 
-  private[this] lazy val fileStorage: Storage[IO] = FileStorage.impl[IO](storageConfig)
+  private[this] lazy val fileStorage: Storage[IO] = FileStorage[IO](storageConfig)
 
   override def beforeAll(): Unit = {
     val _ = baseDirectory.createDirectory()
@@ -59,35 +59,33 @@ object FileStorageSpec extends Specification with ScalaCheck with BeforeAfterAll
   sequential
 
   "Store a file" >> {
-    "Successfully stores a file" >> prop {
-      (protocolMetadata: ProtocolMetadata, protocol: Protocol) =>
-        val storageProtocolFile = storageProtocol(protocolMetadata.protocolId)
+    "Successfully stores a file" >> prop { (metadata: ProtocolMetadata, protocol: Protocol) =>
+      val storageProtocolFile = storageProtocol(metadata.id, metadata.version)
 
-        val io = fileStorage
-          .store(protocolMetadata.protocolId, protocol)
-          .map(_ => storageDirectory.exists && storageProtocolFile.exists)
+      val io = fileStorage
+        .store(metadata.id, metadata.version, protocol)
+        .map(_ => storageDirectory.exists && storageProtocolFile.exists)
 
-        io.unsafeRunSync() should beTrue
+      io.unsafeRunSync() should beTrue
     }
 
     "Successfully stores and recovers a file" >> prop {
-      (protocolMetadata: ProtocolMetadata, protocol: Protocol) =>
+      (metadata: ProtocolMetadata, protocol: Protocol) =>
         val file = for {
-          _ <- fileStorage.store(protocolMetadata.protocolId, protocol)
-          f <- fileStorage.recover(protocolMetadata)
+          _ <- fileStorage.store(metadata.id, metadata.version, protocol)
+          f <- fileStorage.recover(metadata)
         } yield f
 
-        file.unsafeRunSync() should beSome(FullProtocol(protocolMetadata, protocol))
+        file.unsafeRunSync() should beSome(FullProtocol(metadata, protocol))
     }
 
-    "Returns true if there is a file" >> prop {
-      (protocolMetadata: ProtocolMetadata, protocol: Protocol) =>
-        val file = for {
-          _      <- fileStorage.store(protocolMetadata.protocolId, protocol)
-          exists <- fileStorage.exists(protocolMetadata.protocolId)
-        } yield exists
+    "Returns true if there is a file" >> prop { (metadata: ProtocolMetadata, protocol: Protocol) =>
+      val file = for {
+        _      <- fileStorage.store(metadata.id, metadata.version, protocol)
+        exists <- fileStorage.exists(metadata.id)
+      } yield exists
 
-        file.unsafeRunSync() should beTrue
+      file.unsafeRunSync() should beTrue
     }
 
     "Returns false if there is no file" >> prop { protocolId: ProtocolId =>

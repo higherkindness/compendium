@@ -17,7 +17,7 @@
 package higherkindness.compendium.http
 
 import cats.effect.IO
-import higherkindness.compendium.core.refinements.ProtocolId
+import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
 import higherkindness.compendium.core.CompendiumServiceStub
 import higherkindness.compendium.models._
 import higherkindness.compendium.CompendiumArbitrary.protocolIdArbitrary
@@ -37,15 +37,31 @@ object RootServiceSpec extends Specification with ScalaCheck {
   sequential
 
   private val dummyProtocol: ProtocolId => FullProtocol = (pid: ProtocolId) =>
-    FullProtocol(ProtocolMetadata(IdlName.Avro, pid), Protocol(""))
+    FullProtocol(ProtocolMetadata(pid, IdlName.Avro, ProtocolVersion(1)), Protocol(""))
 
-  "GET /protocol/id" >> {
+  "GET /protocol/id?version={version}" >> {
     "If successs returns a valid protocol and status code" >> {
       implicit val compendiumService =
-        new CompendiumServiceStub(Some(dummyProtocol(ProtocolId("id"))), true)
+        CompendiumServiceStub(Some(dummyProtocol(ProtocolId("id"))), true)
 
       val request: Request[IO] =
-        Request[IO](method = Method.GET, uri = Uri(path = s"/protocol/my.proto"))
+        Request[IO](method = Method.GET, uri = Uri(path = "/protocol/my.proto"))
+
+      val response: IO[Response[IO]] =
+        RootService.rootRouteService[IO].orNotFound(request)
+
+      response.map(_.status).unsafeRunSync === Status.Ok
+      response.flatMap(_.as[Protocol]).unsafeRunSync === dummyProtocol(ProtocolId("id")).protocol
+    }
+
+    "If successs with specific version returns a valid protocol and status code" >> {
+      implicit val compendiumService =
+        CompendiumServiceStub(Some(dummyProtocol(ProtocolId("id"))), true)
+
+      val request: Request[IO] =
+        Request[IO](
+          method = Method.GET,
+          uri = Uri(path = "/protocol/my.proto", query = Query("version" -> Option("1"))))
 
       val response: IO[Response[IO]] =
         RootService.rootRouteService[IO].orNotFound(request)
@@ -55,10 +71,10 @@ object RootServiceSpec extends Specification with ScalaCheck {
     }
 
     "If protocol not found returns not found" >> {
-      implicit val compendiumService = new CompendiumServiceStub(None, true)
+      implicit val compendiumService = CompendiumServiceStub(None, true)
 
       val request: Request[IO] =
-        Request[IO](method = Method.GET, uri = Uri(path = s"/protocol/my.proto"))
+        Request[IO](method = Method.GET, uri = Uri(path = "/protocol/my.proto"))
 
       val response: IO[Response[IO]] =
         RootService.rootRouteService[IO].orNotFound(request)
@@ -68,10 +84,10 @@ object RootServiceSpec extends Specification with ScalaCheck {
 
     "If protocol identifier is malformed returns bad request" >> {
       implicit val compendiumService =
-        new CompendiumServiceStub(Some(dummyProtocol(ProtocolId("id"))), true)
+        CompendiumServiceStub(Some(dummyProtocol(ProtocolId("id"))), true)
 
       val request: Request[IO] =
-        Request[IO](method = Method.GET, uri = Uri(path = s"/protocol/not_valid@"))
+        Request[IO](method = Method.GET, uri = Uri(path = "/protocol/not_valid@"))
 
       val response: IO[Response[IO]] =
         RootService.rootRouteService[IO].orNotFound(request)
@@ -79,14 +95,29 @@ object RootServiceSpec extends Specification with ScalaCheck {
       response.map(_.status).unsafeRunSync === Status.BadRequest
     }
 
-    "If protocol IDL Name is not valid returns a 400 Bad Request" >> {
+    "If protocol version is string returns bad request" >> {
       implicit val compendiumService =
-        new CompendiumServiceStub(Some(dummyProtocol(ProtocolId("id"))), true)
+        CompendiumServiceStub(Some(dummyProtocol(ProtocolId("id"))), true)
 
       val request: Request[IO] =
         Request[IO](
           method = Method.GET,
-          uri = Uri(path = s"/protocol/not_valid", query = Query.fromString("idlName=asdf")))
+          uri = Uri(path = "/protocol/id", query = Query("version" -> Option("fake"))))
+
+      val response: IO[Response[IO]] =
+        RootService.rootRouteService[IO].orNotFound(request)
+
+      response.map(_.status).unsafeRunSync === Status.BadRequest
+    }
+
+    "If protocol version is non positive returns bad request" >> {
+      implicit val compendiumService =
+        CompendiumServiceStub(Some(dummyProtocol(ProtocolId("id"))), true)
+
+      val request: Request[IO] =
+        Request[IO](
+          method = Method.GET,
+          uri = Uri(path = "/protocol/id", query = Query("version" -> Option("0"))))
 
       val response: IO[Response[IO]] =
         RootService.rootRouteService[IO].orNotFound(request)
@@ -101,8 +132,8 @@ object RootServiceSpec extends Specification with ScalaCheck {
         override def storeProtocol(
             id: ProtocolId,
             protocol: Protocol,
-            idlNames: IdlName): IO[Unit] =
-          IO.raiseError[Unit](new org.apache.avro.SchemaParseException(""))
+            idlNames: IdlName): IO[ProtocolVersion] =
+          IO.raiseError[ProtocolVersion](new org.apache.avro.SchemaParseException(""))
       }
 
       val request: Request[IO] =
@@ -119,12 +150,12 @@ object RootServiceSpec extends Specification with ScalaCheck {
 
     "If protocol is valid returns Created and the location in the headers" >> prop {
       id: ProtocolId =>
-        implicit val compendiumService = new CompendiumServiceStub(None, false)
+        implicit val compendiumService = CompendiumServiceStub(None, false)
 
         val request: Request[IO] =
           Request[IO](
             method = Method.POST,
-            uri = Uri(path = s"/protocol/${id.value}", query = Query.fromString("idlName=avro")))
+            uri = Uri(path = s"/protocol/${id.value}", query = Query("idlName" -> Option("avro"))))
             .withEntity(dummyProtocol(id).protocol)
 
         val response: IO[Response[IO]] =
@@ -137,8 +168,38 @@ object RootServiceSpec extends Specification with ScalaCheck {
           .map(_.value) === Some(s"/protocol/$id?idlName=avro")
     }
 
+    "If protocol identifier is malformed returns bad request" >> {
+      implicit val compendiumService = CompendiumServiceStub(None, false)
+
+      val request: Request[IO] =
+        Request[IO](
+          method = Method.POST,
+          uri = Uri(path = "/protocol/not_valid@", query = Query("idlName" -> Option("avro"))))
+          .withEntity(dummyProtocol(ProtocolId("id")).protocol)
+
+      val response: IO[Response[IO]] =
+        RootService.rootRouteService[IO].orNotFound(request)
+
+      response.map(_.status).unsafeRunSync === Status.BadRequest
+    }
+
+    "If protocol IDL Name is not valid returns not found" >> {
+      implicit val compendiumService =
+        CompendiumServiceStub(Some(dummyProtocol(ProtocolId("id"))), true)
+
+      val request: Request[IO] =
+        Request[IO](
+          method = Method.POST,
+          uri = Uri(path = s"/protocol/id", query = Query("idlName" -> Option("asdf"))))
+
+      val response: IO[Response[IO]] =
+        RootService.rootRouteService[IO].orNotFound(request)
+
+      response.map(_.status).unsafeRunSync === Status.NotFound
+    }
+
     "If json is invalid returns a 400 Bad Request" >> prop { id: ProtocolId =>
-      implicit val compendiumService = new CompendiumServiceStub(None, false)
+      implicit val compendiumService = CompendiumServiceStub(None, false)
 
       case class Malformed(malformed: String)
 
@@ -158,7 +219,7 @@ object RootServiceSpec extends Specification with ScalaCheck {
 
     "If protocol is valid and it was already in compendium returns Ok and the location in the headers" >> prop {
       id: ProtocolId =>
-        implicit val compendiumService = new CompendiumServiceStub(None, true)
+        implicit val compendiumService = CompendiumServiceStub(None, true)
 
         val request: Request[IO] =
           Request[IO](

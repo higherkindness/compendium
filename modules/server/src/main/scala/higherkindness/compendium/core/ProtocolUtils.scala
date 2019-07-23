@@ -29,7 +29,7 @@ object ProtocolUtils {
 
   private def parser: Schema.Parser = new Schema.Parser()
 
-  def impl[F[_]: Sync](): ProtocolUtils[F] = new ProtocolUtils[F] {
+  def impl[F[_]: Sync]: ProtocolUtils[F] = new ProtocolUtils[F] {
     override def validateProtocol(protocol: Protocol): F[Protocol] =
       if (protocol.raw.trim.isEmpty)
         Sync[F].raiseError(new org.apache.avro.SchemaParseException("Protocol is empty"))

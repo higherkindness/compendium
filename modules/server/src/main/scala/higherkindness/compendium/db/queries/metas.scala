@@ -16,11 +16,15 @@
 
 package higherkindness.compendium.db.queries
 
-import doobie.util.Meta
+import cats.instances.int._
+import doobie.util.{Get, Meta, Put}
+import higherkindness.compendium.core.refinements.ProtocolVersion
 import higherkindness.compendium.models.IdlName
 
 object metas {
 
   implicit val IdlNamesMeta: Meta[IdlName] = Meta[String].timap(IdlName.withName)(_.entryName)
 
+  implicit val protocolVersion: Put[ProtocolVersion] = Put[Int].contramap(_.value)
+  implicit val protocolIdGet: Get[ProtocolVersion]   = Get[Int].temap(ProtocolVersion.from)
 }

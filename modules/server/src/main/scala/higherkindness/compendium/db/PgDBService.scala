@@ -17,11 +17,11 @@
 package higherkindness.compendium.db
 
 import cats.effect.Async
-import cats.implicits._
 import doobie.util.transactor.Transactor
 import doobie.implicits._
-import higherkindness.compendium.core.refinements.ProtocolId
+import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
 import higherkindness.compendium.db.queries.Queries
+import higherkindness.compendium.db.queries.metas._
 import higherkindness.compendium.models.{IdlName, ProtocolMetadata}
 
 object PgDBService {
@@ -29,8 +29,11 @@ object PgDBService {
   def impl[F[_]: Async](xa: Transactor[F]): DBService[F] =
     new DBService[F] {
 
-      override def upsertProtocol(id: ProtocolId, idlName: IdlName): F[Unit] =
-        Queries.upsertProtocolIdQ(id.value, idlName.entryName).run.void.transact(xa)
+      override def upsertProtocol(id: ProtocolId, idlName: IdlName): F[ProtocolVersion] =
+        Queries
+          .upsertProtocolIdQ(id.value, idlName.entryName)
+          .withUniqueGeneratedKeys[ProtocolVersion]("version")
+          .transact(xa)
 
       override def existsProtocol(id: ProtocolId): F[Boolean] =
         Queries.checkIfExistsQ(id.value).unique.transact(xa)

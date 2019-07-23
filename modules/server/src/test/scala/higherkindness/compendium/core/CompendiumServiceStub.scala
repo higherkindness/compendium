@@ -17,16 +17,33 @@
 package higherkindness.compendium.core
 
 import cats.effect.IO
-import higherkindness.compendium.core.refinements.ProtocolId
+import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
 import higherkindness.compendium.models.parserModels.ParserResult
 import higherkindness.compendium.models._
 
-class CompendiumServiceStub(val protocolOpt: Option[FullProtocol], exists: Boolean)
+class CompendiumServiceStub(protocolOpt: Option[FullProtocol], exists: Boolean)
     extends CompendiumService[IO] {
-  override def storeProtocol(id: ProtocolId, protocol: Protocol, idlName: IdlName): IO[Unit] =
-    IO.unit
+  override def storeProtocol(
+      id: ProtocolId,
+      protocol: Protocol,
+      idlName: IdlName): IO[ProtocolVersion] =
+    IO.pure(protocolOpt.map(_.metadata.version).getOrElse(ProtocolVersion(1)))
   override def recoverProtocol(id: ProtocolId): IO[Option[FullProtocol]] = IO(protocolOpt)
   override def existsProtocol(protocolId: ProtocolId): IO[Boolean]       = IO(exists)
 
   override def parseProtocol(protocolId: ProtocolId, target: IdlName): IO[ParserResult] = ???
+
+  override def recoverProtocolVersion(
+      id: ProtocolId,
+      version: ProtocolVersion): IO[Option[FullProtocol]] = recoverProtocol(id)
+
+  override def parseProtocolVersion(
+      id: ProtocolId,
+      version: ProtocolVersion,
+      target: IdlName): IO[ParserResult] = parseProtocol(id, target)
+}
+
+object CompendiumServiceStub {
+  def apply(protocolOpt: Option[FullProtocol], exists: Boolean): CompendiumServiceStub =
+    new CompendiumServiceStub(protocolOpt, exists)
 }
