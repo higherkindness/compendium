@@ -7,7 +7,7 @@ RUN sbt update
 COPY . .
 RUN sbt $PROJECT/universal:packageBin
 
-FROM openjdk:8u181-jre-slim
+FROM openjdk:8u212-jre-slim
 ARG VERSION
 ARG PROJECT
 ENV version=$VERSION
