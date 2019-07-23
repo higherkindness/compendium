@@ -79,7 +79,7 @@ object CompendiumService {
 
       override def recoverProtocolVersion(
           id: ProtocolId,
-          version: ProtocolVersion): F[Option[FullProtocol]] = getProtocol(id, Option(version))
+          version: ProtocolVersion): F[Option[FullProtocol]] = getProtocol(id, Some(version))
 
       override def existsProtocol(protocolId: ProtocolId): F[Boolean] =
         DBService[F].existsProtocol(protocolId)
