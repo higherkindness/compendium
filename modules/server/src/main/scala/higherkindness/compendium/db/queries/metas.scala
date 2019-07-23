@@ -16,10 +16,10 @@
 
 package higherkindness.compendium.db.queries
 
+import cats.instances.int._
 import doobie.util.{Get, Meta, Put}
 import higherkindness.compendium.core.refinements.ProtocolVersion
 import higherkindness.compendium.models.IdlName
-import cats.instances.int._
 
 object metas {
 
