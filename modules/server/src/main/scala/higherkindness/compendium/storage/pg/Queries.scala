@@ -32,13 +32,11 @@ object Queries {
         ON CONFLICT (id, version) DO NOTHING
        """.update
 
-  def recoverProtocol(id: ProtocolId): Query0[Protocol] =
+  def recoverProtocol(id: ProtocolId, version: ProtocolVersion): Query0[Protocol] =
     sql"""
         SELECT protocol
         FROM protocols
-        WHERE id=$id
-        ORDER BY version DESC
-        LIMIT 1
+        WHERE id=$id AND version=$version
       """.query[Protocol]
 
   def protocolExists(id: ProtocolId): Query0[Boolean] =
