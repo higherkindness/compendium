@@ -37,7 +37,7 @@ object FileStorage {
   private[storage] def buildFilename(id: ProtocolId, version: ProtocolVersion): String =
     s"${id.value}_${f"${version.value}%05d"}.protocol"
 
-  implicit def impl[F[_]: Sync](config: FileStorageConfig): Storage[F] =
+  def apply[F[_]: Sync](config: FileStorageConfig): Storage[F] =
     new Storage[F] {
 
       override def store(id: ProtocolId, version: ProtocolVersion, protocol: Protocol): F[Unit] = {

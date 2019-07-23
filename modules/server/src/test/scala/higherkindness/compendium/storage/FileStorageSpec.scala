@@ -40,7 +40,7 @@ object FileStorageSpec extends Specification with ScalaCheck with BeforeAfterAll
   private[this] def storageProtocol(id: ProtocolId, version: ProtocolVersion) =
     new Directory(new File(s"$basePath${File.separator}${FileStorage.buildFilename(id, version)}"))
 
-  private[this] lazy val fileStorage: Storage[IO] = FileStorage.impl[IO](storageConfig)
+  private[this] lazy val fileStorage: Storage[IO] = FileStorage[IO](storageConfig)
 
   override def beforeAll(): Unit = {
     val _ = baseDirectory.createDirectory()
