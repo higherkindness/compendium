@@ -29,18 +29,18 @@ object PgMetadataStorage {
   def apply[F[_]: Async](xa: Transactor[F]): MetadataStorage[F] =
     new MetadataStorage[F] {
 
-      override def upsertProtocol(id: ProtocolId, idlName: IdlName): F[ProtocolVersion] =
+      override def store(id: ProtocolId, idlName: IdlName): F[ProtocolVersion] =
         Queries
-          .upsertProtocolIdQ(id.value, idlName.entryName)
+          .store(id, idlName.entryName)
           .withUniqueGeneratedKeys[ProtocolVersion]("version")
           .transact(xa)
 
-      override def existsProtocol(id: ProtocolId): F[Boolean] =
-        Queries.checkIfExistsQ(id.value).unique.transact(xa)
+      override def retrieve(id: ProtocolId): F[Option[ProtocolMetadata]] =
+        Queries.retrieve(id).option.transact(xa)
 
-      override def selectProtocolMetadataById(id: ProtocolId): F[Option[ProtocolMetadata]] =
-        Queries.selectProtocolMetadataById(id.value).option.transact(xa)
+      override def exists(id: ProtocolId): F[Boolean] =
+        Queries.exists(id).unique.transact(xa)
 
-      override def ping(): F[Boolean] = Queries.checkConnection().unique.transact(xa)
+      override def ping: F[Boolean] = Queries.checkConn.unique.transact(xa)
     }
 }

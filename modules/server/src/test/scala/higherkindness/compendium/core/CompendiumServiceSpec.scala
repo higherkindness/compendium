@@ -69,7 +69,7 @@ object CompendiumServiceSpec extends Specification with ScalaCheck {
 
       CompendiumService
         .impl[IO]
-        .recoverProtocol(metadata.id, metadata.version.some)
+        .retrieveProtocol(metadata.id, metadata.version.some)
         .unsafeRunSync()
         .map(_.protocol) === dummyProtocol.some
     }

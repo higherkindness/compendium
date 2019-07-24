@@ -27,9 +27,9 @@ class StorageQueriesSpec extends PGHelper(Data) with IOChecker {
 
   "StorageQueries" should {
     "match db model" in new context {
-      check(Queries.protocolExists(protocolId))
-      check(Queries.storeProtocol(protocolId, version, protocol))
-      check(Queries.recoverProtocol(protocolId, version))
+      check(Queries.exists(protocolId))
+      check(Queries.store(protocolId, version, protocol))
+      check(Queries.retrieve(protocolId, version))
     }
   }
 

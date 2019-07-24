@@ -24,21 +24,21 @@ import higherkindness.compendium.models.Protocol
 
 object Queries {
 
-  def storeProtocol(id: ProtocolId, version: ProtocolVersion, protocol: Protocol): Update0 =
+  def store(id: ProtocolId, version: ProtocolVersion, protocol: Protocol): Update0 =
     sql"""
         INSERT INTO protocols 
         VALUES ($id, $version, $protocol)
         ON CONFLICT (id, version) DO NOTHING
        """.update
 
-  def recoverProtocol(id: ProtocolId, version: ProtocolVersion): Query0[Protocol] =
+  def retrieve(id: ProtocolId, version: ProtocolVersion): Query0[Protocol] =
     sql"""
         SELECT protocol
         FROM protocols
         WHERE id=$id AND version=$version
       """.query[Protocol]
 
-  def protocolExists(id: ProtocolId): Query0[Boolean] =
+  def exists(id: ProtocolId): Query0[Boolean] =
     sql"""SELECT exists (SELECT true FROM protocols WHERE id=$id)""".query[Boolean]
 
 }

@@ -30,7 +30,7 @@ class CompendiumServiceStub(protocolOpt: Option[FullProtocol], exists: Boolean)
       idlName: IdlName): IO[ProtocolVersion] =
     IO.pure(protocolOpt.map(_.metadata.version).getOrElse(ProtocolVersion(1)))
 
-  override def recoverProtocol(
+  override def retrieveProtocol(
       id: ProtocolId,
       version: Option[ProtocolVersion]): IO[Option[FullProtocol]] = IO(protocolOpt)
 

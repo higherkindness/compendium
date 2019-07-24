@@ -37,7 +37,7 @@ class PgStorageSpec extends PGHelper(Data) {
       val fullProto = FullProtocol(metadata, proto)
 
       val result: IO[Option[FullProtocol]] = pgStorage.store(id, version, proto) >> pgStorage
-        .recover(metadata)
+        .retrieve(metadata)
 
       result.unsafeRunSync must ===(fullProto.some)
 
@@ -54,7 +54,7 @@ class PgStorageSpec extends PGHelper(Data) {
 
       val result: IO[Option[FullProtocol]] = pgStorage.store(id, version1, proto1) >> pgStorage
         .store(id, version2, proto2) >> pgStorage
-        .recover(metadata)
+        .retrieve(metadata)
 
       result.unsafeRunSync must ===(fullProto.some)
     }

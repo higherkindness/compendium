@@ -22,12 +22,12 @@ import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
 
 class MetadataStorageStub(val exists: Boolean, metadata: Option[ProtocolMetadata] = None)
     extends MetadataStorage[IO] {
-  override def upsertProtocol(id: ProtocolId, idlNames: IdlName): IO[ProtocolVersion] =
+  override def store(id: ProtocolId, idlNames: IdlName): IO[ProtocolVersion] =
     IO.pure(metadata.map(_.version).getOrElse(ProtocolVersion(1)))
-  override def existsProtocol(id: ProtocolId): IO[Boolean] = IO.pure(exists)
-  override def ping(): IO[Boolean]                         = IO.pure(exists)
+  override def exists(id: ProtocolId): IO[Boolean] = IO.pure(exists)
+  override def ping: IO[Boolean]                   = IO.pure(exists)
 
-  override def selectProtocolMetadataById(id: ProtocolId): IO[Option[ProtocolMetadata]] =
+  override def retrieve(id: ProtocolId): IO[Option[ProtocolMetadata]] =
     metadata.fold[IO[Option[ProtocolMetadata]]](IO.raiseError(new Throwable("Protocol not found")))(
       mp =>
         if (mp.id == id) IO(metadata)

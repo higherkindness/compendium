@@ -57,7 +57,7 @@ object RootService {
             Sync[F].fromValidated(validation)
           }
 
-          maybeVersionValidated.flatMap(CompendiumService[F].recoverProtocol(id, _))
+          maybeVersionValidated.flatMap(CompendiumService[F].retrieveProtocol(id, _))
         }
 
         (for {

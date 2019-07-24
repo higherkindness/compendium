@@ -33,7 +33,7 @@ class PgMetadataStorageSpec extends PGHelper(Metadata) {
       val idlName: IdlName = IdlName.Avro
 
       val result: IO[Option[ProtocolMetadata]] =
-        pg.upsertProtocol(id, idlName) >> pg.selectProtocolMetadataById(id)
+        pg.store(id, idlName) >> pg.retrieve(id)
 
       val expected = ProtocolMetadata(id, idlName, ProtocolVersion(1))
 
@@ -46,8 +46,8 @@ class PgMetadataStorageSpec extends PGHelper(Metadata) {
       val idlName: IdlName = IdlName.Avro
 
       val result: IO[Option[ProtocolMetadata]] =
-        pg.upsertProtocol(id, idlName) >> pg.upsertProtocol(id, idlName) >> pg
-          .selectProtocolMetadataById(id)
+        pg.store(id, idlName) >> pg.store(id, idlName) >> pg
+          .retrieve(id)
 
       val expected = ProtocolMetadata(id, idlName, ProtocolVersion(2))
 
@@ -57,7 +57,7 @@ class PgMetadataStorageSpec extends PGHelper(Metadata) {
     "return false when the protocol does not exist" in {
       val id: ProtocolId = ProtocolId("p")
 
-      pg.existsProtocol(id).unsafeRunSync must ===(false)
+      pg.exists(id).unsafeRunSync must ===(false)
     }
 
     "return true when the protocol exists" in {
@@ -65,7 +65,7 @@ class PgMetadataStorageSpec extends PGHelper(Metadata) {
       val idlName: IdlName = IdlName.Avro
 
       val result: IO[Boolean] =
-        pg.upsertProtocol(id, idlName) >> pg.existsProtocol(id)
+        pg.store(id, idlName) >> pg.exists(id)
 
       result.unsafeRunSync must ===(true)
     }

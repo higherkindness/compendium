@@ -28,7 +28,7 @@ import higherkindness.compendium.storage.Storage
 trait CompendiumService[F[_]] {
 
   def storeProtocol(id: ProtocolId, protocol: Protocol, idlName: IdlName): F[ProtocolVersion]
-  def recoverProtocol(id: ProtocolId, version: Option[ProtocolVersion]): F[Option[FullProtocol]]
+  def retrieveProtocol(id: ProtocolId, version: Option[ProtocolVersion]): F[Option[FullProtocol]]
   def existsProtocol(id: ProtocolId): F[Boolean]
   def transformProtocol(
       id: ProtocolId,
@@ -48,28 +48,29 @@ object CompendiumService {
           idlName: IdlName): F[ProtocolVersion] =
         for {
           _       <- ProtocolUtils[F].validateProtocol(protocol)
-          version <- MetadataStorage[F].upsertProtocol(id, idlName)
+          version <- MetadataStorage[F].store(id, idlName)
           _       <- Storage[F].store(id, version, protocol)
         } yield version
 
-      override def recoverProtocol(
+      override def retrieveProtocol(
           id: ProtocolId,
           version: Option[ProtocolVersion]): F[Option[FullProtocol]] =
         for {
-          maybeMetadata <- MetadataStorage[F].selectProtocolMetadataById(id)
+          maybeMetadata <- MetadataStorage[F].retrieve(id)
           maybeProto <- maybeMetadata.flatTraverse(metadata =>
-            Storage[F].recover(version.fold(metadata)(version => metadata.copy(version = version))))
+            Storage[F].retrieve(version.fold(metadata)(version =>
+              metadata.copy(version = version))))
         } yield maybeProto
 
       override def existsProtocol(id: ProtocolId): F[Boolean] =
-        MetadataStorage[F].existsProtocol(id)
+        MetadataStorage[F].exists(id)
 
       override def transformProtocol(
           id: ProtocolId,
           target: IdlName,
           version: Option[ProtocolVersion]): F[TransformResult] =
         for {
-          maybeProto  <- recoverProtocol(id, version)
+          maybeProto  <- retrieveProtocol(id, version)
           maybeResult <- maybeProto.traverse(ProtocolTransformer[F].transform(_, target))
         } yield
           maybeResult.getOrElse(

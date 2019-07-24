@@ -56,7 +56,7 @@ object FileStorage {
         } yield ()
       }
 
-      override def recover(protocolMetadata: ProtocolMetadata): F[Option[FullProtocol]] = {
+      override def retrieve(protocolMetadata: ProtocolMetadata): F[Option[FullProtocol]] = {
         val filename = buildFilename(protocolMetadata.id, protocolMetadata.version)
         val file     = new File(s"${config.path}${File.separator}$filename")
         def checkFile(exists: Boolean): Option[File] =

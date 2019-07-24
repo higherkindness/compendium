@@ -74,7 +74,7 @@ object FileStorageSpec extends Specification with ScalaCheck with BeforeAfterAll
       (metadata: ProtocolMetadata, protocol: Protocol) =>
         val file = for {
           _ <- fileStorage.store(metadata.id, metadata.version, protocol)
-          f <- fileStorage.recover(metadata)
+          f <- fileStorage.retrieve(metadata)
         } yield f
 
         file.unsafeRunSync() should beSome(FullProtocol(metadata, protocol))

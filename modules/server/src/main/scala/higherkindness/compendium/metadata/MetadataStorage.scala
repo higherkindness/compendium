@@ -20,10 +20,10 @@ import higherkindness.compendium.models.{IdlName, ProtocolMetadata}
 import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
 
 trait MetadataStorage[F[_]] {
-  def upsertProtocol(id: ProtocolId, idlName: IdlName): F[ProtocolVersion]
-  def existsProtocol(id: ProtocolId): F[Boolean]
-  def selectProtocolMetadataById(id: ProtocolId): F[Option[ProtocolMetadata]]
-  def ping(): F[Boolean]
+  def store(id: ProtocolId, idlName: IdlName): F[ProtocolVersion]
+  def retrieve(id: ProtocolId): F[Option[ProtocolMetadata]]
+  def exists(id: ProtocolId): F[Boolean]
+  def ping: F[Boolean]
 }
 
 object MetadataStorage {
