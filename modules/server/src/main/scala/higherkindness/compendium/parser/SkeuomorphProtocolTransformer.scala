@@ -20,7 +20,7 @@ import cats.effect.Sync
 import cats.syntax.functor._
 import cats.syntax.either._
 import higherkindness.compendium.models._
-import higherkindness.compendium.models.parserModels._
+import higherkindness.compendium.models.transformers.types._
 import higherkindness.skeuomorph.mu
 import higherkindness.skeuomorph.avro
 import higherkindness.skeuomorph.protobuf.{ParseProto, ProtobufF}
@@ -28,13 +28,13 @@ import qq.droste.data.Mu._
 import org.apache.avro.{Protocol => AvroProtocol}
 import qq.droste.data.Mu
 
-object ProtocolParser {
+object SkeuomorphProtocolTransformer {
 
-  def impl[F[_]: Sync]: ProtocolParserService[F] = new ProtocolParserService[F] {
+  def apply[F[_]: Sync]: ProtocolTransformer[F] = new ProtocolTransformer[F] {
 
     import utils._
 
-    private def skeuomorphParse(fp: FullProtocol, target: IdlName): F[FullProtocol] =
+    private def skeuomorphTransformation(fp: FullProtocol, target: IdlName): F[FullProtocol] =
       (fp.metadata.idlName, target) match {
         // (from, to)
         case _ if fp.metadata.idlName.entryName == target.entryName => Sync[F].pure(fp)
@@ -60,8 +60,8 @@ object ProtocolParser {
           }
       }
 
-    override def parse(protocol: FullProtocol, target: IdlName): F[ParserResult] =
-      skeuomorphParse(protocol, target).map(_.asRight[ParserError])
+    override def transform(protocol: FullProtocol, target: IdlName): F[TransformResult] =
+      skeuomorphTransformation(protocol, target).map(_.asRight[TransformError])
   }
 
 }

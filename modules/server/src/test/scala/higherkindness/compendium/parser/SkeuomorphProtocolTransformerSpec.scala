@@ -21,27 +21,27 @@ import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
 import higherkindness.compendium.models._
 import org.specs2.mutable.Specification
 
-class ProtocolParserSpec extends Specification {
+class SkeuomorphProtocolTransformerSpec extends Specification {
 
   import protocols._
 
-  val parser = ProtocolParser.impl[IO]
+  val transformer = SkeuomorphProtocolTransformer[IO]
 
-  "ProtocolParser should parse a simple Avro Schema to Mu" >> {
+  "ProtocolParser should transform a simple Avro Schema to Mu" >> {
     val protocolMetadata = ProtocolMetadata(ProtocolId("id"), IdlName.Avro, ProtocolVersion(1))
     val fullProtocol     = FullProtocol(protocolMetadata, Protocol(simpleAvroExample))
 
-    parser
-      .parse(fullProtocol, IdlName.Mu)
+    transformer
+      .transform(fullProtocol, IdlName.Mu)
       .map(_.isRight)
       .unsafeRunSync()
   }
 
-  "ProtocolParser should parse a simple Protobuf Schema to Mu" >> {
+  "ProtocolParser should transform a simple Protobuf Schema to Mu" >> {
     val protocolMetadata = ProtocolMetadata(ProtocolId("id"), IdlName.Avro, ProtocolVersion(1))
     val fullProtocol     = FullProtocol(protocolMetadata, Protocol(simpleAvroExample))
-    parser
-      .parse(fullProtocol, IdlName.Mu)
+    transformer
+      .transform(fullProtocol, IdlName.Mu)
       .map(_.isRight)
       .unsafeRunSync()
   }

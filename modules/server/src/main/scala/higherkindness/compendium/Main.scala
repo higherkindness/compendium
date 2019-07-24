@@ -27,7 +27,7 @@ import higherkindness.compendium.db._
 import higherkindness.compendium.http._
 import higherkindness.compendium.migrations.Migrations
 import higherkindness.compendium.models.config._
-import higherkindness.compendium.parser.{ProtocolParser, ProtocolParserService}
+import higherkindness.compendium.parser.{ProtocolTransformer, SkeuomorphProtocolTransformer}
 import higherkindness.compendium.storage._
 import higherkindness.compendium.storage.pg.PgStorage
 import org.http4s.server.Router
@@ -48,13 +48,13 @@ object CompendiumStreamApp {
       _                              <- Stream.eval(Migrations.makeMigrations(conf.metadata.storage, List(migrations)))
       implicit0(storage: Storage[F]) <- Stream.resource(initStorage[F](conf.protocols.storage))
       metadataTransactor             <- Stream.resource(createTransactor(conf.metadata.storage))
-      implicit0(dbService: DBService[F])                  = PgDBService.impl[F](metadataTransactor)
-      implicit0(utils: ProtocolUtils[F])                  = ProtocolUtils.impl[F]
-      implicit0(protocolParser: ProtocolParserService[F]) = ProtocolParser.impl[F]
-      implicit0(compendiumService: CompendiumService[F])  = CompendiumService.impl[F]
-      rootService                                         = RootService.rootRouteService
-      healthService                                       = HealthService.healthRouteService
-      app                                                 = Router("/" -> healthService, "/v0" -> rootService)
+      implicit0(dbService: DBService[F])             = PgDBService[F](metadataTransactor)
+      implicit0(utils: ProtocolUtils[F])             = ProtocolUtils.impl[F]
+      implicit0(transformer: ProtocolTransformer[F]) = SkeuomorphProtocolTransformer[F]
+      implicit0(compendium: CompendiumService[F])    = CompendiumService.impl[F]
+      rootService                                    = RootService.rootRouteService
+      healthService                                  = HealthService.healthRouteService
+      app                                            = Router("/" -> healthService, "/v0" -> rootService)
       code <- CompendiumServerStream.serverStream(conf.http, app)
     } yield code
 

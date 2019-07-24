@@ -26,7 +26,7 @@ import higherkindness.compendium.models.{IdlName, ProtocolMetadata}
 
 object PgDBService {
 
-  def impl[F[_]: Async](xa: Transactor[F]): DBService[F] =
+  def apply[F[_]: Async](xa: Transactor[F]): DBService[F] =
     new DBService[F] {
 
       override def upsertProtocol(id: ProtocolId, idlName: IdlName): F[ProtocolVersion] =

@@ -24,7 +24,7 @@ import higherkindness.compendium.models.{IdlName, ProtocolMetadata}
 
 class PgDBServiceSpec extends PGHelper(Metadata) {
 
-  private lazy val pg = PgDBService.impl[IO](transactor)
+  private lazy val pg = PgDBService[IO](transactor)
 
   "Postgres Service" should {
     "insert protocol correctly" in {

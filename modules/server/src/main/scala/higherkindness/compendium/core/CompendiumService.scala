@@ -21,8 +21,8 @@ import cats.implicits._
 import higherkindness.compendium.core.refinements._
 import higherkindness.compendium.db.DBService
 import higherkindness.compendium.models._
-import higherkindness.compendium.models.parserModels.{ParserError, ParserResult}
-import higherkindness.compendium.parser.ProtocolParserService
+import higherkindness.compendium.models.transformers.types.{TransformError, TransformResult}
+import higherkindness.compendium.parser.ProtocolTransformer
 import higherkindness.compendium.storage.Storage
 
 trait CompendiumService[F[_]] {
@@ -33,12 +33,12 @@ trait CompendiumService[F[_]] {
   def transformProtocol(
       id: ProtocolId,
       target: IdlName,
-      version: Option[ProtocolVersion]): F[ParserResult]
+      version: Option[ProtocolVersion]): F[TransformResult]
 }
 
 object CompendiumService {
 
-  implicit def impl[F[_]: Sync: Storage: DBService: ProtocolUtils: ProtocolParserService]: CompendiumService[
+  implicit def impl[F[_]: Sync: Storage: DBService: ProtocolUtils: ProtocolTransformer]: CompendiumService[
     F] =
     new CompendiumService[F] {
 
@@ -67,12 +67,13 @@ object CompendiumService {
       override def transformProtocol(
           id: ProtocolId,
           target: IdlName,
-          version: Option[ProtocolVersion]): F[ParserResult] =
+          version: Option[ProtocolVersion]): F[TransformResult] =
         for {
           maybeProto  <- recoverProtocol(id, version)
-          maybeResult <- maybeProto.traverse(ProtocolParserService[F].parse(_, target))
+          maybeResult <- maybeProto.traverse(ProtocolTransformer[F].transform(_, target))
         } yield
-          maybeResult.getOrElse(ParserError(s"No Protocol Found with id: $id").asLeft[FullProtocol])
+          maybeResult.getOrElse(
+            TransformError(s"No Protocol Found with id: $id").asLeft[FullProtocol])
     }
 
   def apply[F[_]](implicit F: CompendiumService[F]): CompendiumService[F] = F
