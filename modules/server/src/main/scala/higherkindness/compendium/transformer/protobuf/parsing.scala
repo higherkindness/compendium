@@ -16,38 +16,31 @@
 
 package higherkindness.compendium.transformer.protobuf
 
-import java.io.{File, PrintWriter}
+import java.io.PrintWriter
+import java.nio.file.{Files, Path}
 
-import cats.effect.Sync
-import cats.syntax.flatMap._
+import cats.effect.{Bracket, Resource, Sync}
 import higherkindness.compendium.models.FullProtocol
-import higherkindness.skeuomorph.protobuf.ParseProto
 import higherkindness.skeuomorph.protobuf.ParseProto.ProtoSource
-
-import scala.util.Random
 
 object parsing {
 
-  def parseProtobuf[F[_]: Sync](raw: String)(
-      buildFullProtocol: ProtoSource => F[FullProtocol]): F[FullProtocol] = {
+  def transformProtobuf[F[_]: Sync: Bracket[?[_], Throwable]](raw: String)(
+      transformToTarget: ProtoSource => F[FullProtocol]): F[FullProtocol] = {
 
-    val fileName = s"${Random.alphanumeric}.proto"
-    val path     = "/tmp"
-    val filePath = s"$path/$fileName"
+    val tmpFileCreation =
+      Sync[F].delay(Files.createTempFile("compendium", "protobuf"))
+    def printWriterCreation(tmpFile: Path): F[PrintWriter] =
+      Sync[F].delay(new PrintWriter(tmpFile.toFile))
 
-    Sync[F]
-      .delay {
-        new PrintWriter(filePath) {
-          write(raw); close()
-        }
-        ParseProto.ProtoSource(fileName, path)
-      }
-      .flatMap(buildFullProtocol)
-      .flatTap(
-        _ =>
-          Sync[F].delay(
-            new File(filePath).delete()
-        ))
+    val result = for {
+      tmpFile   <- Resource.liftF(tmpFileCreation)
+      tmpWriter <- Resource.fromAutoCloseable(printWriterCreation(tmpFile))
+      _         <- Resource.liftF(Sync[F].delay(tmpWriter.write(raw)))
+      _         <- Resource.liftF(Sync[F].delay(tmpWriter.close()))
+    } yield ProtoSource(tmpFile.getFileName.toString, tmpFile.getParent.toString)
+
+    result.use(transformToTarget)
   }
 
 }

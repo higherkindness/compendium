@@ -19,10 +19,10 @@ package higherkindness.compendium.transformer.skeuomorph
 import cats.effect.Sync
 import cats.implicits._
 import higherkindness.compendium.models.transformer.types.{TransformError, TransformResult}
-import higherkindness.compendium.models.{FullProtocol, IdlName, Protocol}
+import higherkindness.compendium.models.{FullProtocol, IdlName, Protocol, ProtocolMetadata}
 import higherkindness.compendium.transformer.ProtocolTransformer
-import higherkindness.skeuomorph.protobuf.{ParseProto, ProtobufF}
-import higherkindness.skeuomorph.{avro, mu}
+import higherkindness.skeuomorph.protobuf.ParseProto.ProtoSource
+import higherkindness.skeuomorph.{avro, mu, protobuf}
 import org.apache.avro.{Protocol => AvroProtocol}
 import qq.droste.data.Mu
 import qq.droste.data.Mu._
@@ -33,30 +33,33 @@ object SkeuomorphProtocolTransformer {
 
     import higherkindness.compendium.transformer.protobuf.parsing._
 
+    private def protobufToMu(source: ProtoSource, oldMetadata: ProtocolMetadata): F[FullProtocol] =
+      protobuf.ParseProto
+        .parseProto[F, Mu[protobuf.ProtobufF]]
+        .parse(source)
+        .map { protobuf =>
+          val muProto        = mu.Protocol.fromProtobufProto(protobuf)
+          val targetMetadata = oldMetadata.copy(idlName = IdlName.Mu)
+          val targetProto    = Protocol(mu.print.proto.print(muProto))
+          FullProtocol(targetMetadata, targetProto)
+        }
+
     private def skeuomorphTransformation(fp: FullProtocol, target: IdlName): F[FullProtocol] =
       (fp.metadata.idlName, target) match {
         // (from, to)
         case _ if fp.metadata.idlName.entryName == target.entryName => Sync[F].pure(fp)
         case (IdlName.Avro, IdlName.Mu) =>
-          Sync[F]
-            .delay(
-              mu.print.proto.print(mu.Protocol.fromAvroProtocol(
-                avro.Protocol.fromProto(AvroProtocol.parse(fp.protocol.raw)))))
-            .fmap(p =>
-              FullProtocol
-                .apply(fp.metadata.copy(idlName = IdlName.withName(target.entryName)), Protocol(p)))
-        case (IdlName.Protobuf, IdlName.Mu) =>
-          parseProtobuf(fp.protocol.raw) { source =>
-            ParseProto
-              .parseProto[F, Mu[ProtobufF]]
-              .parse(source)
-              .fmap(mu.Protocol.fromProtobufProto(_))
-              .fmap(
-                p =>
-                  FullProtocol(
-                    fp.metadata.copy(idlName = IdlName.withName(target.entryName)),
-                    Protocol(mu.print.proto.print(p))))
+          for {
+            avroProto      <- Sync[F].delay(AvroProtocol.parse(fp.protocol.raw))
+            skeuoAvroProto <- Sync[F].delay(avro.Protocol.fromProto(avroProto))
+            muProto        <- Sync[F].delay(mu.Protocol.fromAvroProtocol(skeuoAvroProto))
+          } yield {
+            val targetMetadata = fp.metadata.copy(idlName = IdlName.Mu)
+            val targetProto    = Protocol(mu.print.proto.print(muProto))
+            FullProtocol(targetMetadata, targetProto)
           }
+        case (IdlName.Protobuf, IdlName.Mu) =>
+          transformProtobuf(fp.protocol.raw)(protobufToMu(_, fp.metadata))
       }
 
     override def transform(protocol: FullProtocol, target: IdlName): F[TransformResult] =

@@ -40,8 +40,9 @@ class SkeuomorphProtocolTransformerSpec extends Specification {
     }
 
     "Transform a simple Protobuf Schema to Mu" >> {
-      val protocolMetadata = ProtocolMetadata(ProtocolId("id"), IdlName.Avro, ProtocolVersion(1))
-      val fullProtocol     = FullProtocol(protocolMetadata, Protocol(simpleAvroExample))
+      val protocolMetadata =
+        ProtocolMetadata(ProtocolId("id"), IdlName.Protobuf, ProtocolVersion(1))
+      val fullProtocol = FullProtocol(protocolMetadata, Protocol(simpleProtobufExample))
       transformer
         .transform(fullProtocol, IdlName.Mu)
         .map(_.isRight)
