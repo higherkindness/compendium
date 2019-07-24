@@ -34,7 +34,7 @@ object CompendiumServiceSpec extends Specification with ScalaCheck {
   private val dummyIdlName: IdlName   = IdlName.Mu
 
   "Store protocol" >> {
-    "If it's a valid protocol we store it" >> prop { metadata: ProtocolMetadata =>
+    "Given a valid protocol it is stored" >> prop { metadata: ProtocolMetadata =>
       implicit val dbService     = new MetadataStorageStub(true)
       implicit val storage       = new StorageStub(dummyProtocol.some, metadata.id, metadata.version)
       implicit val protocolUtils = new ProtocolUtilsStub(dummyProtocol, true)
@@ -47,7 +47,7 @@ object CompendiumServiceSpec extends Specification with ScalaCheck {
         .unsafeRunSync()
     }
 
-    "If it's an invalid protocol we raise an error" >> prop { metadata: ProtocolMetadata =>
+    "Given an invalid protocol an error is raised" >> prop { metadata: ProtocolMetadata =>
       implicit val dbService     = new MetadataStorageStub(true)
       implicit val storage       = new StorageStub(dummyProtocol.some, metadata.id, metadata.version)
       implicit val protocolUtils = new ProtocolUtilsStub(dummyProtocol, false)
@@ -60,8 +60,8 @@ object CompendiumServiceSpec extends Specification with ScalaCheck {
     }
   }
 
-  "Recover protocol" >> {
-    "Given a identifier we recover the protocol" >> prop { metadata: ProtocolMetadata =>
+  "Retrieve protocol" >> {
+    "Given a identifier the protocol is retrieved" >> prop { metadata: ProtocolMetadata =>
       implicit val dbService     = new MetadataStorageStub(true, metadata.some)
       implicit val storage       = new StorageStub(dummyProtocol.some, metadata.id, metadata.version)
       implicit val protocolUtils = new ProtocolUtilsStub(dummyProtocol, true)
@@ -76,7 +76,7 @@ object CompendiumServiceSpec extends Specification with ScalaCheck {
   }
 
   "Exists protocol" >> {
-    "Given a identifier we check if a protocol exists" >> prop { metadata: ProtocolMetadata =>
+    "Given a identifier protocol existence is checked" >> prop { metadata: ProtocolMetadata =>
       implicit val dbService     = new MetadataStorageStub(true)
       implicit val storage       = new StorageStub(dummyProtocol.some, metadata.id, metadata.version)
       implicit val protocolUtils = new ProtocolUtilsStub(dummyProtocol, true)

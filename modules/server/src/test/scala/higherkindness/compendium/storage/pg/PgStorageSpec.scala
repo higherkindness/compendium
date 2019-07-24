@@ -40,7 +40,6 @@ class PgStorageSpec extends PGHelper(Data) {
         .retrieve(metadata)
 
       result.unsafeRunSync must ===(fullProto.some)
-
     }
 
     "update protocol correctly" in {

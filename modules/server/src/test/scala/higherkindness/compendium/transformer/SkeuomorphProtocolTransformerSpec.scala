@@ -28,23 +28,25 @@ class SkeuomorphProtocolTransformerSpec extends Specification {
 
   val transformer = SkeuomorphProtocolTransformer[IO]
 
-  "ProtocolParser should transform a simple Avro Schema to Mu" >> {
-    val protocolMetadata = ProtocolMetadata(ProtocolId("id"), IdlName.Avro, ProtocolVersion(1))
-    val fullProtocol     = FullProtocol(protocolMetadata, Protocol(simpleAvroExample))
+  "ProtocolParser" should {
+    "Transform a simple Avro Schema to Mu" >> {
+      val protocolMetadata = ProtocolMetadata(ProtocolId("id"), IdlName.Avro, ProtocolVersion(1))
+      val fullProtocol     = FullProtocol(protocolMetadata, Protocol(simpleAvroExample))
 
-    transformer
-      .transform(fullProtocol, IdlName.Mu)
-      .map(_.isRight)
-      .unsafeRunSync()
-  }
+      transformer
+        .transform(fullProtocol, IdlName.Mu)
+        .map(_.isRight)
+        .unsafeRunSync()
+    }
 
-  "ProtocolParser should transform a simple Protobuf Schema to Mu" >> {
-    val protocolMetadata = ProtocolMetadata(ProtocolId("id"), IdlName.Avro, ProtocolVersion(1))
-    val fullProtocol     = FullProtocol(protocolMetadata, Protocol(simpleAvroExample))
-    transformer
-      .transform(fullProtocol, IdlName.Mu)
-      .map(_.isRight)
-      .unsafeRunSync()
+    "Transform a simple Protobuf Schema to Mu" >> {
+      val protocolMetadata = ProtocolMetadata(ProtocolId("id"), IdlName.Avro, ProtocolVersion(1))
+      val fullProtocol     = FullProtocol(protocolMetadata, Protocol(simpleAvroExample))
+      transformer
+        .transform(fullProtocol, IdlName.Mu)
+        .map(_.isRight)
+        .unsafeRunSync()
+    }
   }
 
 }

@@ -34,8 +34,8 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
 
   private[this] val dummyProtocol: Protocol = Protocol("rawProtocol")
 
-  implicit val clientConfig: CompendiumConfig =
-    pureconfig.loadConfigOrThrow[CompendiumConfig]("compendium")
+  implicit val clientConfig: CompendiumClientConfig =
+    pureconfig.loadConfigOrThrow[CompendiumClientConfig]("compendium")
 
   private[this] def asEntityJson[T: io.circe.Encoder](t: T): Entity =
     Entity.StringEntity(t.asJson.toString, ContentType.`application/json`)
@@ -106,12 +106,12 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
     }
   }
 
-  "Recover protocol" >> {
+  "Retrieve protocol" >> {
     "Given a valid identifier returns a protocol" >> {
 
       implicit val terp = interp("proto1", IdlName.Scala)
 
-      CompendiumClient().recoverProtocol("proto1", None).unsafeRunSync() should beSome(
+      CompendiumClient().retrieveProtocol("proto1", None).unsafeRunSync() should beSome(
         dummyProtocol)
     }
 
@@ -120,7 +120,7 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
 
       implicit val terp = interp("proto1", IdlName.Scala, version)
 
-      CompendiumClient().recoverProtocol("proto1", version).unsafeRunSync() should beSome(
+      CompendiumClient().retrieveProtocol("proto1", version).unsafeRunSync() should beSome(
         dummyProtocol)
     }
 
@@ -128,7 +128,7 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
 
       implicit val terp = interp("proto1", IdlName.Scala)
 
-      CompendiumClient().recoverProtocol("proto2", None).unsafeRunSync() should beNone
+      CompendiumClient().retrieveProtocol("proto2", None).unsafeRunSync() should beNone
     }
 
     "Given an identifier returns a internal server error" >> {
@@ -136,7 +136,7 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
       implicit val terp = interp("proto1", IdlName.Scala)
 
       CompendiumClient()
-        .recoverProtocol("error", None)
+        .retrieveProtocol("error", None)
         .unsafeRunSync() must throwA[higherkindness.compendium.models.UnknownError]
     }
   }

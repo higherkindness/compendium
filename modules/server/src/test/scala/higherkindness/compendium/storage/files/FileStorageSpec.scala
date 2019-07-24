@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.storage
+package higherkindness.compendium.storage.files
 
 import java.io.File
 import java.nio.file.Paths
@@ -22,9 +22,9 @@ import java.nio.file.Paths
 import cats.effect.IO
 import higherkindness.compendium.CompendiumArbitrary._
 import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
-import higherkindness.compendium.models._
 import higherkindness.compendium.models.config.FileStorageConfig
-import higherkindness.compendium.storage.files.FileStorage
+import higherkindness.compendium.models.{FullProtocol, Protocol, ProtocolMetadata}
+import higherkindness.compendium.storage.{files, Storage}
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
 import org.specs2.specification.{AfterEach, BeforeAfterAll}

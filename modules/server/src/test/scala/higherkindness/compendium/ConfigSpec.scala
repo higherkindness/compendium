@@ -21,6 +21,7 @@ import com.typesafe.config.ConfigFactory
 import higherkindness.compendium.models.config._
 import org.specs2.mutable.Specification
 import pureconfig.generic.auto._
+import pureconfig.module.catseffect._
 
 class ConfigSpec extends Specification {
 
@@ -59,9 +60,7 @@ class ConfigSpec extends Specification {
 
     val config = configWithStorageBlock(storageBlock)
 
-    IO.delay(
-        pureconfig.loadConfigOrThrow[CompendiumServerConfig](ConfigFactory.parseString(config)))
-      .attempt
+    loadConfigF[IO, CompendiumServerConfig](ConfigFactory.parseString(config)).attempt
       .unsafeRunSync() must beRight[CompendiumServerConfig]
   }
 
@@ -81,9 +80,7 @@ class ConfigSpec extends Specification {
 
     val config = configWithStorageBlock(storageBlock)
 
-    IO.delay(
-        pureconfig.loadConfigOrThrow[CompendiumServerConfig](ConfigFactory.parseString(config)))
-      .attempt
+    loadConfigF[IO, CompendiumServerConfig](ConfigFactory.parseString(config)).attempt
       .unsafeRunSync() must beRight[CompendiumServerConfig]
   }
 

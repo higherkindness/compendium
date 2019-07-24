@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.metadata
+package higherkindness.compendium.metadata.pg
 
 import doobie.specs2._
 import higherkindness.compendium.core.refinements.ProtocolId
 import higherkindness.compendium.metadata.MigrationsMode.Metadata
-import higherkindness.compendium.metadata.pg.Queries
+import higherkindness.compendium.metadata.PGHelper
 import org.specs2.specification.Scope
 
 class MetadataQueriesSpec extends PGHelper(Metadata) with IOChecker {

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.metadata
+package higherkindness.compendium.metadata.pg
 
 import cats.effect.IO
 import cats.implicits._
 import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
 import higherkindness.compendium.metadata.MigrationsMode.Metadata
-import higherkindness.compendium.metadata.pg.PgMetadataStorage
+import higherkindness.compendium.metadata.PGHelper
 import higherkindness.compendium.models.{IdlName, ProtocolMetadata}
 
 class PgMetadataStorageSpec extends PGHelper(Metadata) {

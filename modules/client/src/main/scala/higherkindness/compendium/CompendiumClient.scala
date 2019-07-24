@@ -40,7 +40,7 @@ trait CompendiumClient {
    * @param version optional protocol version number
    * @return a protocol
    */
-  def recoverProtocol(identifier: String, version: Option[Int]): IO[Option[Protocol]]
+  def retrieveProtocol(identifier: String, version: Option[Int]): IO[Option[Protocol]]
 
   /** Generates a client for a target and a protocol by its identifier
    *
@@ -53,7 +53,9 @@ trait CompendiumClient {
 
 object CompendiumClient {
 
-  def apply()(implicit interp: InterpTrans[IO], clientConfig: CompendiumConfig): CompendiumClient =
+  def apply()(
+      implicit interp: InterpTrans[IO],
+      clientConfig: CompendiumClientConfig): CompendiumClient =
     new CompendiumClient {
 
       val baseUrl: String          = s"http://${clientConfig.http.host}:${clientConfig.http.port}"
@@ -69,16 +71,16 @@ object CompendiumClient {
             case Status.Created => IO.unit
             case Status.OK      => IO.unit
             case Status.BadRequest =>
-              asError(request, new SchemaError(_))
+              asError(request, SchemaError)
             case Status.InternalServerError =>
-              IO.raiseError(new UnknownError(s"Error in compendium server"))
+              IO.raiseError(UnknownError(s"Error in compendium server"))
             case _ =>
-              IO.raiseError(new UnknownError(s"Unknown error with status code $status"))
+              IO.raiseError(UnknownError(s"Unknown error with status code $status"))
           }
         } yield status.code
       }
 
-      override def recoverProtocol(
+      override def retrieveProtocol(
           identifier: String,
           version: Option[Int]): IO[Option[Protocol]] = {
         val versionParam = version.fold("")(v => s"?$versionParamName=${v.show}")
@@ -92,9 +94,9 @@ object CompendiumClient {
             case Status.OK       => request.as[Protocol].map(Some(_)).exec[IO]
             case Status.NotFound => IO(None)
             case Status.InternalServerError =>
-              IO.raiseError(new UnknownError(s"Error in compendium server"))
+              IO.raiseError(UnknownError(s"Error in compendium server"))
             case _ =>
-              IO.raiseError(new UnknownError(s"Unknown error with status code $status"))
+              IO.raiseError(UnknownError(s"Unknown error with status code $status"))
           }
         } yield out
       }
