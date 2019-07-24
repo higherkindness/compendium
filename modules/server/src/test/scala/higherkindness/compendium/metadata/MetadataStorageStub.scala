@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.db
+package higherkindness.compendium.metadata
 
 import cats.effect.IO
 import higherkindness.compendium.models.{IdlName, ProtocolMetadata}
 import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
 
-class DBServiceStub(val exists: Boolean, metadata: Option[ProtocolMetadata] = None)
-    extends DBService[IO] {
+class MetadataStorageStub(val exists: Boolean, metadata: Option[ProtocolMetadata] = None)
+    extends MetadataStorage[IO] {
   override def upsertProtocol(id: ProtocolId, idlNames: IdlName): IO[ProtocolVersion] =
     IO.pure(metadata.map(_.version).getOrElse(ProtocolVersion(1)))
   override def existsProtocol(id: ProtocolId): IO[Boolean] = IO.pure(exists)

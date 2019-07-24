@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.db.queries
+package higherkindness.compendium.metadata.pg
 
-import doobie._
-import doobie.implicits.toSqlInterpolator
-import doobie.refined.implicits._
+import doobie.implicits._
+import doobie.{Query0, Update0}
+import higherkindness.compendium.core.doobie.implicits._
 import higherkindness.compendium.models.ProtocolMetadata
-import metas._
 
 object Queries {
 

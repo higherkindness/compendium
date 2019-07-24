@@ -19,10 +19,10 @@ package higherkindness.compendium.core
 import cats.effect.Sync
 import cats.implicits._
 import higherkindness.compendium.core.refinements._
-import higherkindness.compendium.db.DBService
+import higherkindness.compendium.metadata.MetadataStorage
 import higherkindness.compendium.models._
-import higherkindness.compendium.models.transformers.types.{TransformError, TransformResult}
-import higherkindness.compendium.parser.ProtocolTransformer
+import higherkindness.compendium.models.transformer.types.{TransformError, TransformResult}
+import higherkindness.compendium.transformer.ProtocolTransformer
 import higherkindness.compendium.storage.Storage
 
 trait CompendiumService[F[_]] {
@@ -38,7 +38,7 @@ trait CompendiumService[F[_]] {
 
 object CompendiumService {
 
-  implicit def impl[F[_]: Sync: Storage: DBService: ProtocolUtils: ProtocolTransformer]: CompendiumService[
+  implicit def impl[F[_]: Sync: Storage: MetadataStorage: ProtocolUtils: ProtocolTransformer]: CompendiumService[
     F] =
     new CompendiumService[F] {
 
@@ -48,7 +48,7 @@ object CompendiumService {
           idlName: IdlName): F[ProtocolVersion] =
         for {
           _       <- ProtocolUtils[F].validateProtocol(protocol)
-          version <- DBService[F].upsertProtocol(id, idlName)
+          version <- MetadataStorage[F].upsertProtocol(id, idlName)
           _       <- Storage[F].store(id, version, protocol)
         } yield version
 
@@ -56,13 +56,13 @@ object CompendiumService {
           id: ProtocolId,
           version: Option[ProtocolVersion]): F[Option[FullProtocol]] =
         for {
-          maybeMetadata <- DBService[F].selectProtocolMetadataById(id)
+          maybeMetadata <- MetadataStorage[F].selectProtocolMetadataById(id)
           maybeProto <- maybeMetadata.flatTraverse(metadata =>
             Storage[F].recover(version.fold(metadata)(version => metadata.copy(version = version))))
         } yield maybeProto
 
       override def existsProtocol(id: ProtocolId): F[Boolean] =
-        DBService[F].existsProtocol(id)
+        MetadataStorage[F].existsProtocol(id)
 
       override def transformProtocol(
           id: ProtocolId,

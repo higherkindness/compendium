@@ -19,8 +19,8 @@ package higherkindness.compendium.storage.pg
 import cats.effect.IO
 import cats.implicits._
 import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
-import higherkindness.compendium.db.MigrationsMode.Data
-import higherkindness.compendium.db.PGHelper
+import higherkindness.compendium.metadata.MigrationsMode.Data
+import higherkindness.compendium.metadata.PGHelper
 import higherkindness.compendium.models.{FullProtocol, IdlName, Protocol, ProtocolMetadata}
 
 class PgStorageSpec extends PGHelper(Data) {

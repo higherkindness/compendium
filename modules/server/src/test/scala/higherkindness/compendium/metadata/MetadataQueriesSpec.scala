@@ -14,17 +14,25 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.db.queries
+package higherkindness.compendium.metadata
 
-import cats.instances.int._
-import doobie.util.{Get, Meta, Put}
-import higherkindness.compendium.core.refinements.ProtocolVersion
-import higherkindness.compendium.models.IdlName
+import doobie.specs2._
+import higherkindness.compendium.metadata.MigrationsMode.Metadata
+import higherkindness.compendium.metadata.pg.Queries
+import org.specs2.specification.Scope
 
-object metas {
+class MetadataQueriesSpec extends PGHelper(Metadata) with IOChecker {
 
-  implicit val IdlNamesMeta: Meta[IdlName] = Meta[String].timap(IdlName.withName)(_.entryName)
+  "MetadataQueries" should {
+    "match db model" in new context {
+      check(Queries.checkIfExistsQ(protocolId))
+      check(Queries.upsertProtocolIdQ(protocolId, idlName))
+    }
+  }
 
-  implicit val protocolVersion: Put[ProtocolVersion] = Put[Int].contramap(_.value)
-  implicit val protocolIdGet: Get[ProtocolVersion]   = Get[Int].temap(ProtocolVersion.from)
+  trait context extends Scope {
+    val protocolId: String = "my.test.protocol.id"
+    val idlName: String    = "Protobuf"
+  }
+
 }

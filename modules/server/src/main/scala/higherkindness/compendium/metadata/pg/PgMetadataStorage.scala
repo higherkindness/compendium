@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.db
+package higherkindness.compendium.metadata.pg
 
 import cats.effect.Async
-import doobie.util.transactor.Transactor
 import doobie.implicits._
+import doobie.util.transactor.Transactor
+import higherkindness.compendium.core.doobie.implicits._
 import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
-import higherkindness.compendium.db.queries.Queries
-import higherkindness.compendium.db.queries.metas._
+import higherkindness.compendium.metadata.MetadataStorage
 import higherkindness.compendium.models.{IdlName, ProtocolMetadata}
 
-object PgDBService {
+object PgMetadataStorage {
 
-  def apply[F[_]: Async](xa: Transactor[F]): DBService[F] =
-    new DBService[F] {
+  def apply[F[_]: Async](xa: Transactor[F]): MetadataStorage[F] =
+    new MetadataStorage[F] {
 
       override def upsertProtocol(id: ProtocolId, idlName: IdlName): F[ProtocolVersion] =
         Queries

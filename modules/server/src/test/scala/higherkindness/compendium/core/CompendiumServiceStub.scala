@@ -18,7 +18,7 @@ package higherkindness.compendium.core
 
 import cats.effect.IO
 import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
-import higherkindness.compendium.models.transformers.types.TransformResult
+import higherkindness.compendium.models.transformer.types.TransformResult
 import higherkindness.compendium.models._
 
 class CompendiumServiceStub(protocolOpt: Option[FullProtocol], exists: Boolean)

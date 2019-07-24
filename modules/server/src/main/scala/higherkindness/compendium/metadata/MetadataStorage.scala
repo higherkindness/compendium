@@ -14,25 +14,18 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.db
+package higherkindness.compendium.metadata
 
-import doobie.specs2._
-import higherkindness.compendium.db.MigrationsMode.Metadata
-import higherkindness.compendium.db.queries.Queries
-import org.specs2.specification.Scope
+import higherkindness.compendium.models.{IdlName, ProtocolMetadata}
+import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
 
-class MetadataQueriesSpec extends PGHelper(Metadata) with IOChecker {
+trait MetadataStorage[F[_]] {
+  def upsertProtocol(id: ProtocolId, idlName: IdlName): F[ProtocolVersion]
+  def existsProtocol(id: ProtocolId): F[Boolean]
+  def selectProtocolMetadataById(id: ProtocolId): F[Option[ProtocolMetadata]]
+  def ping(): F[Boolean]
+}
 
-  "MetadataQueries" should {
-    "match db model" in new context {
-      check(Queries.checkIfExistsQ(protocolId))
-      check(Queries.upsertProtocolIdQ(protocolId, idlName))
-    }
-  }
-
-  trait context extends Scope {
-    val protocolId: String = "my.test.protocol.id"
-    val idlName: String    = "Protobuf"
-  }
-
+object MetadataStorage {
+  def apply[F[_]](implicit F: MetadataStorage[F]): MetadataStorage[F] = F
 }

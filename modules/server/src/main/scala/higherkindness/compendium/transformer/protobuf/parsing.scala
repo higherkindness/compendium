@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.parser
+package higherkindness.compendium.transformer.protobuf
 
 import java.io.{File, PrintWriter}
 
@@ -26,10 +26,10 @@ import higherkindness.skeuomorph.protobuf.ParseProto.ProtoSource
 
 import scala.util.Random
 
-object utils {
+object parsing {
 
-  def parseProtobufRaw[F[_]: Sync](raw: String)(
-      f: ProtoSource => F[FullProtocol]): F[FullProtocol] = {
+  def parseProtobuf[F[_]: Sync](raw: String)(
+      buildFullProtocol: ProtoSource => F[FullProtocol]): F[FullProtocol] = {
 
     val fileName = s"${Random.alphanumeric}.proto"
     val path     = "/tmp"
@@ -42,7 +42,7 @@ object utils {
         }
         ParseProto.ProtoSource(fileName, path)
       }
-      .flatMap(f)
+      .flatMap(buildFullProtocol)
       .flatTap(
         _ =>
           Sync[F].delay(

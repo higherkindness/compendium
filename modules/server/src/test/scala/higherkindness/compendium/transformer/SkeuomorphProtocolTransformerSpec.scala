@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.parser
+package higherkindness.compendium.transformer
 
 import cats.effect.IO
 import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
 import higherkindness.compendium.models._
+import higherkindness.compendium.transformer.skeuomorph.SkeuomorphProtocolTransformer
 import org.specs2.mutable.Specification
 
 class SkeuomorphProtocolTransformerSpec extends Specification {

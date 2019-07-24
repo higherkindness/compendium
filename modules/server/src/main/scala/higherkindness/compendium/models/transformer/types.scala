@@ -14,19 +14,14 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.parser
+package higherkindness.compendium.models.transformer
 
-import cats.effect.Sync
-import higherkindness.compendium.models.{FullProtocol, IdlName}
-import higherkindness.compendium.models.transformers.types.TransformResult
+import higherkindness.compendium.models.FullProtocol
 
-trait ProtocolTransformer[F[_]] {
+object types {
 
-  def transform(protocol: FullProtocol, target: IdlName): F[TransformResult]
-}
+  final case class TransformError(msg: String)
 
-object ProtocolTransformer {
-
-  def apply[F[_]: Sync](implicit F: ProtocolTransformer[F]): ProtocolTransformer[F] = F
+  type TransformResult = Either[TransformError, FullProtocol]
 
 }

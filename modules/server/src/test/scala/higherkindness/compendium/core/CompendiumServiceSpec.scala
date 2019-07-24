@@ -19,10 +19,10 @@ package higherkindness.compendium.core
 import cats.effect.IO
 import cats.syntax.all._
 import higherkindness.compendium.CompendiumArbitrary._
-import higherkindness.compendium.db.DBServiceStub
+import higherkindness.compendium.metadata.MetadataStorageStub
 import higherkindness.compendium.models.{IdlName, Protocol, ProtocolMetadata}
-import higherkindness.compendium.parser.SkeuomorphProtocolTransformer
 import higherkindness.compendium.storage.StorageStub
+import higherkindness.compendium.transformer.skeuomorph.SkeuomorphProtocolTransformer
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
 
@@ -35,7 +35,7 @@ object CompendiumServiceSpec extends Specification with ScalaCheck {
 
   "Store protocol" >> {
     "If it's a valid protocol we store it" >> prop { metadata: ProtocolMetadata =>
-      implicit val dbService     = new DBServiceStub(true)
+      implicit val dbService     = new MetadataStorageStub(true)
       implicit val storage       = new StorageStub(dummyProtocol.some, metadata.id, metadata.version)
       implicit val protocolUtils = new ProtocolUtilsStub(dummyProtocol, true)
       implicit val transformer   = SkeuomorphProtocolTransformer[IO]
@@ -48,7 +48,7 @@ object CompendiumServiceSpec extends Specification with ScalaCheck {
     }
 
     "If it's an invalid protocol we raise an error" >> prop { metadata: ProtocolMetadata =>
-      implicit val dbService     = new DBServiceStub(true)
+      implicit val dbService     = new MetadataStorageStub(true)
       implicit val storage       = new StorageStub(dummyProtocol.some, metadata.id, metadata.version)
       implicit val protocolUtils = new ProtocolUtilsStub(dummyProtocol, false)
       implicit val transformer   = SkeuomorphProtocolTransformer[IO]
@@ -62,7 +62,7 @@ object CompendiumServiceSpec extends Specification with ScalaCheck {
 
   "Recover protocol" >> {
     "Given a identifier we recover the protocol" >> prop { metadata: ProtocolMetadata =>
-      implicit val dbService     = new DBServiceStub(true, metadata.some)
+      implicit val dbService     = new MetadataStorageStub(true, metadata.some)
       implicit val storage       = new StorageStub(dummyProtocol.some, metadata.id, metadata.version)
       implicit val protocolUtils = new ProtocolUtilsStub(dummyProtocol, true)
       implicit val transformer   = SkeuomorphProtocolTransformer[IO]
@@ -77,7 +77,7 @@ object CompendiumServiceSpec extends Specification with ScalaCheck {
 
   "Exists protocol" >> {
     "Given a identifier we check if a protocol exists" >> prop { metadata: ProtocolMetadata =>
-      implicit val dbService     = new DBServiceStub(true)
+      implicit val dbService     = new MetadataStorageStub(true)
       implicit val storage       = new StorageStub(dummyProtocol.some, metadata.id, metadata.version)
       implicit val protocolUtils = new ProtocolUtilsStub(dummyProtocol, true)
       implicit val transformer   = SkeuomorphProtocolTransformer[IO]

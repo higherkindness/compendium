@@ -14,25 +14,24 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.parser
+package higherkindness.compendium.transformer.skeuomorph
 
 import cats.effect.Sync
-import cats.syntax.functor._
-import cats.syntax.either._
-import higherkindness.compendium.models._
-import higherkindness.compendium.models.transformers.types._
-import higherkindness.skeuomorph.mu
-import higherkindness.skeuomorph.avro
+import cats.implicits._
+import higherkindness.compendium.models.transformer.types.{TransformError, TransformResult}
+import higherkindness.compendium.models.{FullProtocol, IdlName, Protocol}
+import higherkindness.compendium.transformer.ProtocolTransformer
 import higherkindness.skeuomorph.protobuf.{ParseProto, ProtobufF}
-import qq.droste.data.Mu._
+import higherkindness.skeuomorph.{avro, mu}
 import org.apache.avro.{Protocol => AvroProtocol}
 import qq.droste.data.Mu
+import qq.droste.data.Mu._
 
 object SkeuomorphProtocolTransformer {
 
   def apply[F[_]: Sync]: ProtocolTransformer[F] = new ProtocolTransformer[F] {
 
-    import utils._
+    import higherkindness.compendium.transformer.protobuf.parsing._
 
     private def skeuomorphTransformation(fp: FullProtocol, target: IdlName): F[FullProtocol] =
       (fp.metadata.idlName, target) match {
@@ -47,7 +46,7 @@ object SkeuomorphProtocolTransformer {
               FullProtocol
                 .apply(fp.metadata.copy(idlName = IdlName.withName(target.entryName)), Protocol(p)))
         case (IdlName.Protobuf, IdlName.Mu) =>
-          parseProtobufRaw(fp.protocol.raw) { source =>
+          parseProtobuf(fp.protocol.raw) { source =>
             ParseProto
               .parseProto[F, Mu[ProtobufF]]
               .parse(source)

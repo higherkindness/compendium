@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.storage
+package higherkindness.compendium.storage.files
 
 import java.io.{File, FilenameFilter, PrintWriter}
 
 import cats.effect.Sync
 import cats.implicits._
 import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
-import higherkindness.compendium.models.{FullProtocol, Protocol, ProtocolMetadata}
 import higherkindness.compendium.models.config.FileStorageConfig
+import higherkindness.compendium.models.{FullProtocol, Protocol, ProtocolMetadata}
+import higherkindness.compendium.storage.Storage
 
 object FileStorage {
 

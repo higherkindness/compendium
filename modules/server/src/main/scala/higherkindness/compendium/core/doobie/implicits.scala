@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.storage.pg
+package higherkindness.compendium.core.doobie
 
-import cats.instances.string._
-import doobie.util.{Get, Put}
-import higherkindness.compendium.core.refinements.ProtocolId
-import higherkindness.compendium.models.Protocol
+import cats.instances.all._
+import doobie.util.{Get, Meta, Put}
+import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
+import higherkindness.compendium.models.{IdlName, Protocol}
 
 object implicits {
 
@@ -29,4 +29,9 @@ object implicits {
 
   implicit val protocolIdPut: Put[ProtocolId] = Put[String].contramap(_.value)
   implicit val protocolIdGet: Get[ProtocolId] = Get[String].temap(ProtocolId.from)
+
+  implicit val IdlNamesMeta: Meta[IdlName] = Meta[String].timap(IdlName.withName)(_.entryName)
+
+  implicit val protocolVersionPut: Put[ProtocolVersion] = Put[Int].contramap(_.value)
+  implicit val protocolVersionGet: Get[ProtocolVersion] = Get[Int].temap(ProtocolVersion.from)
 }

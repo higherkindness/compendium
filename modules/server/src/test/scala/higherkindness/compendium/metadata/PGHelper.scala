@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.db
+package higherkindness.compendium.metadata
 
 import cats.effect._
 import com.dimafeng.testcontainers.PostgreSQLContainer
@@ -36,7 +36,7 @@ object MigrationsMode {
 // PGHelper spins up a fresh postgres container and runs the specified migrations afterwards
 abstract class PGHelper(mode: MigrationsMode) extends Specification with ForAllTestContainer {
 
-  import higherkindness.compendium.db.MigrationsMode.{Data, Metadata}
+  import higherkindness.compendium.metadata.MigrationsMode.{Data, Metadata}
 
   private val location = mode match {
     case Metadata => Migrations.metadataLocation[IO]

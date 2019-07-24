@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.db
+package higherkindness.compendium.metadata
 
 import cats.effect.IO
 import cats.implicits._
 import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
-import higherkindness.compendium.db.MigrationsMode.Metadata
+import higherkindness.compendium.metadata.MigrationsMode.Metadata
+import higherkindness.compendium.metadata.pg.PgMetadataStorage
 import higherkindness.compendium.models.{IdlName, ProtocolMetadata}
 
-class PgDBServiceSpec extends PGHelper(Metadata) {
+class PgMetadataStorageSpec extends PGHelper(Metadata) {
 
-  private lazy val pg = PgDBService[IO](transactor)
+  private lazy val pg = PgMetadataStorage[IO](transactor)
 
   "Postgres Service" should {
     "insert protocol correctly" in {
