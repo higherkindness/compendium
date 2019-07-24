@@ -28,7 +28,7 @@ class SkeuomorphProtocolTransformerSpec extends Specification {
 
   val transformer = SkeuomorphProtocolTransformer[IO]
 
-  "ProtocolParser" should {
+  "Skeuomorph based protocol transformer" should {
     "Transform a simple Avro Schema to Mu" >> {
       val protocolMetadata = ProtocolMetadata(ProtocolId("id"), IdlName.Avro, ProtocolVersion(1))
       val fullProtocol     = FullProtocol(protocolMetadata, Protocol(simpleAvroExample))
