@@ -33,14 +33,14 @@ object parsing {
     def printWriterCreation(tmpFile: Path): F[PrintWriter] =
       Sync[F].delay(new PrintWriter(tmpFile.toFile))
 
-    val result = for {
+    val protoSource = for {
       tmpFile   <- Resource.liftF(tmpFileCreation)
       tmpWriter <- Resource.fromAutoCloseable(printWriterCreation(tmpFile))
       _         <- Resource.liftF(Sync[F].delay(tmpWriter.write(raw)))
       _         <- Resource.liftF(Sync[F].delay(tmpWriter.close()))
     } yield ProtoSource(tmpFile.getFileName.toString, tmpFile.getParent.toString)
 
-    result.use(transformToTarget)
+    protoSource.use(transformToTarget)
   }
 
 }
