@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.db.queries
+package higherkindness.compendium.metadata.pg
 
-import doobie._
-import doobie.implicits.toSqlInterpolator
-import doobie.refined.implicits._
+import doobie.implicits._
+import doobie.{Query0, Update0}
+import higherkindness.compendium.core.doobie.implicits._
+import higherkindness.compendium.core.refinements.ProtocolId
 import higherkindness.compendium.models.ProtocolMetadata
-import metas._
 
 object Queries {
 
-  def checkIfExistsQ(id: String): Query0[Boolean] =
+  def exists(id: ProtocolId): Query0[Boolean] =
     sql"""
           SELECT exists (SELECT true FROM metaprotocols WHERE id=$id)
        """.query[Boolean]
 
-  def upsertProtocolIdQ(id: String, idl_name: String): Update0 =
+  def store(id: ProtocolId, idl_name: String): Update0 =
     sql"""
           INSERT INTO metaprotocols (id, idl_name, version)
           VALUES ($id, $idl_name::idl, 1)
@@ -37,11 +37,11 @@ object Queries {
           RETURNING version
        """.update
 
-  def selectProtocolMetadataById(id: String): Query0[ProtocolMetadata] =
+  def retrieve(id: ProtocolId): Query0[ProtocolMetadata] =
     sql"""
          SELECT * from metaprotocols WHERE id=$id
        """.query[ProtocolMetadata]
 
-  def checkConnection(): Query0[Boolean] =
+  def checkConn: Query0[Boolean] =
     sql"SELECT exists (SELECT 1)".query[Boolean]
 }

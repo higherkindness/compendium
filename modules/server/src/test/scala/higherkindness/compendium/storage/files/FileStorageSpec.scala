@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.storage
+package higherkindness.compendium.storage.files
 
 import java.io.File
 import java.nio.file.Paths
@@ -22,8 +22,9 @@ import java.nio.file.Paths
 import cats.effect.IO
 import higherkindness.compendium.CompendiumArbitrary._
 import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
-import higherkindness.compendium.models._
 import higherkindness.compendium.models.config.FileStorageConfig
+import higherkindness.compendium.models.{FullProtocol, Protocol, ProtocolMetadata}
+import higherkindness.compendium.storage.{files, Storage}
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
 import org.specs2.specification.{AfterEach, BeforeAfterAll}
@@ -40,7 +41,7 @@ object FileStorageSpec extends Specification with ScalaCheck with BeforeAfterAll
   private[this] def storageProtocol(id: ProtocolId, version: ProtocolVersion) =
     new Directory(new File(s"$basePath${File.separator}${FileStorage.buildFilename(id, version)}"))
 
-  private[this] lazy val fileStorage: Storage[IO] = FileStorage[IO](storageConfig)
+  private[this] lazy val fileStorage: Storage[IO] = files.FileStorage[IO](storageConfig)
 
   override def beforeAll(): Unit = {
     val _ = baseDirectory.createDirectory()
@@ -73,7 +74,7 @@ object FileStorageSpec extends Specification with ScalaCheck with BeforeAfterAll
       (metadata: ProtocolMetadata, protocol: Protocol) =>
         val file = for {
           _ <- fileStorage.store(metadata.id, metadata.version, protocol)
-          f <- fileStorage.recover(metadata)
+          f <- fileStorage.retrieve(metadata)
         } yield f
 
         file.unsafeRunSync() should beSome(FullProtocol(metadata, protocol))

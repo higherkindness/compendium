@@ -35,7 +35,7 @@ class StorageStub(
       id === identifier
     } *> IO.unit
 
-  override def recover(metadata: ProtocolMetadata): IO[Option[FullProtocol]] =
+  override def retrieve(metadata: ProtocolMetadata): IO[Option[FullProtocol]] =
     if (metadata.id == identifier && metadata.version == protoVersion)
       IO(proto.map(FullProtocol(metadata, _)))
     else IO(None)

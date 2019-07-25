@@ -19,7 +19,7 @@ package higherkindness.compendium.http
 import buildinfo.BuildInfo
 import cats.effect.Sync
 import cats.syntax.flatMap._
-import higherkindness.compendium.db.DBService
+import higherkindness.compendium.metadata.MetadataStorage
 import higherkindness.compendium.models.HealthResponse
 import org.http4s.HttpRoutes
 import org.http4s.circe.CirceEntityEncoder._
@@ -27,15 +27,14 @@ import org.http4s.dsl.Http4sDsl
 
 object HealthService {
 
-  def healthRouteService[F[_]: Sync: DBService]: HttpRoutes[F] = {
+  def healthRouteService[F[_]: Sync: MetadataStorage]: HttpRoutes[F] = {
 
     object f extends Http4sDsl[F]
     import f._
 
     HttpRoutes.of[F] {
       case GET -> Root / "health" =>
-        DBService[F]
-          .ping()
+        MetadataStorage[F].ping
           .ifM(
             Ok(HealthResponse("pass", BuildInfo.name, BuildInfo.version)),
             InternalServerError()

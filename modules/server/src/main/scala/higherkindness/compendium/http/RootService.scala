@@ -17,7 +17,7 @@
 package higherkindness.compendium.http
 
 import cats.effect.Sync
-import cats.syntax.all._
+import cats.implicits._
 import higherkindness.compendium.core.CompendiumService
 import higherkindness.compendium.core.refinements._
 import higherkindness.compendium.http.QueryParams.{IdlNameParam, ProtoVersion, TargetParam}
@@ -51,14 +51,14 @@ object RootService {
         }
 
       case GET -> Root / "protocol" / id :? ProtoVersion(versionParam) =>
-        def recoverProtocol(id: ProtocolId): F[Option[FullProtocol]] =
-          versionParam.fold(CompendiumService[F].recoverProtocol(id)) { versionValidated =>
-            val validation =
-              versionValidated.leftMap(errs => ProtocolVersionError(errs.toList.mkString(",")))
-            Sync[F]
-              .fromValidated(validation)
-              .flatMap(CompendiumService[F].recoverProtocolVersion(id, _))
+        def recoverProtocol(id: ProtocolId): F[Option[FullProtocol]] = {
+          val maybeVersionValidated = versionParam.traverse { validated =>
+            val validation = validated.leftMap(errs => ProtocolVersionError(errs.toList.mkString))
+            Sync[F].fromValidated(validation)
           }
+
+          maybeVersionValidated.flatMap(CompendiumService[F].retrieveProtocol(id, _))
+        }
 
         (for {
           protocolId <- ProtocolId.parseOrRaise(id)
@@ -73,7 +73,7 @@ object RootService {
       case GET -> Root / "protocol" / id / "generate" :? TargetParam(target) =>
         (for {
           protocolId   <- ProtocolId.parseOrRaise(id)
-          parserResult <- CompendiumService[F].parseProtocol(protocolId, target)
+          parserResult <- CompendiumService[F].transformProtocol(protocolId, target, None)
           resp         <- parserResult.fold(pe => InternalServerError(pe.msg), mp => Ok(mp.protocol.raw))
         } yield resp).recoverWith {
           case e: ProtocolIdError => BadRequest(ErrorResponse(e.message))

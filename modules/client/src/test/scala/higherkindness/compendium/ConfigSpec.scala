@@ -20,13 +20,13 @@ import cats.effect.IO
 import higherkindness.compendium.models.config._
 import org.specs2.mutable.Specification
 import pureconfig.generic.auto._
+import pureconfig.module.catseffect._
 
 class ConfigSpec extends Specification {
 
   "Config must load properly" >> {
-    IO.delay(pureconfig.loadConfigOrThrow[CompendiumConfig]("compendium"))
-      .attempt
-      .unsafeRunSync() must beRight[CompendiumConfig]
+    loadConfigF[IO, CompendiumClientConfig]("compendium").attempt
+      .unsafeRunSync() must beRight[CompendiumClientConfig]
   }
 
 }

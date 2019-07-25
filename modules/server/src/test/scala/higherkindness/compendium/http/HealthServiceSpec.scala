@@ -18,7 +18,7 @@ package higherkindness.compendium.http
 
 import buildinfo.BuildInfo
 import cats.effect.IO
-import higherkindness.compendium.db.DBServiceStub
+import higherkindness.compendium.metadata.MetadataStorageStub
 import higherkindness.compendium.models.HealthResponse
 import org.http4s.circe.CirceEntityCodec._
 import org.http4s.implicits._
@@ -35,7 +35,7 @@ object HealthServiceSpec extends Specification with ScalaCheck {
 
   "GET /health" >> {
     "If successs returns a health response with status 200" >> {
-      implicit val dbService = new DBServiceStub(true)
+      implicit val dbService = new MetadataStorageStub(true)
 
       val request: Request[IO] =
         Request[IO](method = Method.GET, uri = Uri(path = s"/health"))
@@ -48,7 +48,7 @@ object HealthServiceSpec extends Specification with ScalaCheck {
     }
 
     "If protocol not found returns not found" >> {
-      implicit val dbService = new DBServiceStub(false)
+      implicit val dbService = new MetadataStorageStub(false)
 
       val request: Request[IO] =
         Request[IO](method = Method.GET, uri = Uri(path = s"/health"))

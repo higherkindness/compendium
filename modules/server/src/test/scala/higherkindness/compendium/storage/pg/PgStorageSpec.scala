@@ -19,8 +19,8 @@ package higherkindness.compendium.storage.pg
 import cats.effect.IO
 import cats.implicits._
 import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
-import higherkindness.compendium.db.MigrationsMode.Data
-import higherkindness.compendium.db.PGHelper
+import higherkindness.compendium.metadata.MigrationsMode.Data
+import higherkindness.compendium.metadata.PGHelper
 import higherkindness.compendium.models.{FullProtocol, IdlName, Protocol, ProtocolMetadata}
 
 class PgStorageSpec extends PGHelper(Data) {
@@ -37,10 +37,9 @@ class PgStorageSpec extends PGHelper(Data) {
       val fullProto = FullProtocol(metadata, proto)
 
       val result: IO[Option[FullProtocol]] = pgStorage.store(id, version, proto) >> pgStorage
-        .recover(metadata)
+        .retrieve(metadata)
 
       result.unsafeRunSync must ===(fullProto.some)
-
     }
 
     "update protocol correctly" in {
@@ -54,7 +53,7 @@ class PgStorageSpec extends PGHelper(Data) {
 
       val result: IO[Option[FullProtocol]] = pgStorage.store(id, version1, proto1) >> pgStorage
         .store(id, version2, proto2) >> pgStorage
-        .recover(metadata)
+        .retrieve(metadata)
 
       result.unsafeRunSync must ===(fullProto.some)
     }

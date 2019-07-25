@@ -27,17 +27,17 @@ import higherkindness.compendium.storage.Storage
 private class PgStorage[F[_]: Bracket[?[_], Throwable]](xa: Transactor[F]) extends Storage[F] {
 
   override def store(id: ProtocolId, version: ProtocolVersion, protocol: Protocol): F[Unit] =
-    Queries.storeProtocol(id, version, protocol).run.void.transact(xa)
+    Queries.store(id, version, protocol).run.void.transact(xa)
 
-  override def recover(metadata: ProtocolMetadata): F[Option[FullProtocol]] =
+  override def retrieve(metadata: ProtocolMetadata): F[Option[FullProtocol]] =
     Queries
-      .recoverProtocol(metadata.id, metadata.version)
+      .retrieve(metadata.id, metadata.version)
       .option
       .map(_.map(FullProtocol(metadata, _)))
       .transact(xa)
 
   override def exists(id: ProtocolId): F[Boolean] =
-    Queries.protocolExists(id).unique.transact(xa)
+    Queries.exists(id).unique.transact(xa)
 }
 
 object PgStorage {

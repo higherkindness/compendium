@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.parser
+package higherkindness.compendium.metadata
 
-import cats.effect.Sync
-import higherkindness.compendium.models.{FullProtocol, IdlName}
-import higherkindness.compendium.models.parserModels.ParserResult
+import higherkindness.compendium.models.{IdlName, ProtocolMetadata}
+import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
 
-trait ProtocolParserService[F[_]] {
-
-  def parse(protocol: FullProtocol, target: IdlName): F[ParserResult]
+trait MetadataStorage[F[_]] {
+  def store(id: ProtocolId, idlName: IdlName): F[ProtocolVersion]
+  def retrieve(id: ProtocolId): F[Option[ProtocolMetadata]]
+  def exists(id: ProtocolId): F[Boolean]
+  def ping: F[Boolean]
 }
 
-object ProtocolParserService {
-
-  def apply[F[_]: Sync](implicit F: ProtocolParserService[F]): ProtocolParserService[F] = F
-
+object MetadataStorage {
+  def apply[F[_]](implicit F: MetadataStorage[F]): MetadataStorage[F] = F
 }

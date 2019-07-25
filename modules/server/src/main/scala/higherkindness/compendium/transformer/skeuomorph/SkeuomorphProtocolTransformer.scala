@@ -14,27 +14,26 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.parser
+package higherkindness.compendium.transformer.skeuomorph
 
 import cats.effect.Sync
-import cats.syntax.functor._
-import cats.syntax.either._
-import higherkindness.compendium.models._
-import higherkindness.compendium.models.parserModels._
-import higherkindness.skeuomorph.mu
-import higherkindness.skeuomorph.avro
+import cats.implicits._
+import higherkindness.compendium.models.transformer.types.{TransformError, TransformResult}
+import higherkindness.compendium.models.{FullProtocol, IdlName, Protocol}
+import higherkindness.compendium.transformer.ProtocolTransformer
 import higherkindness.skeuomorph.protobuf.{ParseProto, ProtobufF}
-import qq.droste.data.Mu._
+import higherkindness.skeuomorph.{avro, mu}
 import org.apache.avro.{Protocol => AvroProtocol}
 import qq.droste.data.Mu
+import qq.droste.data.Mu._
 
-object ProtocolParser {
+object SkeuomorphProtocolTransformer {
 
-  def impl[F[_]: Sync]: ProtocolParserService[F] = new ProtocolParserService[F] {
+  def apply[F[_]: Sync]: ProtocolTransformer[F] = new ProtocolTransformer[F] {
 
-    import utils._
+    import higherkindness.compendium.transformer.protobuf.parsing._
 
-    private def skeuomorphParse(fp: FullProtocol, target: IdlName): F[FullProtocol] =
+    private def skeuomorphTransformation(fp: FullProtocol, target: IdlName): F[FullProtocol] =
       (fp.metadata.idlName, target) match {
         // (from, to)
         case _ if fp.metadata.idlName.entryName == target.entryName => Sync[F].pure(fp)
@@ -47,7 +46,7 @@ object ProtocolParser {
               FullProtocol
                 .apply(fp.metadata.copy(idlName = IdlName.withName(target.entryName)), Protocol(p)))
         case (IdlName.Protobuf, IdlName.Mu) =>
-          parseProtobufRaw(fp.protocol.raw) { source =>
+          parseProtobuf(fp.protocol.raw) { source =>
             ParseProto
               .parseProto[F, Mu[ProtobufF]]
               .parse(source)
@@ -60,8 +59,8 @@ object ProtocolParser {
           }
       }
 
-    override def parse(protocol: FullProtocol, target: IdlName): F[ParserResult] =
-      skeuomorphParse(protocol, target).map(_.asRight[ParserError])
+    override def transform(protocol: FullProtocol, target: IdlName): F[TransformResult] =
+      skeuomorphTransformation(protocol, target).map(_.asRight[TransformError])
   }
 
 }

@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.db.queries
+package higherkindness.compendium.transformer
 
-import cats.instances.int._
-import doobie.util.{Get, Meta, Put}
-import higherkindness.compendium.core.refinements.ProtocolVersion
-import higherkindness.compendium.models.IdlName
+import cats.effect.Sync
+import higherkindness.compendium.models.{FullProtocol, IdlName}
+import higherkindness.compendium.models.transformer.types.TransformResult
 
-object metas {
+trait ProtocolTransformer[F[_]] {
 
-  implicit val IdlNamesMeta: Meta[IdlName] = Meta[String].timap(IdlName.withName)(_.entryName)
+  def transform(protocol: FullProtocol, target: IdlName): F[TransformResult]
+}
 
-  implicit val protocolVersion: Put[ProtocolVersion] = Put[Int].contramap(_.value)
-  implicit val protocolIdGet: Get[ProtocolVersion]   = Get[Int].temap(ProtocolVersion.from)
+object ProtocolTransformer {
+
+  def apply[F[_]: Sync](implicit F: ProtocolTransformer[F]): ProtocolTransformer[F] = F
+
 }

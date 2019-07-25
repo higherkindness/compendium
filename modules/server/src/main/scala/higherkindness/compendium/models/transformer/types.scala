@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.models
+package higherkindness.compendium.models.transformer
 
-object parserModels {
+import higherkindness.compendium.models.FullProtocol
 
-  final case class ParserError(msg: String)
+object types {
 
-  type ParserResult = Either[ParserError, FullProtocol]
+  final case class TransformError(msg: String)
+
+  type TransformResult = Either[TransformError, FullProtocol]
 
 }

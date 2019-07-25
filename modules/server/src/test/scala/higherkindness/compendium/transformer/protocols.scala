@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.parser
+package higherkindness.compendium.transformer
 
 object protocols {
 

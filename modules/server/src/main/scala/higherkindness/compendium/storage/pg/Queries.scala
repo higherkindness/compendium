@@ -19,27 +19,26 @@ package higherkindness.compendium.storage.pg
 import doobie.syntax.string._
 import doobie.{Query0, Update0}
 import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
-import higherkindness.compendium.db.queries.metas._
+import higherkindness.compendium.core.doobie.implicits._
 import higherkindness.compendium.models.Protocol
-import higherkindness.compendium.storage.pg.implicits._
 
 object Queries {
 
-  def storeProtocol(id: ProtocolId, version: ProtocolVersion, protocol: Protocol): Update0 =
+  def store(id: ProtocolId, version: ProtocolVersion, protocol: Protocol): Update0 =
     sql"""
         INSERT INTO protocols 
         VALUES ($id, $version, $protocol)
         ON CONFLICT (id, version) DO NOTHING
        """.update
 
-  def recoverProtocol(id: ProtocolId, version: ProtocolVersion): Query0[Protocol] =
+  def retrieve(id: ProtocolId, version: ProtocolVersion): Query0[Protocol] =
     sql"""
         SELECT protocol
         FROM protocols
         WHERE id=$id AND version=$version
       """.query[Protocol]
 
-  def protocolExists(id: ProtocolId): Query0[Boolean] =
+  def exists(id: ProtocolId): Query0[Boolean] =
     sql"""SELECT exists (SELECT true FROM protocols WHERE id=$id)""".query[Boolean]
 
 }

@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.db
+package higherkindness.compendium.metadata.pg
 
 import cats.effect.IO
 import cats.implicits._
 import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
-import higherkindness.compendium.db.MigrationsMode.Metadata
+import higherkindness.compendium.metadata.MigrationsMode.Metadata
+import higherkindness.compendium.metadata.PGHelper
 import higherkindness.compendium.models.{IdlName, ProtocolMetadata}
 
-class PgDBServiceSpec extends PGHelper(Metadata) {
+class PgMetadataStorageSpec extends PGHelper(Metadata) {
 
-  private lazy val pg = PgDBService.impl[IO](transactor)
+  private lazy val pg = PgMetadataStorage[IO](transactor)
 
   "Postgres Service" should {
     "insert protocol correctly" in {
@@ -32,7 +33,7 @@ class PgDBServiceSpec extends PGHelper(Metadata) {
       val idlName: IdlName = IdlName.Avro
 
       val result: IO[Option[ProtocolMetadata]] =
-        pg.upsertProtocol(id, idlName) >> pg.selectProtocolMetadataById(id)
+        pg.store(id, idlName) >> pg.retrieve(id)
 
       val expected = ProtocolMetadata(id, idlName, ProtocolVersion(1))
 
@@ -45,8 +46,8 @@ class PgDBServiceSpec extends PGHelper(Metadata) {
       val idlName: IdlName = IdlName.Avro
 
       val result: IO[Option[ProtocolMetadata]] =
-        pg.upsertProtocol(id, idlName) >> pg.upsertProtocol(id, idlName) >> pg
-          .selectProtocolMetadataById(id)
+        pg.store(id, idlName) >> pg.store(id, idlName) >> pg
+          .retrieve(id)
 
       val expected = ProtocolMetadata(id, idlName, ProtocolVersion(2))
 
@@ -56,7 +57,7 @@ class PgDBServiceSpec extends PGHelper(Metadata) {
     "return false when the protocol does not exist" in {
       val id: ProtocolId = ProtocolId("p")
 
-      pg.existsProtocol(id).unsafeRunSync must ===(false)
+      pg.exists(id).unsafeRunSync must ===(false)
     }
 
     "return true when the protocol exists" in {
@@ -64,7 +65,7 @@ class PgDBServiceSpec extends PGHelper(Metadata) {
       val idlName: IdlName = IdlName.Avro
 
       val result: IO[Boolean] =
-        pg.upsertProtocol(id, idlName) >> pg.existsProtocol(id)
+        pg.store(id, idlName) >> pg.exists(id)
 
       result.unsafeRunSync must ===(true)
     }
