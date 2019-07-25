@@ -51,7 +51,7 @@ object CompendiumStreamApp {
       _                              <- Stream.eval(Migrations.makeMigrations(conf.metadata.storage, List(migrations)))
       implicit0(storage: Storage[F]) <- Stream.resource(initStorage[F](conf.protocols.storage))
       metadataTransactor             <- Stream.resource(createTransactor(conf.metadata.storage))
-      implicit0(dbService: MetadataStorage[F])       = PgMetadataStorage[F](metadataTransactor)
+      implicit0(metadataStore: MetadataStorage[F])   = PgMetadataStorage[F](metadataTransactor)
       implicit0(utils: ProtocolUtils[F])             = ProtocolUtils.impl[F]
       implicit0(transformer: ProtocolTransformer[F]) = SkeuomorphProtocolTransformer[F]
       implicit0(compendium: CompendiumService[F])    = CompendiumService.impl[F]
