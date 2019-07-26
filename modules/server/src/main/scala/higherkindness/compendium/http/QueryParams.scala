@@ -19,15 +19,18 @@ package higherkindness.compendium.http
 import higherkindness.compendium.core.refinements.ProtocolVersion
 import higherkindness.compendium.models.IdlName
 import org.http4s.QueryParamDecoder
-import org.http4s.dsl.impl.{OptionalValidatingQueryParamDecoderMatcher, QueryParamDecoderMatcher}
+import org.http4s.dsl.impl.{
+  OptionalValidatingQueryParamDecoderMatcher,
+  ValidatingQueryParamDecoderMatcher
+}
 
 object QueryParams {
 
   implicit val queryIdlDecoderQueryParam: QueryParamDecoder[IdlName] =
     QueryParamDecoder.fromUnsafeCast[IdlName](qp => IdlName.withName(qp.value))("IdlName")
 
-  object TargetParam  extends QueryParamDecoderMatcher[IdlName]("target")
-  object IdlNameParam extends QueryParamDecoderMatcher[IdlName]("idlName")
+  object TargetParam  extends ValidatingQueryParamDecoderMatcher[IdlName]("target")
+  object IdlNameParam extends ValidatingQueryParamDecoderMatcher[IdlName]("idlName")
 
   implicit val versionQueryParamDecoder: QueryParamDecoder[ProtocolVersion] =
     QueryParamDecoder.fromUnsafeCast[ProtocolVersion](param =>
