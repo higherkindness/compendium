@@ -56,15 +56,15 @@ object RootService {
         }
 
       case GET -> Root / "protocol" / id :? ProtoVersion(maybeVersionValidated) =>
-        val idlValidation = maybeVersionValidated.traverse { validated =>
+        val versionValidation = maybeVersionValidated.traverse { validated =>
           val validation = validated.leftMap(errs => ProtocolVersionError(errs.toList.mkString))
           Sync[F].fromValidated(validation)
         }
 
         (for {
           protocolId   <- ProtocolId.parseOrRaise(id)
-          maybeIdlName <- idlValidation
-          protocol     <- CompendiumService[F].retrieveProtocol(protocolId, maybeIdlName)
+          maybeVersion <- versionValidation
+          protocol     <- CompendiumService[F].retrieveProtocol(protocolId, maybeVersion)
           response     <- protocol.fold(NotFound())(mp => Ok(mp.protocol))
         } yield response).recoverWith {
           case e: ProtocolIdError      => BadRequest(ErrorResponse(e.msg))
