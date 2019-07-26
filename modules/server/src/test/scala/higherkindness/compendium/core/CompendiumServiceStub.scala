@@ -18,7 +18,7 @@ package higherkindness.compendium.core
 
 import cats.effect.IO
 import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
-import higherkindness.compendium.models.transformer.types.TransformResult
+import higherkindness.compendium.models.transformer.types.{TransformError, TransformResult}
 import higherkindness.compendium.models._
 
 class CompendiumServiceStub(protocolOpt: Option[FullProtocol], exists: Boolean)
@@ -32,14 +32,15 @@ class CompendiumServiceStub(protocolOpt: Option[FullProtocol], exists: Boolean)
 
   override def retrieveProtocol(
       id: ProtocolId,
-      version: Option[ProtocolVersion]): IO[Option[FullProtocol]] = IO(protocolOpt)
+      version: Option[ProtocolVersion]): IO[Option[FullProtocol]] = IO.pure(protocolOpt)
 
-  override def existsProtocol(protocolId: ProtocolId): IO[Boolean] = IO(exists)
+  override def existsProtocol(protocolId: ProtocolId): IO[Boolean] = IO.pure(exists)
 
   override def transformProtocol(
       id: ProtocolId,
       target: IdlName,
-      version: Option[ProtocolVersion]): IO[TransformResult] = ???
+      version: Option[ProtocolVersion]): IO[TransformResult] =
+    IO.pure(protocolOpt.toRight(TransformError("err")))
 }
 
 object CompendiumServiceStub {

@@ -36,48 +36,55 @@ object RootService {
     import f._
 
     HttpRoutes.of[F] {
-      case req @ POST -> Root / "protocol" / id :? IdlNameParam(idlName) =>
+      case req @ POST -> Root / "protocol" / id :? IdlNameParam(idlNameValidated) =>
+        val idlValidation =
+          Sync[F].fromValidated(idlNameValidated.leftMap(errs => UnknownTargetError(errs.toList.mkString)))
+
         (for {
-          protocol   <- req.as[Protocol]
           protocolId <- ProtocolId.parseOrRaise(id)
+          idlName    <- idlValidation
+          protocol   <- req.as[Protocol]
           exists     <- CompendiumService[F].existsProtocol(protocolId)
-          _          <- CompendiumService[F].storeProtocol(protocolId, protocol, idlName)
-          resp       <- exists.fold(Ok(), Created())
-        } yield resp.putHeaders(Location(req.uri.withPath(s"${req.uri.path}")))).recoverWith {
+          version    <- CompendiumService[F].storeProtocol(protocolId, protocol, idlName)
+          response   <- exists.fold(Ok(), Created(version.value))
+        } yield response.putHeaders(Location(req.uri.withPath(s"${req.uri.path}")))).recoverWith {
           case e: org.apache.avro.SchemaParseException => BadRequest(ErrorResponse(e.getMessage))
           case e: org.http4s.InvalidMessageBodyFailure => BadRequest(ErrorResponse(e.getMessage))
-          case e: ProtocolIdError                      => BadRequest(ErrorResponse(e.message))
+          case e: ProtocolIdError                      => BadRequest(ErrorResponse(e.msg))
+          case e: UnknownTargetError                   => BadRequest(ErrorResponse(e.msg))
           case _                                       => InternalServerError()
         }
 
-      case GET -> Root / "protocol" / id :? ProtoVersion(versionParam) =>
-        def recoverProtocol(id: ProtocolId): F[Option[FullProtocol]] = {
-          val maybeVersionValidated = versionParam.traverse { validated =>
-            val validation = validated.leftMap(errs => ProtocolVersionError(errs.toList.mkString))
-            Sync[F].fromValidated(validation)
-          }
-
-          maybeVersionValidated.flatMap(CompendiumService[F].retrieveProtocol(id, _))
+      case GET -> Root / "protocol" / id :? ProtoVersion(maybeVersionValidated) =>
+        val versionValidation = maybeVersionValidated.traverse { validated =>
+          val validation = validated.leftMap(errs => ProtocolVersionError(errs.toList.mkString))
+          Sync[F].fromValidated(validation)
         }
 
         (for {
-          protocolId <- ProtocolId.parseOrRaise(id)
-          protocol   <- recoverProtocol(protocolId)
-          resp       <- protocol.fold(NotFound())(mp => Ok(mp.protocol))
-        } yield resp).recoverWith {
-          case e: ProtocolIdError      => BadRequest(ErrorResponse(e.message))
-          case e: ProtocolVersionError => BadRequest(ErrorResponse(e.message))
+          protocolId   <- ProtocolId.parseOrRaise(id)
+          maybeVersion <- versionValidation
+          protocol     <- CompendiumService[F].retrieveProtocol(protocolId, maybeVersion)
+          response     <- protocol.fold(NotFound())(mp => Ok(mp.protocol))
+        } yield response).recoverWith {
+          case e: ProtocolIdError      => BadRequest(ErrorResponse(e.msg))
+          case e: ProtocolVersionError => BadRequest(ErrorResponse(e.msg))
           case _                       => InternalServerError()
         }
 
-      case GET -> Root / "protocol" / id / "generate" :? TargetParam(target) =>
+      case GET -> Root / "protocol" / id / "transformation" :? TargetParam(idlNameValidated) =>
+        val idlValidation =
+          Sync[F].fromValidated(idlNameValidated.leftMap(errs => UnknownTargetError(errs.toList.mkString)))
+
         (for {
-          protocolId   <- ProtocolId.parseOrRaise(id)
-          parserResult <- CompendiumService[F].transformProtocol(protocolId, target, None)
-          resp         <- parserResult.fold(pe => InternalServerError(pe.msg), mp => Ok(mp.protocol.raw))
-        } yield resp).recoverWith {
-          case e: ProtocolIdError => BadRequest(ErrorResponse(e.message))
-          case _                  => InternalServerError()
+          protocolId <- ProtocolId.parseOrRaise(id)
+          idlName    <- idlValidation
+          transform  <- CompendiumService[F].transformProtocol(protocolId, idlName, None)
+          response   <- transform.fold(pe => InternalServerError(pe.msg), mp => Ok(mp.protocol))
+        } yield response).recoverWith {
+          case e: ProtocolIdError    => BadRequest(ErrorResponse(e.msg))
+          case e: UnknownTargetError => BadRequest(ErrorResponse(e.msg))
+          case _                     => InternalServerError()
         }
     }
   }

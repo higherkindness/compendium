@@ -20,7 +20,7 @@ import higherkindness.compendium.models.FullProtocol
 
 object types {
 
-  final case class TransformError(msg: String)
+  final case class TransformError(msg: String) extends Exception(msg)
 
   type TransformResult = Either[TransformError, FullProtocol]
 
