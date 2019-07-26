@@ -41,10 +41,10 @@ object RootService {
           Sync[F].fromValidated(validated.leftMap(errs => UnknownTargetError(errs.toList.mkString)))
 
         (for {
-          protocol   <- req.as[Protocol]
           protocolId <- ProtocolId.parseOrRaise(id)
-          exists     <- CompendiumService[F].existsProtocol(protocolId)
           idlName    <- idlValidation
+          protocol   <- req.as[Protocol]
+          exists     <- CompendiumService[F].existsProtocol(protocolId)
           version    <- CompendiumService[F].storeProtocol(protocolId, protocol, idlName)
           response   <- exists.fold(Ok(), Created(version.value))
         } yield response.putHeaders(Location(req.uri.withPath(s"${req.uri.path}")))).recoverWith {
@@ -72,7 +72,7 @@ object RootService {
           case _                       => InternalServerError()
         }
 
-      case GET -> Root / "protocol" / id / "transform" :? TargetParam(validated) =>
+      case GET -> Root / "protocol" / id / "transformation" :? TargetParam(validated) =>
         val idlValidation =
           Sync[F].fromValidated(validated.leftMap(errs => UnknownTargetError(errs.toList.mkString)))
 
@@ -80,7 +80,7 @@ object RootService {
           protocolId <- ProtocolId.parseOrRaise(id)
           idlName    <- idlValidation
           transform  <- CompendiumService[F].transformProtocol(protocolId, idlName, None)
-          response   <- transform.fold(pe => InternalServerError(pe.msg), mp => Ok(mp.protocol.raw))
+          response   <- transform.fold(pe => InternalServerError(pe.msg), mp => Ok(mp.protocol))
         } yield response).recoverWith {
           case e: ProtocolIdError    => BadRequest(ErrorResponse(e.msg))
           case e: UnknownTargetError => BadRequest(ErrorResponse(e.msg))
