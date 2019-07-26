@@ -36,9 +36,9 @@ object RootService {
     import f._
 
     HttpRoutes.of[F] {
-      case req @ POST -> Root / "protocol" / id :? IdlNameParam(validated) =>
+      case req @ POST -> Root / "protocol" / id :? IdlNameParam(idlNameValidated) =>
         val idlValidation =
-          Sync[F].fromValidated(validated.leftMap(errs => UnknownTargetError(errs.toList.mkString)))
+          Sync[F].fromValidated(idlNameValidated.leftMap(errs => UnknownTargetError(errs.toList.mkString)))
 
         (for {
           protocolId <- ProtocolId.parseOrRaise(id)
@@ -55,8 +55,8 @@ object RootService {
           case _                                       => InternalServerError()
         }
 
-      case GET -> Root / "protocol" / id :? ProtoVersion(versionParam) =>
-        val idlValidation = versionParam.traverse { validated =>
+      case GET -> Root / "protocol" / id :? ProtoVersion(maybeVersionValidated) =>
+        val idlValidation = maybeVersionValidated.traverse { validated =>
           val validation = validated.leftMap(errs => ProtocolVersionError(errs.toList.mkString))
           Sync[F].fromValidated(validation)
         }
@@ -72,9 +72,9 @@ object RootService {
           case _                       => InternalServerError()
         }
 
-      case GET -> Root / "protocol" / id / "transformation" :? TargetParam(validated) =>
+      case GET -> Root / "protocol" / id / "transformation" :? TargetParam(idlNameValidated) =>
         val idlValidation =
-          Sync[F].fromValidated(validated.leftMap(errs => UnknownTargetError(errs.toList.mkString)))
+          Sync[F].fromValidated(idlNameValidated.leftMap(errs => UnknownTargetError(errs.toList.mkString)))
 
         (for {
           protocolId <- ProtocolId.parseOrRaise(id)
