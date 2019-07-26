@@ -18,6 +18,7 @@ package higherkindness.compendium.models
 
 final case class ProtocolIdError(msg: String)      extends Exception(msg)
 final case class ProtocolVersionError(msg: String) extends Exception(msg)
-final case class UnknownTargetError(msg: String)   extends Exception(msg)
+final case class ProtocolNotFound(msg: String)     extends Exception(msg)
+final case class UnknownIdlName(msg: String)       extends Exception(msg)
 final case class SchemaError(msg: String)          extends Exception(msg)
 final case class UnknownError(msg: String)         extends Exception(msg)
