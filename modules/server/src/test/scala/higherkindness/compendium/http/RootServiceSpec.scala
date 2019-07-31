@@ -195,7 +195,7 @@ object RootServiceSpec extends Specification with ScalaCheck {
       response.status === Status.BadRequest
     }
 
-    "If json is invalid returns a 400 Bad Request" >> prop { id: ProtocolId =>
+    "If json is invalid returns bad Request" >> prop { id: ProtocolId =>
       implicit val compendiumService = CompendiumServiceStub(None, false)
 
       case class Malformed(malformed: String)
@@ -235,8 +235,8 @@ object RootServiceSpec extends Specification with ScalaCheck {
     }
   }
 
-  "GET /protocol/id/transformation?target={target}" >> {
-    "If identifier and target are valid returns the protocol transformed" >> prop {
+  "GET /protocol/id/transformation?target={target}[&version={version}]" >> {
+    "If identifier, version and target are valid returns the protocol transformed" >> prop {
       metadata: ProtocolMetadata =>
         val dummyProto = dummyProtocol(metadata.id)
 
@@ -247,12 +247,46 @@ object RootServiceSpec extends Specification with ScalaCheck {
           method = Method.GET,
           uri = Uri(
             path = s"/protocol/${metadata.id.value}/transformation",
-            query = Query.fromString(s"target=${target.entryName}")))
+            query = Query.fromString(s"target=${target.entryName}&version=1")))
 
         val response = RootService.rootRouteService[IO].orNotFound(request).unsafeRunSync
 
         response.status === Status.Ok
         response.as[Protocol].unsafeRunSync === dummyProto.protocol
+    }
+
+    "If source protocol does not exist returns not found" >> prop { metadata: ProtocolMetadata =>
+      implicit val compendiumService = CompendiumServiceStub(None, true)
+      val target                     = IdlName.Mu
+
+      val request = Request[IO](
+        method = Method.GET,
+        uri = Uri(
+          path = s"/protocol/${metadata.id.value}/transformation",
+          query = Query.fromString(s"target=${target.entryName}&version=1"))
+      )
+
+      val response = RootService.rootRouteService[IO].orNotFound(request).unsafeRunSync
+
+      response.status === Status.NotFound
+    }
+
+    "If version is invalid returns bad request" >> prop { metadata: ProtocolMetadata =>
+      val dummyProto = dummyProtocol(metadata.id)
+
+      implicit val compendiumService = CompendiumServiceStub(dummyProto.some, true)
+      val target                     = IdlName.Mu
+
+      val request = Request[IO](
+        method = Method.GET,
+        uri = Uri(
+          path = s"/protocol/${metadata.id.value}/transformation",
+          query = Query.fromString(s"target=${target.entryName}&version=fake"))
+      )
+
+      val response = RootService.rootRouteService[IO].orNotFound(request).unsafeRunSync
+
+      response.status === Status.BadRequest
     }
 
     "If identifier is valid but target is invalid returns bad request" >> prop {

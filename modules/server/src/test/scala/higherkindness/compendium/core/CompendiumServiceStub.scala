@@ -36,10 +36,7 @@ class CompendiumServiceStub(protocolOpt: Option[FullProtocol], exists: Boolean)
 
   override def existsProtocol(protocolId: ProtocolId): IO[Boolean] = IO.pure(exists)
 
-  override def transformProtocol(
-      id: ProtocolId,
-      target: IdlName,
-      version: Option[ProtocolVersion]): IO[TransformResult] =
+  override def transformProtocol(fullProtocol: FullProtocol, target: IdlName): IO[TransformResult] =
     IO.pure(protocolOpt.toRight(TransformError("err")))
 }
 

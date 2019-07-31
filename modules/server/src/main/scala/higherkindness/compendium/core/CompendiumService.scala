@@ -21,19 +21,16 @@ import cats.implicits._
 import higherkindness.compendium.core.refinements._
 import higherkindness.compendium.metadata.MetadataStorage
 import higherkindness.compendium.models._
-import higherkindness.compendium.models.transformer.types.{TransformError, TransformResult}
-import higherkindness.compendium.transformer.ProtocolTransformer
+import higherkindness.compendium.models.transformer.types.TransformResult
 import higherkindness.compendium.storage.Storage
+import higherkindness.compendium.transformer.ProtocolTransformer
 
 trait CompendiumService[F[_]] {
 
   def storeProtocol(id: ProtocolId, protocol: Protocol, idlName: IdlName): F[ProtocolVersion]
   def retrieveProtocol(id: ProtocolId, version: Option[ProtocolVersion]): F[Option[FullProtocol]]
   def existsProtocol(id: ProtocolId): F[Boolean]
-  def transformProtocol(
-      id: ProtocolId,
-      target: IdlName,
-      version: Option[ProtocolVersion]): F[TransformResult]
+  def transformProtocol(fullProtocol: FullProtocol, target: IdlName): F[TransformResult]
 }
 
 object CompendiumService {
@@ -66,15 +63,9 @@ object CompendiumService {
         MetadataStorage[F].exists(id)
 
       override def transformProtocol(
-          id: ProtocolId,
-          target: IdlName,
-          version: Option[ProtocolVersion]): F[TransformResult] =
-        for {
-          maybeProto  <- retrieveProtocol(id, version)
-          maybeResult <- maybeProto.traverse(ProtocolTransformer[F].transform(_, target))
-        } yield
-          maybeResult.getOrElse(
-            TransformError(s"No Protocol Found with id: $id").asLeft[FullProtocol])
+          fullProtocol: FullProtocol,
+          target: IdlName): F[TransformResult] =
+        ProtocolTransformer[F].transform(fullProtocol, target)
     }
 
   def apply[F[_]](implicit F: CompendiumService[F]): CompendiumService[F] = F
