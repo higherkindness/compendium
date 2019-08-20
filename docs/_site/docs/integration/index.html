@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    <meta charset="UTF-8">
+    <title>Compendium</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A set of command line tools that let you have compile time verification of your documentation written as Swift Playground">
+    <meta name="keywords" content="functional-programming, monads, monad-transformers, functional-data-structure, swift, bow, fp-types, adt, free-monads, tagless-final, mtl, for-comprehension, category-theory">
+
+    <meta property="og:image" content="" />
+    <meta property="og:title" content="Compendium" />
+    <meta property="og:site_name" content="Compendium" />
+    <meta property="og:url" content="https://nef.bow-swift.io/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:description" content="A set of command line tools that let you have compile time verification of your documentation written as Swift Playground" />
+    <meta property="og:keywords" content="functional-programming, monads, monad-transformers, functional-data-structure, swift, bow, fp-types, adt, free-monads, tagless-final, mtl, for-comprehension, category-theory" />
+
+    <meta name="twitter:text:description" content="A set of command line tools that let you have compile time verification of your documentation written as Swift Playground" />
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@bow_swift">
+    <meta name="twitter:creator" content="@bow_swift">
+    <meta name="twitter:image" content="" />
+
+    <script defer src="/js/docs.js"></script>
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="/img/favicon.png">
+
+    <!-- Nef docs css -->
+    <link rel="stylesheet" type="text/css" href="/css/docs.css">
+</head>
+
+    <body>
+        <div id="site-sidebar">
+    <div class="sidebar-brand">
+        <a href="/" title="Compendium">
+            <img src="/img/nav-brand.svg" alt="Compendium">
+            <span>Compendium</span>
+        </a>
+        <button
+          type="button"
+          title="Close"
+          class="button sidebar-toggle"
+          onClick="toggleClass('#site-sidebar', 'toggled')">
+            <span class="close"></span>
+        </button>
+    </div>
+    <ul class="sidebar-menu">
+         
+        <li class=" sidebar-menu-item">
+            <a href="/docs/verification/" title="Verification">Verification</a>
+        </li>
+        
+        <li class=" sidebar-menu-item">
+            <a href="/docs/compile/" title="Compile">Compile</a>
+        </li>
+        
+        <li class=" sidebar-menu-item">
+            <a href="/docs/generation/" title="Generation">Generation</a>
+        </li>
+        
+        <li class="active sidebar-menu-item">
+            <a href="/docs/integration/" title="Integration">Integration</a>
+        </li>
+        
+    </ul>
+</div>
+
+        <main id="site-doc">
+    <div class="doc-header">
+      <button
+        type="button"
+        class="button doc-toggle"
+        title="Toggle"
+        onClick="toggleClasses(['#site-sidebar', '#site-doc'], ['toggled', 'expanded'])">
+          <img src="/img/sidebar-icon-open.svg" alt="Toggle">
+      </button>
+    </div>
+    <div class="doc-content">
+        <h1 id="integration-h1">Integration h1</h1>
+<h2 id="integration-h2">Integration h2</h2>
+<h3 id="integration-h3">Integration h3</h3>
+<h4 id="integration-h4">Integration h4</h4>
+<h5 id="integration-h5">Integration h5</h5>
+<h6 id="integration-h6">Integration h6</h6>
+
+<p>Lorem ipsum dolor sit amet, <a href="#">consectetur adipiscing</a> elit. Nam lacinia auctor nunc, in commodo ante faucibus ut. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Nunc vel neque ut nisi sodales aliquet. Ut nunc velit, feugiat et elit eget, lobortis sodales est. Integer turpis tellus, semper nec neque ut, elementum mollis metus. Ut <code class="highlighter-rouge">faucibus lorem</code> felis porta lorem vehicula accumsan. Duis sed tempor enim, ac porttitor mi. Maecenas non sollicitudin quam. Nam mollis scelerisque sapien eu viverra. Etiam tempor bibendum eros, a faucibus tellus ullamcorper a. Aliquam id lorem est. Vivamus in ipsum condimentum, vulputate nisl et, rutrum tellus.</p>
+
+<ul>
+  <li>item 1</li>
+  <li>item 2</li>
+  <li>item 3</li>
+  <li>item 4</li>
+</ul>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">func</span> <span class="nf">impureAdd</span><span class="p">(</span><span class="nv">x</span><span class="p">:</span> <span class="kt">Int</span><span class="p">,</span> <span class="nv">y</span><span class="p">:</span> <span class="kt">Int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Int</span> <span class="p">{</span>
+    <span class="nf">print</span><span class="p">(</span><span class="s">"Received (</span><span class="se">\(</span><span class="n">x</span><span class="se">)</span><span class="s">, </span><span class="se">\(</span><span class="n">y</span><span class="se">)</span><span class="s">)"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span>
+<span class="p">}</span>
+
+<span class="k">let</span> <span class="nv">impureSquare</span> <span class="o">=</span> <span class="nf">impureAdd</span><span class="p">(</span><span class="nv">x</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="nv">y</span><span class="p">:</span> <span class="mi">5</span><span class="p">)</span> <span class="o">*</span> <span class="nf">impureAdd</span><span class="p">(</span><span class="nv">x</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="nv">y</span><span class="p">:</span> <span class="mi">5</span><span class="p">)</span>
+</code></pre></div></div>
+
+    </div>
+</main>
+
+    </body>
+</html>

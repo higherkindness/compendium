@@ -1,0 +1,13 @@
+content:
+    - title: Verification
+      description: Eases the creation of Swift Playgrounds with support for third party libraries.
+      icon: img/main-feature-primary.svg
+
+    - title: Compile
+      description: Compiles Swift Playgrounds with support for third party libraries from the command line.
+      icon: img/main-feature-secondary.svg
+
+    - title: Generation
+      description: Generates Markdown project from Swift Playground.
+      icon: img/main-feature-tertiary.svg
+      
