@@ -8,13 +8,17 @@
 
 HTTP service for schema storage and client generation
 
-# compendium in the wild
+# Contributing
+
+Please review the [Contribution document](CONTRIBUTING.md) for information on how to get started contributing to the project.
 
 [comment]: # (Start Copyright)
 # Copyright
 
 compendium is designed and developed by 47 Degrees
 
-Copyright (C) 2018-2019 47 Degrees. <http://47deg.com>
+Copyright © 2018-2019 47 Degrees. <http://47deg.com>
+
+Licensed under Apache License. See [LICENSE](LICENSE) for terms.
 
 [comment]: # (End Copyright)
