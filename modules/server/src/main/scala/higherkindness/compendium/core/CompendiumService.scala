@@ -65,7 +65,14 @@ object CompendiumService {
       override def transformProtocol(
           fullProtocol: FullProtocol,
           target: IdlName): F[TransformResult] =
-        ProtocolTransformer[F].transform(fullProtocol, target)
+        ProtocolTransformer[F].transform(fullProtocol, target).flatTap {
+          case Right(fullProtocol) =>
+            storeProtocol(
+              fullProtocol.metadata.id,
+              fullProtocol.protocol,
+              fullProtocol.metadata.idlName)
+          case Left(err) => Sync[F].raiseError[ProtocolVersion](err)
+        }
     }
 
   def apply[F[_]](implicit F: CompendiumService[F]): CompendiumService[F] = F
