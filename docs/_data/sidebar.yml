@@ -1,4 +1,7 @@
 options:
+  - title: Start
+    url: /docs/
+
   - title: Verification
     url: /docs/verification/
 

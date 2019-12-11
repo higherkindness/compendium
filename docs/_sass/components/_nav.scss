@@ -7,6 +7,7 @@
     padding: ($base-point-grid * 5) 0;
     width: 100%;
     transition: background-color $base-duration $base-timing, padding $base-duration $base-timing;
+    height: ($base-point-grid * 18);
 
     &.nav-scroll {
         padding: ($base-point-grid * 2) 0;
@@ -18,6 +19,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        height: 100%;
 
         .nav-brand {
             display: flex;
@@ -121,6 +123,9 @@
 
                       a {
                           color: $white;
+                          &:hover {
+                            border-bottom-color: $white;
+                          }
                       }
                   }
                 }
