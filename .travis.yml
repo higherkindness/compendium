@@ -26,9 +26,9 @@ jobs:
         - gem install jekyll-watch -v 2.1.2
         - gem install jekyll -v 3.8.3
       script:
-        - sbt ++$TRAVIS_SCALA_VERSION orgScriptCI
+        - sbt orgScriptCI
       after_success:
-        - sbt ++$TRAVIS_SCALA_VERSION orgAfterCISuccess
+        - sbt orgAfterCISuccess
     - stage: publish-docker
       sudo: required
       services:
