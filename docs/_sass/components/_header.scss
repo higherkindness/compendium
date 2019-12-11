@@ -3,13 +3,16 @@
 // -----------------------------------------------
 
 #site-header {
-    padding: ($base-point-grid * 18) 0 ($base-point-grid * 12) 0;
+    flex: 1 0 auto;
+    margin-top: ($base-point-grid * 18);
     background: rgba($brand-primary, 0.06);
 
     .header-flex {
         display: flex;
         align-items: center;
+        justify-content: space-evenly;
         color: $white;
+        height: 100%;
 
         .header-text {
             width: $column-5;
@@ -61,7 +64,7 @@
         }
 
         .header-image {
-            width: $column-7;
+            width: 33%;
             text-align: center;
         }
     }
@@ -88,9 +91,8 @@
 }
 @include bp(medium) {
     #site-header {
-        padding-top: ($base-point-grid * 20);
         .header-flex {
-             flex-direction: column;
+            padding: ($base-point-grid * 20) 0;
             .header-text {
                 text-align: center;
                 width: $column-12;

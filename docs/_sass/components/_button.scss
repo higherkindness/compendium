@@ -28,7 +28,7 @@
 
   &::before,
   &::after {
-    background-color: #fff;
+    background-color: $gray-primary;
     content: " ";
     height: 100%;
     left: 98%;

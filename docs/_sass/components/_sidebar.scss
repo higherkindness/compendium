@@ -4,7 +4,7 @@
 
 #site-sidebar {
     position: fixed;
-    background: rgba($brand-primary, 0.06);
+    background: lighten($brand-primary, 30);
     width: 250px;
     height: 100%;
     left: 0;

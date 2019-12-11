@@ -22,6 +22,8 @@ html {
 // Typography
 // -----------------------------------------------
 body {
+    display: flex;
+    flex-direction: column;
     color: $base-font-color;
     background: $white;
     font-family: $base-font-family;

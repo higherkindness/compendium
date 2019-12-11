@@ -2,6 +2,7 @@
 // -----------------------------------------------
 // -----------------------------------------------
 #site-nav {
+    flex: 0 0 auto;
     position: fixed;
     padding: ($base-point-grid * 5) 0;
     width: 100%;
@@ -10,7 +11,7 @@
     &.nav-scroll {
         padding: ($base-point-grid * 2) 0;
         background: rgba(244, 245, 255, 0.9);
-        
+
     }
 
     .nav-flex {
@@ -117,7 +118,7 @@
                       &:not(:last-child) {
                           margin-right: 0;
                       }
-                      
+
                       a {
                           color: $white;
                       }

@@ -2,7 +2,8 @@
 // -----------------------------------------------
 // -----------------------------------------------
 #site-footer {
-    height: 300px;
+    flex: 0 0 0;
+    height: 200px;
     padding: ($base-point-grid * 10) 0;
     background: $brand-primary;
     color: rgba($white, 0.5);
@@ -29,6 +30,8 @@
     .footer-flex {
         display: flex;
         justify-content: space-between;
+        align-items: center;
+        height: 100%;
 
         .footer-dev {
             width: $column-4;

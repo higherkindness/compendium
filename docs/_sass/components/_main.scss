@@ -3,11 +3,14 @@
 // -----------------------------------------------
 
 #site-main {
+    flex: 1 0 auto;
     padding: ($base-point-grid * 10) 0;
 
     .main-flex {
         display: flex;
         justify-content: space-between;
+        align-items: center;
+        height: 100%;
 
         .main-item {
             width: $column-4;
