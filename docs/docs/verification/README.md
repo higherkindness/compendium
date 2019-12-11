@@ -19,7 +19,7 @@ Lorem ipsum dolor sit amet, [consectetur adipiscing](#) elit. Nam lacinia auctor
 - item 3
 - item 4
 
-```swift
+```scala
 func impureAdd(x: Int, y: Int) -> Int {
     print("Received (\(x), \(y))")
     return x + y
