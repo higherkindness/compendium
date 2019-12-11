@@ -1,5 +1,5 @@
 ---
 layout: docs
-title: Nef
+title: Compendium
 permalink: /docs/
 ---
