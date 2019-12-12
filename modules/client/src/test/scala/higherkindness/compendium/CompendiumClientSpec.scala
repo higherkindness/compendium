@@ -35,7 +35,7 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
   private[this] val dummyProtocol: Protocol = Protocol("rawProtocol")
 
   implicit val clientConfig: CompendiumClientConfig =
-    pureconfig.loadConfigOrThrow[CompendiumClientConfig]("compendium")
+    pureconfig.ConfigSource.default.at("compendium").loadOrThrow[CompendiumClientConfig]
 
   private[this] def asEntityJson[T: io.circe.Encoder](t: T): Entity =
     Entity.StringEntity(t.asJson.toString, ContentType.`application/json`)

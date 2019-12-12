@@ -24,8 +24,8 @@ import higherkindness.compendium.transformer.ProtocolTransformer
 import higherkindness.skeuomorph.protobuf.ParseProto.ProtoSource
 import higherkindness.skeuomorph.{avro, mu, protobuf}
 import org.apache.avro.{Protocol => AvroProtocol}
-import qq.droste.data.Mu
-import qq.droste.data.Mu._
+import higherkindness.droste.data.Mu
+import higherkindness.droste.data.Mu._
 
 object SkeuomorphProtocolTransformer {
 
@@ -38,7 +38,7 @@ object SkeuomorphProtocolTransformer {
         .parseProto[F, Mu[protobuf.ProtobufF]]
         .parse(source)
         .map { protobuf =>
-          val muProto        = mu.Protocol.fromProtobufProto(protobuf)
+          val muProto        = mu.Protocol.fromProtobufProto(mu.CompressionType.Identity, true)(protobuf)
           val targetMetadata = oldMetadata.copy(idlName = IdlName.Mu)
           val targetProto    = Protocol(mu.print.proto.print(muProto))
           FullProtocol(targetMetadata, targetProto)
@@ -52,7 +52,8 @@ object SkeuomorphProtocolTransformer {
           for {
             avroProto      <- Sync[F].delay(AvroProtocol.parse(fp.protocol.raw))
             skeuoAvroProto <- Sync[F].delay(avro.Protocol.fromProto(avroProto))
-            muProto        <- Sync[F].delay(mu.Protocol.fromAvroProtocol(skeuoAvroProto))
+            muProto <- Sync[F].delay(
+              mu.Protocol.fromAvroProtocol(mu.CompressionType.Identity, true)(skeuoAvroProto))
           } yield {
             val targetMetadata = fp.metadata.copy(idlName = IdlName.Mu)
             val targetProto    = Protocol(mu.print.proto.print(muProto))
