@@ -19,13 +19,17 @@ package higherkidness.compendium
 import cats.effect.IO
 import higherkindness.compendium.models.config._
 import org.specs2.mutable.Specification
+import pureconfig._
 import pureconfig.generic.auto._
 import pureconfig.module.catseffect._
 
 class ConfigSpec extends Specification {
 
   "Config must load properly" >> {
-    loadConfigF[IO, CompendiumClientConfig]("compendium").attempt
+    ConfigSource.default
+      .at("compendium")
+      .loadF[IO, CompendiumClientConfig]
+      .attempt
       .unsafeRunSync() must beRight[CompendiumClientConfig]
   }
 

@@ -6,25 +6,26 @@ import sbtorgpolicies.templates._
 import sbtorgpolicies.templates.badges._
 
 lazy val V = new {
-  val betterMonadicFor: String = "0.3.0"
-  val cats: String             = "1.6.1"
-  val catsScalacheck: String   = "0.1.1"
-  val mouse: String            = "0.20"
-  val circe: String            = "0.11.1"
+  val betterMonadicFor: String = "0.3.1"
+  val cats: String             = "2.0.0"
+  val catsScalacheck: String   = "0.2.0"
+  val mouse: String            = "0.23"
+  val circe: String            = "0.12.3"
   val kindProjector: String    = "0.10.3"
   val paradise: String         = "2.1.1"
-  val scala: String            = "2.12.8"
-  val skeumorph: String        = "0.0.10"
-  val specs2: String           = "4.6.0"
+  val scala: String            = "2.12.10"
+  val skeumorph: String        = "0.0.17"
+  val specs2: String           = "4.8.1"
   val enumeratum: String       = "1.5.13"
-  val enumeratumCirce: String  = "1.5.21"
-  val http4s: String           = "0.20.3"
+  val enumeratumCirce: String  = "1.5.22"
+  val http4s: String           = "0.21.0-M6"
   val shapeless: String        = "2.3.3"
-  val pureConfig: String       = "0.11.1"
-  val hammock: String          = "0.9.2"
-  val doobie: String           = "0.7.0"
-  val flyway: String           = "5.2.4"
-  val refined: String          = "0.9.8"
+  val pureConfig: String       = "0.12.1"
+  val hammock: String          = "0.10.0"
+  val doobie: String           = "0.8.6"
+  val flyway: String           = "6.1.1"
+  val refined: String          = "0.9.10"
+  val slf4j: String            = "1.7.29"
 }
 
 lazy val root = project
@@ -114,7 +115,7 @@ lazy val commonSettings = Seq(
     organizationEmail = "hello@47deg.com"
   ),
   startYear := Some(2018),
-  scalaVersion := "2.12.8",
+  scalaVersion := "2.12.10",
   crossScalaVersions := Seq(scalaVersion.value),
   ThisBuild / scalacOptions -= "-Xplugin-require:macroparadise",
   libraryDependencies ++= Seq(
@@ -122,10 +123,10 @@ lazy val commonSettings = Seq(
     "org.typelevel" %% "mouse" % V.mouse,
     %%("shapeless", V.shapeless),
     %%("pureconfig", V.pureConfig),
-    "com.github.pureconfig" %%  "pureconfig-generic"      % V.pureConfig,
-    "com.github.pureconfig" %%  "pureconfig-cats-effect"  % V.pureConfig,
-    "com.github.pureconfig" %%  "pureconfig-enumeratum"  % V.pureConfig,
-    "io.higherkindness"     %%  "skeuomorph"              % V.skeumorph,
+    "com.github.pureconfig" %% "pureconfig-generic"     % V.pureConfig,
+    "com.github.pureconfig" %% "pureconfig-cats-effect" % V.pureConfig,
+    "com.github.pureconfig" %% "pureconfig-enumeratum"  % V.pureConfig,
+    "io.higherkindness"     %% "skeuomorph"             % V.skeumorph,
     %%("http4s-dsl", V.http4s),
     %%("http4s-blaze-server", V.http4s),
     %%("http4s-circe", V.http4s),
@@ -143,7 +144,7 @@ lazy val commonSettings = Seq(
     %%("doobie-specs2", V.doobie)     % Test,
     "io.chrisdavenport"               %% "cats-scalacheck" % V.catsScalacheck % Test,
     "io.chrisdavenport"               %% "testcontainers-specs2" % "0.1.0" % Test,
-    "org.testcontainers"              % "postgresql" % "1.11.3" % Test
+    "org.testcontainers"              % "postgresql" % "1.12.4" % Test
   ),
   orgScriptTaskListSetting := List(
     (clean in Global).asRunnableItemFull,
@@ -187,7 +188,7 @@ lazy val clientSettings = Seq(
 lazy val serverSettings = Seq(
   parallelExecution in Test := false,
   libraryDependencies ++= Seq(
-    "org.slf4j"         % "slf4j-simple"        % "1.7.26",
+    "org.slf4j"         % "slf4j-simple"        % V.slf4j,
     "eu.timepit"        %% "refined"            % V.refined,
     "eu.timepit"        %% "refined-scalacheck" % V.refined,
     "io.chrisdavenport" %% "cats-scalacheck"    % V.catsScalacheck % Test,
@@ -211,5 +212,5 @@ val noPublishSettings = Seq(
 
 // check for library updates whenever the project is [re]load
 // format: OFF
-onLoad in Global := { s => "dependencyUpdates" :: s }
+//onLoad in Global := { s => "dependencyUpdates" :: s }
 // format: ON
