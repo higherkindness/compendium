@@ -16,7 +16,7 @@
 
 package higherkindness.compendium
 
-import cats.effect.IO
+import cats.effect.Sync
 import cats.free.Free
 import cats.implicits._
 import hammock._
@@ -24,7 +24,7 @@ import hammock.circe.implicits._
 import higherkindness.compendium.models._
 import higherkindness.compendium.models.config._
 
-trait CompendiumClient {
+trait CompendiumClient[F[_]] {
 
   /** Stores a protocol
    *
@@ -32,15 +32,15 @@ trait CompendiumClient {
    * @param protocol a protocol
    * @return the identifier of the protocol
    */
-  def storeProtocol(identifier: String, protocol: Protocol): IO[Int]
+  def storeProtocol(identifier: String, protocol: Protocol): F[Int]
 
   /** Retrieve a Protocol by its id
    *
    * @param identifier the protocol identifier
-   * @param version optional protocol version number
+   * @param version    optional protocol version number
    * @return a protocol
    */
-  def retrieveProtocol(identifier: String, version: Option[Int]): IO[Option[Protocol]]
+  def retrieveProtocol(identifier: String, version: Option[Int]): F[Option[Protocol]]
 
   /** Generates a client for a target and a protocol by its identifier
    *
@@ -48,67 +48,67 @@ trait CompendiumClient {
    * @param identifier the protocol identifier
    * @return a client for that protocol and target
    */
-  def generateClient(target: IdlName, identifier: String): IO[String]
+  def generateClient(target: IdlName, identifier: String): F[String]
 }
 
 object CompendiumClient {
 
-  def apply()(
-      implicit interp: InterpTrans[IO],
-      clientConfig: CompendiumClientConfig): CompendiumClient =
-    new CompendiumClient {
+  def apply[F[_]: Sync]()(
+      implicit interp: InterpTrans[F],
+      clientConfig: CompendiumClientConfig
+  ): CompendiumClient[F] =
+    new CompendiumClient[F] {
 
       val baseUrl: String          = s"http://${clientConfig.http.host}:${clientConfig.http.port}"
       val versionParamName: String = "version"
 
-      override def storeProtocol(identifier: String, protocol: Protocol): IO[Int] = {
-        val request =
+      override def storeProtocol(identifier: String, protocol: Protocol): F[Int] = {
+        val request: Free[HttpF, HttpResponse] =
           Hammock.request(Method.POST, uri"$baseUrl/v0/protocol/$identifier", Map(), Some(protocol))
 
         for {
-          status <- request.map(_.status).exec[IO]
+          status <- request.map(_.status).exec[F]
           _ <- status match {
-            case Status.Created => IO.unit
-            case Status.OK      => IO.unit
+            case Status.Created => Sync[F].unit
+            case Status.OK      => Sync[F].unit
             case Status.BadRequest =>
               asError(request, SchemaError)
             case Status.InternalServerError =>
-              IO.raiseError(UnknownError(s"Error in compendium server"))
+              Sync[F].raiseError(UnknownError(s"Error in compendium server"))
             case _ =>
-              IO.raiseError(UnknownError(s"Unknown error with status code $status"))
+              Sync[F].raiseError(UnknownError(s"Unknown error with status code $status"))
           }
         } yield status.code
       }
 
       override def retrieveProtocol(
           identifier: String,
-          version: Option[Int]): IO[Option[Protocol]] = {
+          version: Option[Int]
+      ): F[Option[Protocol]] = {
         val versionParam = version.fold("")(v => s"?$versionParamName=${v.show}")
         val uri          = uri"$baseUrl/v0/protocol/$identifier$versionParam"
 
         val request: Free[HttpF, HttpResponse] = Hammock.request(Method.GET, uri, Map())
 
         for {
-          status <- request.map(_.status).exec[IO]
+          status <- request.map(_.status).exec[F]
           out <- status match {
-            case Status.OK       => request.as[Protocol].map(Some(_)).exec[IO]
-            case Status.NotFound => IO(None)
+            case Status.OK       => request.as[Protocol].map(Option(_)).exec[F]
+            case Status.NotFound => Sync[F].pure(None)
             case Status.InternalServerError =>
-              IO.raiseError(UnknownError(s"Error in compendium server"))
+              Sync[F].raiseError(UnknownError(s"Error in compendium server"))
             case _ =>
-              IO.raiseError(UnknownError(s"Unknown error with status code $status"))
+              Sync[F].raiseError(UnknownError(s"Unknown error with status code $status"))
           }
         } yield out
       }
 
-      override def generateClient(target: IdlName, identifier: String): IO[String] = IO("")
+      override def generateClient(target: IdlName, identifier: String): F[String] = Sync[F].pure("")
 
-      private def asError(
-          request: Free[HttpF, HttpResponse],
-          error: String => Exception): IO[Unit] =
+      private def asError(request: Free[HttpF, HttpResponse], error: String => Exception): F[Unit] =
         request
           .as[ErrorResponse]
-          .exec[IO]
-          .flatMap(rsp => IO.raiseError(error(rsp.message)))
+          .exec[F]
+          .flatMap(rsp => Sync[F].raiseError(error(rsp.message)))
     }
 }
