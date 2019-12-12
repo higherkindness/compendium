@@ -143,7 +143,7 @@ lazy val commonSettings = Seq(
     %%("doobie-specs2", V.doobie)     % Test,
     "io.chrisdavenport"               %% "cats-scalacheck" % V.catsScalacheck % Test,
     "io.chrisdavenport"               %% "testcontainers-specs2" % "0.1.0" % Test,
-    "org.testcontainers"              % "postgresql" % "1.11.3" % Test
+    "org.testcontainers"              % "postgresql" % "1.11.4" % Test
   ),
   orgScriptTaskListSetting := List(
     (clean in Global).asRunnableItemFull,
