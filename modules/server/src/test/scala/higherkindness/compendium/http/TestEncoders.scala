@@ -17,11 +17,11 @@
 package higherkindness.compendium.http
 
 import higherkindness.compendium.models.Protocol
-import io.circe.ObjectEncoder
+import io.circe.Encoder
 import io.circe.generic.semiauto.deriveEncoder
 
 object TestEncoders {
 
-  implicit val protocolEncoder: ObjectEncoder[Protocol] = deriveEncoder[Protocol]
+  implicit val protocolEncoder: Encoder.AsObject[Protocol] = deriveEncoder[Protocol]
 
 }

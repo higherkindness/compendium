@@ -20,6 +20,7 @@ import cats.effect.IO
 import com.typesafe.config.ConfigFactory
 import higherkindness.compendium.models.config._
 import org.specs2.mutable.Specification
+import pureconfig._
 import pureconfig.generic.auto._
 import pureconfig.module.catseffect._
 
@@ -60,7 +61,10 @@ class ConfigSpec extends Specification {
 
     val config = configWithStorageBlock(storageBlock)
 
-    loadConfigF[IO, CompendiumServerConfig](ConfigFactory.parseString(config)).attempt
+    ConfigSource
+      .fromConfig(ConfigFactory.parseString(config))
+      .loadF[IO, CompendiumServerConfig]
+      .attempt
       .unsafeRunSync() must beRight[CompendiumServerConfig]
   }
 
@@ -80,7 +84,10 @@ class ConfigSpec extends Specification {
 
     val config = configWithStorageBlock(storageBlock)
 
-    loadConfigF[IO, CompendiumServerConfig](ConfigFactory.parseString(config)).attempt
+    ConfigSource
+      .fromConfig(ConfigFactory.parseString(config))
+      .loadF[IO, CompendiumServerConfig]
+      .attempt
       .unsafeRunSync() must beRight[CompendiumServerConfig]
   }
 
