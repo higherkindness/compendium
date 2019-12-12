@@ -55,7 +55,8 @@ object CompendiumClient {
 
   def apply[F[_]: Sync]()(
       implicit interp: InterpTrans[F],
-      clientConfig: CompendiumClientConfig): CompendiumClient[F] =
+      clientConfig: CompendiumClientConfig
+  ): CompendiumClient[F] =
     new CompendiumClient[F] {
 
       val baseUrl: String          = s"http://${clientConfig.http.host}:${clientConfig.http.port}"
@@ -67,26 +68,23 @@ object CompendiumClient {
 
         for {
           status <- request.map(_.status).exec[F]
-          _ <- {
-            val statusToF: F[Unit] =
-              status match {
-                case Status.Created => Sync[F].unit
-                case Status.OK      => Sync[F].unit
-                case Status.BadRequest =>
-                  asError(request, SchemaError)
-                case Status.InternalServerError =>
-                  Sync[F].raiseError(UnknownError(s"Error in compendium server"))
-                case _ =>
-                  Sync[F].raiseError(UnknownError(s"Unknown error with status code $status"))
-              }
-            statusToF
+          _ <- status match {
+            case Status.Created => Sync[F].unit
+            case Status.OK      => Sync[F].unit
+            case Status.BadRequest =>
+              asError(request, SchemaError)
+            case Status.InternalServerError =>
+              Sync[F].raiseError(UnknownError(s"Error in compendium server"))
+            case _ =>
+              Sync[F].raiseError(UnknownError(s"Unknown error with status code $status"))
           }
         } yield status.code
       }
 
       override def retrieveProtocol(
           identifier: String,
-          version: Option[Int]): F[Option[Protocol]] = {
+          version: Option[Int]
+      ): F[Option[Protocol]] = {
         val versionParam = version.fold("")(v => s"?$versionParamName=${v.show}")
         val uri          = uri"$baseUrl/v0/protocol/$identifier$versionParam"
 
@@ -94,16 +92,13 @@ object CompendiumClient {
 
         for {
           status <- request.map(_.status).exec[F]
-          out <- {
-            val statusToF: F[Option[Protocol]] = status match {
-              case Status.OK       => request.as[Protocol].map(Option(_)).exec[F]
-              case Status.NotFound => Sync[F].pure(None)
-              case Status.InternalServerError =>
-                Sync[F].raiseError(UnknownError(s"Error in compendium server"))
-              case _ =>
-                Sync[F].raiseError(UnknownError(s"Unknown error with status code $status"))
-            }
-            statusToF
+          out <- status match {
+            case Status.OK       => request.as[Protocol].map(Option(_)).exec[F]
+            case Status.NotFound => Sync[F].pure(None)
+            case Status.InternalServerError =>
+              Sync[F].raiseError(UnknownError(s"Error in compendium server"))
+            case _ =>
+              Sync[F].raiseError(UnknownError(s"Unknown error with status code $status"))
           }
         } yield out
       }
