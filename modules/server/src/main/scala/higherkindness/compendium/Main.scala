@@ -34,6 +34,7 @@ import higherkindness.compendium.storage.files.FileStorage
 import higherkindness.compendium.storage.pg.PgStorage
 import higherkindness.compendium.transformer.skeuomorph.SkeuomorphProtocolTransformer
 import org.http4s.server.Router
+import pureconfig._
 import pureconfig.module.catseffect._
 import pureconfig.generic.auto._
 
@@ -46,7 +47,7 @@ object CompendiumStreamApp {
 
   def stream[F[_]: ConcurrentEffect: Timer: ContextShift]: Stream[F, ExitCode] =
     for {
-      conf                           <- Stream.eval(loadConfigF[F, CompendiumServerConfig]("compendium"))
+      conf                           <- Stream.eval(ConfigSource.default.at("compendium").loadF[F, CompendiumServerConfig])
       migrations                     <- Stream.eval(Migrations.metadataLocation)
       _                              <- Stream.eval(Migrations.makeMigrations(conf.metadata.storage, List(migrations)))
       implicit0(storage: Storage[F]) <- Stream.resource(initStorage[F](conf.protocols.storage))
@@ -71,9 +72,9 @@ object CompendiumStreamApp {
   private def createTransactor[F[_]: Async: ContextShift](
       conf: DatabaseStorageConfig): Resource[F, Transactor[F]] =
     for {
-      ce <- ExecutionContexts.fixedThreadPool[F](10)
-      te <- ExecutionContexts.cachedThreadPool[F]
+      ce      <- ExecutionContexts.fixedThreadPool[F](10)
+      blocker <- Blocker[F]
       xa <- HikariTransactor
-        .fromHikariConfig[F](DatabaseStorageConfig.getHikariConfig(conf), ce, te)
+        .fromHikariConfig[F](DatabaseStorageConfig.getHikariConfig(conf), ce, blocker)
     } yield xa
 }
