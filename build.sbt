@@ -25,7 +25,7 @@ lazy val V = new {
   val doobie: String           = "0.8.7"
   val flyway: String           = "6.1.1"
   val refined: String          = "0.9.10"
-  val slf4j: String            = "1.7.29"
+  val slf4j: String            = "1.7.30"
 }
 
 lazy val root = project
