@@ -6,7 +6,7 @@ jobs:
       jdk:
         - openjdk8
       scala:
-        - 2.12.8
+        - 2.12.10
       before_cache:
         - find $HOME/.sbt -name "*.lock" -type f -delete
         - find $HOME/.ivy2/cache -name "ivydata-*.properties" -type f -delete
