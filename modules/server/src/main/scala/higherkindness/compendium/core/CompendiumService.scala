@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2018-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,28 +21,29 @@ import cats.implicits._
 import higherkindness.compendium.core.refinements._
 import higherkindness.compendium.metadata.MetadataStorage
 import higherkindness.compendium.models._
-import higherkindness.compendium.models.transformer.types.TransformResult
 import higherkindness.compendium.storage.Storage
 import higherkindness.compendium.transformer.ProtocolTransformer
 
 trait CompendiumService[F[_]] {
 
   def storeProtocol(id: ProtocolId, protocol: Protocol, idlName: IdlName): F[ProtocolVersion]
-  def retrieveProtocol(id: ProtocolId, version: Option[ProtocolVersion]): F[Option[FullProtocol]]
+  def retrieveProtocol(id: ProtocolId, version: Option[ProtocolVersion]): F[FullProtocol]
   def existsProtocol(id: ProtocolId): F[Boolean]
-  def transformProtocol(fullProtocol: FullProtocol, target: IdlName): F[TransformResult]
+  def transformProtocol(fullProtocol: FullProtocol, target: IdlName): F[FullProtocol]
 }
 
 object CompendiumService {
 
   implicit def impl[F[_]: Sync: Storage: MetadataStorage: ProtocolUtils: ProtocolTransformer]: CompendiumService[
-    F] =
+    F
+  ] =
     new CompendiumService[F] {
 
       override def storeProtocol(
           id: ProtocolId,
           protocol: Protocol,
-          idlName: IdlName): F[ProtocolVersion] =
+          idlName: IdlName
+      ): F[ProtocolVersion] =
         for {
           _       <- ProtocolUtils[F].validateProtocol(protocol)
           version <- MetadataStorage[F].store(id, idlName)
@@ -51,27 +52,28 @@ object CompendiumService {
 
       override def retrieveProtocol(
           id: ProtocolId,
-          version: Option[ProtocolVersion]): F[Option[FullProtocol]] =
+          version: Option[ProtocolVersion]
+      ): F[FullProtocol] =
         for {
-          maybeMetadata <- MetadataStorage[F].retrieve(id)
-          maybeProto <- maybeMetadata.flatTraverse(metadata =>
-            Storage[F].retrieve(version.fold(metadata)(version =>
-              metadata.copy(version = version))))
-        } yield maybeProto
+          metadata <- MetadataStorage[F].retrieve(id)
+          proto <- Storage[F].retrieve(
+            version.fold(metadata)(version => metadata.copy(version = version))
+          )
+        } yield proto
 
       override def existsProtocol(id: ProtocolId): F[Boolean] =
         MetadataStorage[F].exists(id)
 
       override def transformProtocol(
           fullProtocol: FullProtocol,
-          target: IdlName): F[TransformResult] =
-        ProtocolTransformer[F].transform(fullProtocol, target).flatTap {
-          case Right(fullProtocol) =>
-            storeProtocol(
-              fullProtocol.metadata.id,
-              fullProtocol.protocol,
-              fullProtocol.metadata.idlName)
-          case Left(err) => Sync[F].raiseError[ProtocolVersion](err)
+          target: IdlName
+      ): F[FullProtocol] =
+        ProtocolTransformer[F].transform(fullProtocol, target).flatMap { fullProtocol =>
+          storeProtocol(
+            fullProtocol.metadata.id,
+            fullProtocol.protocol,
+            fullProtocol.metadata.idlName
+          ).as(fullProtocol)
         }
     }
 

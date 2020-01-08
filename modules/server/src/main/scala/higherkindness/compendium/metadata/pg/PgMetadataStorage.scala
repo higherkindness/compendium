@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2018-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import doobie.util.transactor.Transactor
 import higherkindness.compendium.core.doobie.implicits._
 import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
 import higherkindness.compendium.metadata.MetadataStorage
-import higherkindness.compendium.models.{IdlName, ProtocolMetadata}
+import higherkindness.compendium.models.{IdlName, ProtocolMetadata, ProtocolNotFound}
 
 object PgMetadataStorage {
 
@@ -35,8 +35,10 @@ object PgMetadataStorage {
           .withUniqueGeneratedKeys[ProtocolVersion]("version")
           .transact(xa)
 
-      override def retrieve(id: ProtocolId): F[Option[ProtocolMetadata]] =
-        Queries.retrieve(id).option.transact(xa)
+      override def retrieve(id: ProtocolId): F[ProtocolMetadata] =
+        Async[F].handleErrorWith(Queries.retrieve(id).unique.transact(xa)) { e =>
+          Async[F].raiseError(ProtocolNotFound(e.getMessage))
+        }
 
       override def exists(id: ProtocolId): F[Boolean] =
         Queries.exists(id).unique.transact(xa)

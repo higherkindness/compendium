@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2018-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,12 +32,12 @@ class PgMetadataStorageSpec extends PGHelper(Metadata) {
       val id: ProtocolId   = ProtocolId("pId")
       val idlName: IdlName = IdlName.Avro
 
-      val result: IO[Option[ProtocolMetadata]] =
+      val result: IO[ProtocolMetadata] =
         pg.store(id, idlName) >> pg.retrieve(id)
 
       val expected = ProtocolMetadata(id, idlName, ProtocolVersion(1))
 
-      result.unsafeRunSync must ===(Some(expected))
+      result.unsafeRunSync must_=== expected
 
     }
 
@@ -45,13 +45,13 @@ class PgMetadataStorageSpec extends PGHelper(Metadata) {
       val id: ProtocolId   = ProtocolId("pId2")
       val idlName: IdlName = IdlName.Avro
 
-      val result: IO[Option[ProtocolMetadata]] =
+      val result: IO[ProtocolMetadata] =
         pg.store(id, idlName) >> pg.store(id, idlName) >> pg
           .retrieve(id)
 
       val expected = ProtocolMetadata(id, idlName, ProtocolVersion(2))
 
-      result.unsafeRunSync must ===(Some(expected))
+      result.unsafeRunSync must_=== expected
     }
 
     "return false when the protocol does not exist" in {
@@ -67,7 +67,7 @@ class PgMetadataStorageSpec extends PGHelper(Metadata) {
       val result: IO[Boolean] =
         pg.store(id, idlName) >> pg.exists(id)
 
-      result.unsafeRunSync must ===(true)
+      result.unsafeRunSync must_=== true
     }
 
   }

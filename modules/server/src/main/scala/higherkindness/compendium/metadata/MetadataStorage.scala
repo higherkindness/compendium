@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2018-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
 
 trait MetadataStorage[F[_]] {
   def store(id: ProtocolId, idlName: IdlName): F[ProtocolVersion]
-  def retrieve(id: ProtocolId): F[Option[ProtocolMetadata]]
+  def retrieve(id: ProtocolId): F[ProtocolMetadata]
   def exists(id: ProtocolId): F[Boolean]
   def ping: F[Boolean]
 }

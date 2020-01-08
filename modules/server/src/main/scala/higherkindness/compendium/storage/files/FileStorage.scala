@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2018-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import cats.effect.Sync
 import cats.implicits._
 import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
 import higherkindness.compendium.models.config.FileStorageConfig
-import higherkindness.compendium.models.{FullProtocol, Protocol, ProtocolMetadata}
+import higherkindness.compendium.models._
 import higherkindness.compendium.storage.Storage
 
 object FileStorage {
@@ -56,17 +56,19 @@ object FileStorage {
         } yield ()
       }
 
-      override def retrieve(protocolMetadata: ProtocolMetadata): F[Option[FullProtocol]] = {
+      override def retrieve(protocolMetadata: ProtocolMetadata): F[FullProtocol] = {
         val filename = buildFilename(protocolMetadata.id, protocolMetadata.version)
         val file     = new File(s"${config.path}${File.separator}$filename")
-        def checkFile(exists: Boolean): Option[File] =
-          Option(exists).filter(identity).map(_ => file)
+        def checkFile: F[File] =
+          Sync[F]
+            .delay(file.exists)
+            .ifM(Sync[F].delay(file), Sync[F].raiseError(FileNotFound(filename)))
 
         for {
-          maybeFile   <- Sync[F].catchNonFatal(file.exists).map(checkFile)
-          maybeSource <- Sync[F].catchNonFatal(maybeFile.map(scala.io.Source.fromFile))
-          maybeProto  <- Sync[F].catchNonFatal(maybeSource.map(source => Protocol(source.mkString)))
-        } yield maybeProto.map(FullProtocol(protocolMetadata, _))
+          file   <- checkFile
+          source <- Sync[F].delay(scala.io.Source.fromFile(file))
+          proto  <- Sync[F].delay(Protocol(source.mkString))
+        } yield FullProtocol(protocolMetadata, proto)
       }
 
       override def exists(id: ProtocolId): F[Boolean] = {

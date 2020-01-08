@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2018-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@ import org.specs2.matcher.Matchers
 class StorageStub(
     val proto: Option[Protocol],
     val identifier: ProtocolId,
-    val protoVersion: ProtocolVersion)
-    extends Storage[IO]
+    val protoVersion: ProtocolVersion
+) extends Storage[IO]
     with Matchers {
   override def store(id: ProtocolId, version: ProtocolVersion, protocol: Protocol): IO[Unit] =
     IO {
@@ -35,10 +35,11 @@ class StorageStub(
       id === identifier
     } *> IO.unit
 
-  override def retrieve(metadata: ProtocolMetadata): IO[Option[FullProtocol]] =
+  override def retrieve(metadata: ProtocolMetadata): IO[FullProtocol] =
     if (metadata.id == identifier && metadata.version == protoVersion)
-      IO(proto.map(FullProtocol(metadata, _)))
-    else IO(None)
+      proto.fold(IO.raiseError[FullProtocol](ProtocolNotFound("Not Found")))(p =>
+        IO.pure(FullProtocol(metadata, p)))
+    else IO.raiseError[FullProtocol](ProtocolNotFound("Not found"))
 
   override def exists(id: ProtocolId): IO[Boolean] =
     IO(id == identifier)

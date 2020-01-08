@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2018-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import higherkindness.compendium.CompendiumArbitrary._
 import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
 import higherkindness.compendium.core.CompendiumServiceStub
 import higherkindness.compendium.models._
+import higherkindness.compendium.models.transformer.types.SchemaParseException
 import io.circe.Encoder
 import io.circe.generic.semiauto.deriveEncoder
 import org.http4s.circe.CirceEntityCodec._
@@ -133,7 +134,7 @@ object RootServiceSpec extends Specification with ScalaCheck {
             id: ProtocolId,
             protocol: Protocol,
             idlNames: IdlName): IO[ProtocolVersion] =
-          IO.raiseError[ProtocolVersion](new org.apache.avro.SchemaParseException(""))
+          IO.raiseError[ProtocolVersion](SchemaParseException(""))
       }
 
       val request: Request[IO] =

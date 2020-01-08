@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2018-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ class SkeuomorphProtocolTransformerSpec extends Specification {
 
       val transformResult = transformer.transform(fullProtocol, IdlName.Mu)
 
-      transformResult.unsafeRunSync() should beRight
+      transformResult.attempt.unsafeRunSync() should beRight
     }
 
     "Transform a simple Protobuf Schema to Mu" >> {
@@ -45,7 +45,7 @@ class SkeuomorphProtocolTransformerSpec extends Specification {
 
       val transformResult = transformer.transform(fullProtocol, IdlName.Mu)
 
-      transformResult.unsafeRunSync() should beRight
+      transformResult.attempt.unsafeRunSync() should beRight
     }
   }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2018-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import cats.effect.IO
 import cats.syntax.apply._
 import higherkindness.compendium.CompendiumArbitrary._
 import higherkindness.compendium.models.Protocol
+import higherkindness.compendium.models.transformer.types.SchemaParseException
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
 
@@ -44,7 +45,7 @@ object ProtocolUtilsSpec extends Specification with ScalaCheck {
       protocol: Protocol =>
         validator
           .validateProtocol(protocol)
-          .unsafeRunSync must throwA[org.apache.avro.SchemaParseException]
+          .unsafeRunSync must throwA[SchemaParseException]
     }
 
     "Given multiple protocols validates them sequentially" >> {
@@ -54,7 +55,7 @@ object ProtocolUtilsSpec extends Specification with ScalaCheck {
 
       val validation = validator.validateProtocol(protocol) *> validator.validateProtocol(protocol)
 
-      validation.unsafeRunSync should not(throwA[org.apache.avro.SchemaParseException])
+      validation.unsafeRunSync should not(throwA[SchemaParseException])
     }
   }
 

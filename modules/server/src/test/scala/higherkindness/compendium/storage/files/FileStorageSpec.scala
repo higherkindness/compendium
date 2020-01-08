@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2018-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ object FileStorageSpec extends Specification with ScalaCheck with BeforeAfterAll
           f <- fileStorage.retrieve(metadata)
         } yield f
 
-        file.unsafeRunSync() should beSome(FullProtocol(metadata, protocol))
+        file.unsafeRunSync() must_=== FullProtocol(metadata, protocol)
     }
 
     "Returns true if there is a file" >> prop { (metadata: ProtocolMetadata, protocol: Protocol) =>
