@@ -17,7 +17,8 @@
 package higherkindness.compendium.core.doobie
 
 import cats.instances.all._
-import doobie.util.{Get, Meta, Put}
+import doobie.util.{Get, Put}
+import doobie.util.meta.Meta
 import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
 import higherkindness.compendium.models.{IdlName, Protocol}
 
