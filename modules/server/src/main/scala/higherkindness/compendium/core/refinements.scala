@@ -40,7 +40,7 @@ object refinements {
 
   object ProtocolId extends RefinedTypeOps[ProtocolId, String] {
     def parseOrRaise[F[_]: Sync](id: String): F[ProtocolId] =
-      Sync[F].fromEither(ProtocolId.from(id).leftMap(ProtocolIdError))
+      F.fromEither(ProtocolId.from(id).leftMap(ProtocolIdError))
   }
 
   type ProtocolVersion = Int Refined Positive
@@ -48,9 +48,8 @@ object refinements {
   object ProtocolVersion extends RefinedTypeOps[ProtocolVersion, Int] {
     def parseOrRaise[F[_]: Sync](version: String): F[ProtocolVersion] =
       for {
-        number <- Sync[F].delay(version.toInt)
-        protoVersion <- Sync[F].fromEither(
-          ProtocolVersion.from(number).leftMap(ProtocolVersionError))
+        number       <- F.delay(version.toInt)
+        protoVersion <- F.fromEither(ProtocolVersion.from(number).leftMap(ProtocolVersionError))
       } yield protoVersion
   }
 }

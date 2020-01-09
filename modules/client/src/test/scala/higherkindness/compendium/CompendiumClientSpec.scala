@@ -27,6 +27,7 @@ import org.specs2.mutable.Specification
 import pureconfig.generic.auto._
 import hammock._
 import io.circe.syntax._
+import io.circe.Encoder
 
 object CompendiumClientSpec extends Specification with ScalaCheck {
 
@@ -37,11 +38,13 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
   implicit val clientConfig: CompendiumClientConfig =
     pureconfig.ConfigSource.default.at("compendium").loadOrThrow[CompendiumClientConfig]
 
-  private[this] def asEntityJson[T: io.circe.Encoder](t: T): Entity =
+  private[this] def asEntityJson[T: Encoder](t: T): Entity =
     Entity.StringEntity(t.asJson.toString, ContentType.`application/json`)
 
-  def interp[F[_]](identifier: String, target: IdlName, version: Option[Int] = None)(
-      implicit S: Sync[F]): InterpTrans[F] = new InterpTrans[F] {
+  def interp[F[_]: Sync](
+      identifier: String,
+      target: IdlName,
+      version: Option[Int] = None): InterpTrans[F] = new InterpTrans[F] {
 
     val trans: HttpF ~> F = new (HttpF ~> F) {
       private def response(entity: Entity): HttpResponse =
@@ -50,58 +53,58 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
       def apply[A](req: HttpF[A]): F[A] = req match {
         case Get(HttpRequest(uri, _, _))
             if uri.path.equalsIgnoreCase(s"/v0/protocol/$identifier") =>
-          S.catchNonFatal {
+          F.catchNonFatal {
             response(asEntityJson(dummyProtocol))
           }
 
         case Get(HttpRequest(uri, _, _))
             if uri.path.equalsIgnoreCase(
               s"/v0/protocol/$identifier?version=${version.getOrElse(0)}") =>
-          S.catchNonFatal {
+          F.catchNonFatal {
             response(asEntityJson(dummyProtocol))
           }
 
         case Get(HttpRequest(uri, _, _)) if uri.path.equalsIgnoreCase(s"/v0/protocol/error") =>
-          S.catchNonFatal {
+          F.catchNonFatal {
             response(Entity.EmptyEntity).copy(status = Status.InternalServerError)
           }
 
         case Get(HttpRequest(uri, _, _))
             if uri.path.equalsIgnoreCase(
               s"/v0/protocol/$identifier/generate?target=${target.toString}") =>
-          S.catchNonFatal {
+          F.catchNonFatal {
             response(Entity.StringEntity(uri.path)).copy(status = Status.NotImplemented)
           }
 
         case Get(_) =>
-          S.catchNonFatal {
+          F.catchNonFatal {
             response(Entity.EmptyEntity).copy(status = Status.NotFound)
           }
 
         case Post(HttpRequest(uri, _, _))
             if uri.path.equalsIgnoreCase(s"/v0/protocol/schemaerror") =>
-          S.catchNonFatal {
+          F.catchNonFatal {
             response(asEntityJson(ErrorResponse("Schema error"))).copy(status = Status.BadRequest)
           }
 
         case Post(HttpRequest(uri, _, _))
             if uri.path.equalsIgnoreCase(s"/v0/protocol/alreadyexists") =>
-          S.catchNonFatal {
+          F.catchNonFatal {
             response(Entity.StringEntity(uri.path)).copy(status = Status.OK)
           }
 
         case Post(HttpRequest(uri, _, _)) if uri.path.equalsIgnoreCase(s"/v0/protocol/internal") =>
-          S.catchNonFatal {
+          F.catchNonFatal {
             response(Entity.EmptyEntity).copy(status = Status.InternalServerError)
           }
 
         case Post(HttpRequest(uri, _, _)) =>
-          S.catchNonFatal {
+          F.catchNonFatal {
             response(Entity.StringEntity(uri.path)).copy(status = Status.Created)
           }
 
         case _ =>
-          S.raiseError(new Exception("Unexpected HTTP Method"))
+          F.raiseError(new Exception("Unexpected HTTP Method"))
       }
     }
   }

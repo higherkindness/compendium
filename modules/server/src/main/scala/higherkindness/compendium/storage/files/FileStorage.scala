@@ -46,9 +46,9 @@ object FileStorage {
         val path     = s"${config.path}${File.separator}$filename"
 
         for {
-          _    <- Sync[F].catchNonFatal(new File(config.path.toUri).mkdirs)
-          file <- Sync[F].catchNonFatal(new File(path))
-          _ <- Sync[F].catchNonFatal {
+          _    <- F.catchNonFatal(new File(config.path.toUri).mkdirs)
+          file <- F.catchNonFatal(new File(path))
+          _ <- F.catchNonFatal {
             val printWriter = new PrintWriter(file)
             printWriter.write(protocol.raw)
             printWriter.close()
@@ -60,14 +60,13 @@ object FileStorage {
         val filename = buildFilename(protocolMetadata.id, protocolMetadata.version)
         val file     = new File(s"${config.path}${File.separator}$filename")
         def checkFile: F[File] =
-          Sync[F]
-            .delay(file.exists)
+          F.delay(file.exists)
             .ifM(Sync[F].pure(file), Sync[F].raiseError(FileNotFound(filename)))
 
         for {
           file   <- checkFile
-          source <- Sync[F].delay(scala.io.Source.fromFile(file))
-          proto  <- Sync[F].delay(Protocol(source.mkString))
+          source <- F.delay(scala.io.Source.fromFile(file))
+          proto  <- F.delay(Protocol(source.mkString))
         } yield FullProtocol(protocolMetadata, proto)
       }
 
@@ -76,7 +75,7 @@ object FileStorage {
           override def accept(dir: File, name: String): Boolean = name.startsWith(s"${id.value}_")
         }
 
-        Sync[F].catchNonFatal(new File(s"${config.path}").listFiles(filter)).map(_.nonEmpty)
+        F.catchNonFatal(new File(s"${config.path}").listFiles(filter)).map(_.nonEmpty)
       }
     }
 

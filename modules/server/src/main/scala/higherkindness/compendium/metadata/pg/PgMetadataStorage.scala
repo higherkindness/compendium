@@ -36,8 +36,8 @@ object PgMetadataStorage {
           .transact(xa)
 
       override def retrieve(id: ProtocolId): F[ProtocolMetadata] =
-        Async[F].handleErrorWith(Queries.retrieve(id).unique.transact(xa)) { e =>
-          Async[F].raiseError(ProtocolNotFound(e.getMessage))
+        F.handleErrorWith(Queries.retrieve(id).unique.transact(xa)) { e =>
+          F.raiseError(ProtocolNotFound(e.getMessage))
         }
 
       override def exists(id: ProtocolId): F[Boolean] =

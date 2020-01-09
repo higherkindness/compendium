@@ -27,5 +27,5 @@ trait MetadataStorage[F[_]] {
 }
 
 object MetadataStorage {
-  def apply[F[_]](implicit F: MetadataStorage[F]): MetadataStorage[F] = F
+  def apply[F[_]: MetadataStorage]: MetadataStorage[F] = F
 }

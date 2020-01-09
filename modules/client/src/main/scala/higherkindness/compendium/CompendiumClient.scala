@@ -69,8 +69,8 @@ object CompendiumClient {
         for {
           status <- request.map(_.status).exec[F]
           _ <- status match {
-            case Status.Created => Sync[F].unit
-            case Status.OK      => Sync[F].unit
+            case Status.Created => F.unit
+            case Status.OK      => F.unit
             case Status.BadRequest =>
               asError(request, SchemaError)
             case Status.InternalServerError =>
@@ -94,21 +94,21 @@ object CompendiumClient {
           status <- request.map(_.status).exec[F]
           out <- status match {
             case Status.OK       => request.as[Protocol].map(Option(_)).exec[F]
-            case Status.NotFound => Sync[F].pure(None)
+            case Status.NotFound => F.pure(None)
             case Status.InternalServerError =>
-              Sync[F].raiseError(UnknownError(s"Error in compendium server"))
+              F.raiseError(UnknownError(s"Error in compendium server"))
             case _ =>
-              Sync[F].raiseError(UnknownError(s"Unknown error with status code $status"))
+              F.raiseError(UnknownError(s"Unknown error with status code $status"))
           }
         } yield out
       }
 
-      override def generateClient(target: IdlName, identifier: String): F[String] = Sync[F].pure("")
+      override def generateClient(target: IdlName, identifier: String): F[String] = F.pure("")
 
       private def asError(request: Free[HttpF, HttpResponse], error: String => Exception): F[Unit] =
         request
           .as[ErrorResponse]
           .exec[F]
-          .flatMap(rsp => Sync[F].raiseError(error(rsp.message)))
+          .flatMap(rsp => F.raiseError(error(rsp.message)))
     }
 }

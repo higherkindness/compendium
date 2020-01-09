@@ -34,11 +34,10 @@ object HealthService {
 
     HttpRoutes.of[F] {
       case GET -> Root / "health" =>
-        MetadataStorage[F].ping
-          .ifM(
-            Ok(HealthResponse("pass", BuildInfo.name, BuildInfo.version)),
-            InternalServerError()
-          )
+        F.ping.ifM(
+          Ok(HealthResponse("pass", BuildInfo.name, BuildInfo.version)),
+          InternalServerError()
+        )
     }
   }
 }

@@ -36,14 +36,14 @@ object RootService {
     import f._
 
     def idlValidation(idlNameValidated: ValidatedNel[ParseFailure, IdlName]): F[IdlName] =
-      Sync[F].fromValidated(idlNameValidated.leftMap(errs => UnknownIdlName(errs.toList.mkString)))
+      F.fromValidated(idlNameValidated.leftMap(errs => UnknownIdlName(errs.toList.mkString)))
 
     def versionValidation(
         maybeVersionValidated: Option[ValidatedNel[ParseFailure, ProtocolVersion]]
     ): F[Option[ProtocolVersion]] =
       maybeVersionValidated.traverse { validated =>
         val validation = validated.leftMap(errs => ProtocolVersionError(errs.toList.mkString))
-        Sync[F].fromValidated(validation)
+        F.fromValidated(validation)
       }
 
     val routes = HttpRoutes.of[F] {

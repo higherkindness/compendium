@@ -26,6 +26,6 @@ trait ProtocolTransformer[F[_]] {
 
 object ProtocolTransformer {
 
-  def apply[F[_]: Sync](implicit F: ProtocolTransformer[F]): ProtocolTransformer[F] = F
+  def apply[F[_]: Sync: ProtocolTransformer]: ProtocolTransformer[F] = F
 
 }
