@@ -36,14 +36,14 @@ object RootService {
     import f._
 
     def idlValidation(idlNameValidated: ValidatedNel[ParseFailure, IdlName]): F[IdlName] =
-      Sync[F].fromValidated(idlNameValidated.leftMap(errs => UnknownIdlName(errs.toList.mkString)))
+      F.fromValidated(idlNameValidated.leftMap(errs => UnknownIdlName(errs.toList.mkString)))
 
     def versionValidation(
         maybeVersionValidated: Option[ValidatedNel[ParseFailure, ProtocolVersion]]
     ): F[Option[ProtocolVersion]] =
       maybeVersionValidated.traverse { validated =>
         val validation = validated.leftMap(errs => ProtocolVersionError(errs.toList.mkString))
-        Sync[F].fromValidated(validation)
+        F.fromValidated(validation)
       }
 
     val routes = HttpRoutes.of[F] {
@@ -52,7 +52,7 @@ object RootService {
           protocolId <- ProtocolId.parseOrRaise(id)
           idlName    <- idlValidation(idlNameValidated)
           protocol   <- req.as[Protocol]
-          version    <- CompendiumService[F].storeProtocol(protocolId, protocol, idlName)
+          version    <- F.storeProtocol(protocolId, protocol, idlName)
           response   <- Created(version.value)
         } yield response.putHeaders(Location(req.uri.withPath(s"${req.uri.path}")))
 
@@ -60,7 +60,7 @@ object RootService {
         for {
           protocolId   <- ProtocolId.parseOrRaise(id)
           maybeVersion <- versionValidation(maybeVersionValidated)
-          fullProtocol <- CompendiumService[F].retrieveProtocol(protocolId, maybeVersion)
+          fullProtocol <- F.retrieveProtocol(protocolId, maybeVersion)
           response     <- Ok(fullProtocol.protocol)
         } yield response
 
@@ -71,8 +71,8 @@ object RootService {
           protocolId   <- ProtocolId.parseOrRaise(id)
           maybeVersion <- versionValidation(maybeVersionValidated)
           idlName      <- idlValidation(idlNameValidated)
-          protocol     <- CompendiumService[F].retrieveProtocol(protocolId, maybeVersion)
-          transform    <- CompendiumService[F].transformProtocol(protocol, idlName)
+          protocol     <- F.retrieveProtocol(protocolId, maybeVersion)
+          transform    <- F.transformProtocol(protocol, idlName)
           response     <- Ok(transform.protocol)
         } yield response
     }

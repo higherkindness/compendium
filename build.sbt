@@ -9,6 +9,7 @@ lazy val V = new {
   val betterMonadicFor: String = "0.3.1"
   val cats: String             = "2.1.0"
   val catsScalacheck: String   = "0.2.0"
+  val contextApplied: String   = "0.1.2"
   val mouse: String            = "0.24"
   val circe: String            = "0.12.3"
   val kindProjector: String    = "0.10.3"
@@ -150,10 +151,11 @@ lazy val commonSettings = Seq(
     (clean in Global).asRunnableItemFull,
     (compile in Compile).asRunnableItemFull,
     (test in Test).asRunnableItemFull,
-    "docs/tut".asRunnableItem,
+    "docs/tut".asRunnableItem
   ),
   orgMaintainersSetting := List(
-    Dev("47degdev", Some("47 Degrees (twitter: @47deg)"), Some("hello@47deg.com"))),
+    Dev("47degdev", Some("47 Degrees (twitter: @47deg)"), Some("hello@47deg.com"))
+  ),
   // format: OFF
   orgBadgeListSetting := List(
     TravisBadge.apply,
@@ -191,7 +193,7 @@ lazy val serverSettings = Seq(
     "org.slf4j"         % "slf4j-simple"        % V.slf4j,
     "eu.timepit"        %% "refined"            % V.refined,
     "eu.timepit"        %% "refined-scalacheck" % V.refined,
-    "io.chrisdavenport" %% "cats-scalacheck"    % V.catsScalacheck % Test,
+    "io.chrisdavenport" %% "cats-scalacheck"    % V.catsScalacheck % Test
   )
 )
 
@@ -199,7 +201,8 @@ lazy val compilerPlugins = Seq(
   libraryDependencies ++= Seq(
     compilerPlugin("org.typelevel"   % "kind-projector"      % V.kindProjector cross CrossVersion.binary),
     compilerPlugin("com.olegpy"      %% "better-monadic-for" % V.betterMonadicFor),
-    compilerPlugin("org.scalamacros" % "paradise"            % V.paradise cross CrossVersion.patch)
+    compilerPlugin("org.scalamacros" % "paradise"            % V.paradise cross CrossVersion.patch),
+    compilerPlugin("org.augustjune"  %% "context-applied"    % V.contextApplied)
   )
 )
 

@@ -29,15 +29,15 @@ object parsing {
       transformToTarget: ProtoSource => F[FullProtocol]): F[FullProtocol] = {
 
     val tmpFileCreation =
-      Sync[F].delay(Files.createTempFile("compendium", "protobuf"))
+      F.delay(Files.createTempFile("compendium", "protobuf"))
     def printWriterCreation(tmpFile: Path): F[PrintWriter] =
-      Sync[F].delay(new PrintWriter(tmpFile.toFile))
+      F.delay(new PrintWriter(tmpFile.toFile))
 
     val protoSource = for {
       tmpFile   <- Resource.liftF(tmpFileCreation)
       tmpWriter <- Resource.fromAutoCloseable(printWriterCreation(tmpFile))
-      _         <- Resource.liftF(Sync[F].delay(tmpWriter.write(raw)))
-      _         <- Resource.liftF(Sync[F].delay(tmpWriter.close()))
+      _         <- Resource.liftF(F.delay(tmpWriter.write(raw)))
+      _         <- Resource.liftF(F.delay(tmpWriter.close()))
     } yield ProtoSource(tmpFile.getFileName.toString, tmpFile.getParent.toString)
 
     protoSource.use(transformToTarget)

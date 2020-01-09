@@ -30,8 +30,7 @@ object Migrations {
   def dataLocation[F[_]: Sync]: F[Location] = Sync[F].delay(new Location("db/migration/data"))
 
   def makeMigrations[F[_]: Sync](conf: DatabaseStorageConfig, migrations: List[Location]): F[Int] =
-    Sync[F]
-      .delay {
+    F.delay {
         Flyway
           .configure()
           .dataSource(conf.jdbcUrl, conf.username, conf.password)
@@ -41,7 +40,7 @@ object Migrations {
       }
       .attempt
       .flatMap {
-        case Right(count) => Sync[F].delay(count)
-        case Left(error)  => Sync[F].raiseError(error)
+        case Right(count) => F.delay(count)
+        case Left(error)  => F.raiseError(error)
       }
 }

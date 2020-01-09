@@ -27,5 +27,5 @@ trait Storage[F[_]] {
 }
 
 object Storage {
-  def apply[F[_]](implicit S: Storage[F]): Storage[F] = S
+  def apply[F[_]: Storage]: Storage[F] = F
 }

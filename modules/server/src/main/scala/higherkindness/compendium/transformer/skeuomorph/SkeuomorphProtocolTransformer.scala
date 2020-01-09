@@ -49,10 +49,11 @@ object SkeuomorphProtocolTransformer {
         case _ if fp.metadata.idlName.entryName == target.entryName => Sync[F].pure(fp)
         case (IdlName.Avro, IdlName.Mu) =>
           for {
-            avroProto      <- Sync[F].delay(AvroProtocol.parse(fp.protocol.raw))
-            skeuoAvroProto <- Sync[F].delay(avro.Protocol.fromProto(avroProto))
-            muProto <- Sync[F].delay(
-              mu.Protocol.fromAvroProtocol(mu.CompressionType.Identity, true)(skeuoAvroProto))
+            avroProto      <- F.delay(AvroProtocol.parse(fp.protocol.raw))
+            skeuoAvroProto <- F.delay(avro.Protocol.fromProto(avroProto))
+            muProto <- F.delay(
+              mu.Protocol.fromAvroProtocol(mu.CompressionType.Identity, true)(skeuoAvroProto)
+            )
           } yield {
             val targetMetadata = fp.metadata.copy(idlName = IdlName.Mu)
             val targetProto    = Protocol(mu.print.proto.print(muProto))

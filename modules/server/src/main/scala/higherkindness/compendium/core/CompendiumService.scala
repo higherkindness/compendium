@@ -77,5 +77,5 @@ object CompendiumService {
         }
     }
 
-  def apply[F[_]](implicit F: CompendiumService[F]): CompendiumService[F] = F
+  def apply[F[_]: CompendiumService]: CompendiumService[F] = F
 }

@@ -33,13 +33,12 @@ object ProtocolUtils {
   def impl[F[_]: Sync]: ProtocolUtils[F] = new ProtocolUtils[F] {
     override def validateProtocol(protocol: Protocol): F[Protocol] =
       if (protocol.raw.trim.isEmpty)
-        Sync[F].raiseError(SchemaParseException("Protocol is empty"))
+        F.raiseError(SchemaParseException("Protocol is empty"))
       else
-        Sync[F]
-          .catchNonFatal(parser.parse(protocol.raw))
+        F.catchNonFatal(parser.parse(protocol.raw))
           .map(_ => protocol)
-          .handleErrorWith(e => Sync[F].raiseError(SchemaParseException(e.getMessage)))
+          .handleErrorWith(e => F.raiseError(SchemaParseException(e.getMessage)))
   }
 
-  def apply[F[_]](implicit F: ProtocolUtils[F]): ProtocolUtils[F] = F
+  def apply[F[_]: ProtocolUtils]: ProtocolUtils[F] = F
 }
