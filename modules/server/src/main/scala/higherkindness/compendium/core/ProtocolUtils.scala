@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2018-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package higherkindness.compendium.core
 import cats.effect.Sync
 import cats.implicits._
 import higherkindness.compendium.models.Protocol
+import higherkindness.compendium.models.transformer.types.SchemaParseException
 import org.apache.avro.Schema
 
 trait ProtocolUtils[F[_]] {
@@ -32,9 +33,12 @@ object ProtocolUtils {
   def impl[F[_]: Sync]: ProtocolUtils[F] = new ProtocolUtils[F] {
     override def validateProtocol(protocol: Protocol): F[Protocol] =
       if (protocol.raw.trim.isEmpty)
-        Sync[F].raiseError(new org.apache.avro.SchemaParseException("Protocol is empty"))
+        Sync[F].raiseError(SchemaParseException("Protocol is empty"))
       else
-        Sync[F].catchNonFatal(parser.parse(protocol.raw)).map(_ => protocol)
+        Sync[F]
+          .catchNonFatal(parser.parse(protocol.raw))
+          .map(_ => protocol)
+          .handleErrorWith(e => Sync[F].raiseError(SchemaParseException(e.getMessage)))
   }
 
   def apply[F[_]](implicit F: ProtocolUtils[F]): ProtocolUtils[F] = F

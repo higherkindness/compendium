@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2018-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,16 +24,16 @@ import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
 import higherkindness.compendium.models.{FullProtocol, Protocol, ProtocolMetadata}
 import higherkindness.compendium.storage.Storage
 
-private class PgStorage[F[_]: Bracket[?[_], Throwable]](xa: Transactor[F]) extends Storage[F] {
+private class PgStorage[F[_]: Bracket[*[_], Throwable]](xa: Transactor[F]) extends Storage[F] {
 
   override def store(id: ProtocolId, version: ProtocolVersion, protocol: Protocol): F[Unit] =
     Queries.store(id, version, protocol).run.void.transact(xa)
 
-  override def retrieve(metadata: ProtocolMetadata): F[Option[FullProtocol]] =
+  override def retrieve(metadata: ProtocolMetadata): F[FullProtocol] =
     Queries
       .retrieve(metadata.id, metadata.version)
-      .option
-      .map(_.map(FullProtocol(metadata, _)))
+      .unique
+      .map(FullProtocol(metadata, _))
       .transact(xa)
 
   override def exists(id: ProtocolId): F[Boolean] =
@@ -42,7 +42,7 @@ private class PgStorage[F[_]: Bracket[?[_], Throwable]](xa: Transactor[F]) exten
 
 object PgStorage {
 
-  def apply[F[_]: Bracket[?[_], Throwable]](xa: Transactor[F]): Storage[F] =
+  def apply[F[_]: Bracket[*[_], Throwable]](xa: Transactor[F]): Storage[F] =
     new PgStorage(xa)
 
 }

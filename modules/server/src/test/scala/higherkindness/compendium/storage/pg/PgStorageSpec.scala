@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2018-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,10 +36,10 @@ class PgStorageSpec extends PGHelper(Data) {
       val proto     = Protocol("the new protocol content")
       val fullProto = FullProtocol(metadata, proto)
 
-      val result: IO[Option[FullProtocol]] = pgStorage.store(id, version, proto) >> pgStorage
+      val result: IO[FullProtocol] = pgStorage.store(id, version, proto) >> pgStorage
         .retrieve(metadata)
 
-      result.unsafeRunSync must ===(fullProto.some)
+      result.unsafeRunSync must_=== fullProto
     }
 
     "update protocol correctly" in {
@@ -51,11 +51,11 @@ class PgStorageSpec extends PGHelper(Data) {
       val metadata  = ProtocolMetadata(id, IdlName.Mu, version2)
       val fullProto = FullProtocol(metadata, proto2)
 
-      val result: IO[Option[FullProtocol]] = pgStorage.store(id, version1, proto1) >> pgStorage
+      val result: IO[FullProtocol] = pgStorage.store(id, version1, proto1) >> pgStorage
         .store(id, version2, proto2) >> pgStorage
         .retrieve(metadata)
 
-      result.unsafeRunSync must ===(fullProto.some)
+      result.unsafeRunSync must_=== fullProto
     }
 
     "return false when the protocol does not exist" in {
@@ -71,7 +71,7 @@ class PgStorageSpec extends PGHelper(Data) {
 
       val result: IO[Boolean] = pgStorage.store(id, version, proto) >> pgStorage.exists(id)
 
-      result.unsafeRunSync must ===(true)
+      result.unsafeRunSync must_=== true
     }
 
   }
