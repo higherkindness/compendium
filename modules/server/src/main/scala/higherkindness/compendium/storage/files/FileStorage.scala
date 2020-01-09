@@ -62,7 +62,7 @@ object FileStorage {
         def checkFile: F[File] =
           Sync[F]
             .delay(file.exists)
-            .ifM(Sync[F].delay(file), Sync[F].raiseError(FileNotFound(filename)))
+            .ifM(Sync[F].pure(file), Sync[F].raiseError(FileNotFound(filename)))
 
         for {
           file   <- checkFile

@@ -22,7 +22,7 @@ import cats.syntax.option._
 import cats.syntax.applicativeError._
 import higherkindness.compendium.models._
 import higherkindness.compendium.models.transformer.types.SchemaParseException
-import org.http4s.{HttpRoutes, Response, Status}
+import org.http4s._
 
 object RoutesMiddleware {
 
@@ -37,13 +37,13 @@ object RoutesMiddleware {
     Kleisli { req =>
       OptionT {
         httpRoutes.run(req).value.handleError {
-          case e: SchemaParseException                 => badRequest(e.getMessage)
-          case e: org.http4s.InvalidMessageBodyFailure => badRequest(e.getMessage)
-          case e: ProtocolIdError                      => badRequest(e.getMessage)
-          case e: ProtocolNotFound                     => notFound(e.getMessage)
-          case e: UnknownIdlName                       => badRequest(e.getMessage)
-          case e: ProtocolVersionError                 => badRequest(e.getMessage)
-          case e                                       => genResponse(Status.InternalServerError, e.getMessage)
+          case e: SchemaParseException      => badRequest(e.getMessage)
+          case e: InvalidMessageBodyFailure => badRequest(e.getMessage)
+          case e: ProtocolIdError           => badRequest(e.getMessage)
+          case e: ProtocolNotFound          => notFound(e.getMessage)
+          case e: UnknownIdlName            => badRequest(e.getMessage)
+          case e: ProtocolVersionError      => badRequest(e.getMessage)
+          case e                            => genResponse(Status.InternalServerError, e.getMessage)
         }
       }
     }
