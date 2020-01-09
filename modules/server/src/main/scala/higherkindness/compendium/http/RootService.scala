@@ -52,7 +52,7 @@ object RootService {
           protocolId <- ProtocolId.parseOrRaise(id)
           idlName    <- idlValidation(idlNameValidated)
           protocol   <- req.as[Protocol]
-          version    <- F.storeProtocol(protocolId, protocol, idlName)
+          version    <- CompendiumService[F].storeProtocol(protocolId, protocol, idlName)
           response   <- Created(version.value)
         } yield response.putHeaders(Location(req.uri.withPath(s"${req.uri.path}")))
 
@@ -60,7 +60,7 @@ object RootService {
         for {
           protocolId   <- ProtocolId.parseOrRaise(id)
           maybeVersion <- versionValidation(maybeVersionValidated)
-          fullProtocol <- F.retrieveProtocol(protocolId, maybeVersion)
+          fullProtocol <- CompendiumService[F].retrieveProtocol(protocolId, maybeVersion)
           response     <- Ok(fullProtocol.protocol)
         } yield response
 
@@ -71,8 +71,8 @@ object RootService {
           protocolId   <- ProtocolId.parseOrRaise(id)
           maybeVersion <- versionValidation(maybeVersionValidated)
           idlName      <- idlValidation(idlNameValidated)
-          protocol     <- F.retrieveProtocol(protocolId, maybeVersion)
-          transform    <- F.transformProtocol(protocol, idlName)
+          protocol     <- CompendiumService[F].retrieveProtocol(protocolId, maybeVersion)
+          transform    <- CompendiumService[F].transformProtocol(protocol, idlName)
           response     <- Ok(transform.protocol)
         } yield response
     }
