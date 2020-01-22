@@ -21,7 +21,7 @@ import higherkindness.compendium.models.config._
 import org.specs2.mutable.Specification
 import pureconfig._
 import pureconfig.generic.auto._
-import pureconfig.module.catseffect._
+import pureconfig.module.catseffect.syntax._
 
 class ConfigSpec extends Specification {
 
