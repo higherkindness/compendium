@@ -19,12 +19,14 @@ package higherkindness.compendium.transformer.skeuomorph
 import cats.effect.Sync
 import cats.implicits._
 import higherkindness.compendium.models.{FullProtocol, IdlName, Protocol, ProtocolMetadata}
+import higherkindness.compendium.models.transformer.types._
 import higherkindness.compendium.transformer.ProtocolTransformer
 import higherkindness.skeuomorph.protobuf.ParseProto.ProtoSource
 import higherkindness.skeuomorph.{avro, mu, protobuf}
 import org.apache.avro.{Protocol => AvroProtocol}
 import higherkindness.droste.data.Mu
 import higherkindness.droste.data.Mu._
+import scala.meta._
 
 object SkeuomorphProtocolTransformer {
 
@@ -32,18 +34,26 @@ object SkeuomorphProtocolTransformer {
 
     import higherkindness.compendium.transformer.protobuf.parsing._
 
-    private def protobufToMu(source: ProtoSource, oldMetadata: ProtocolMetadata): F[FullProtocol] =
+    private def protobufToMu(
+        source: ProtoSource,
+        oldMetadata: ProtocolMetadata,
+        streamCtor: (Type, Type) => Type.Apply
+    ): F[FullProtocol] =
       protobuf.ParseProto
         .parseProto[F, Mu[protobuf.ProtobufF]]
         .parse(source)
-        .map { protobuf =>
-          val muProto        = mu.Protocol.fromProtobufProto(mu.CompressionType.Identity, true)(protobuf)
-          val targetMetadata = oldMetadata.copy(idlName = IdlName.Mu)
-          val targetProto    = Protocol(mu.print.proto.print(muProto))
-          FullProtocol(targetMetadata, targetProto)
-        }
+        .map(protobuf => mu.Protocol.fromProtobufProto(mu.CompressionType.Identity, true)(protobuf))
+        .flatMap(p =>
+          Sync[F]
+            .fromEither(mu.codegen.protocol(p, streamCtor).leftMap(TransformError).map(_.syntax))
+        )
+        .map(p => FullProtocol(oldMetadata.copy(idlName = IdlName.Mu), Protocol(p)))
 
-    private def skeuomorphTransformation(fp: FullProtocol, target: IdlName): F[FullProtocol] =
+    private def skeuomorphTransformation(fp: FullProtocol, target: IdlName): F[FullProtocol] = {
+      val streamCtor: (Type, Type) => Type.Apply = {
+        case (f, a) => t"_root_.fs2.Stream[$f, $a]"
+      }
+
       (fp.metadata.idlName, target) match {
         // (from, to)
         case _ if fp.metadata.idlName.entryName == target.entryName => Sync[F].pure(fp)
@@ -54,14 +64,19 @@ object SkeuomorphProtocolTransformer {
             muProto <- F.delay(
               mu.Protocol.fromAvroProtocol(mu.CompressionType.Identity, true)(skeuoAvroProto)
             )
+            proto <- F.fromEither(
+              mu.codegen.protocol(muProto, streamCtor).leftMap(TransformError).map(_.syntax)
+            )
           } yield {
             val targetMetadata = fp.metadata.copy(idlName = IdlName.Mu)
-            val targetProto    = Protocol(mu.print.proto.print(muProto))
+            val targetProto    = Protocol(proto)
             FullProtocol(targetMetadata, targetProto)
           }
         case (IdlName.Protobuf, IdlName.Mu) =>
-          transformProtobuf(fp.protocol.raw)(protobufToMu(_, fp.metadata))
+          transformProtobuf(fp.protocol.raw)(protobufToMu(_, fp.metadata, streamCtor))
       }
+
+    }
 
     override def transform(protocol: FullProtocol, target: IdlName): F[FullProtocol] =
       skeuomorphTransformation(protocol, target)
