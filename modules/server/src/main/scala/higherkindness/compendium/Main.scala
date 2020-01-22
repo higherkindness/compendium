@@ -23,20 +23,20 @@ import doobie.util.ExecutionContexts
 import doobie.util.transactor.Transactor
 import fs2.Stream
 import higherkindness.compendium.core._
-import higherkindness.compendium.metadata._
 import higherkindness.compendium.http._
+import higherkindness.compendium.metadata._
 import higherkindness.compendium.metadata.pg.PgMetadataStorage
 import higherkindness.compendium.migrations.Migrations
 import higherkindness.compendium.models.config._
-import higherkindness.compendium.transformer.ProtocolTransformer
 import higherkindness.compendium.storage._
 import higherkindness.compendium.storage.files.FileStorage
 import higherkindness.compendium.storage.pg.PgStorage
+import higherkindness.compendium.transformer.ProtocolTransformer
 import higherkindness.compendium.transformer.skeuomorph.SkeuomorphProtocolTransformer
 import org.http4s.server.Router
 import pureconfig._
-import pureconfig.module.catseffect._
 import pureconfig.generic.auto._
+import pureconfig.module.catseffect.syntax._
 
 object Main extends IOApp {
   override def run(args: List[String]): IO[ExitCode] =
