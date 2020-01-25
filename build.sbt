@@ -25,7 +25,7 @@ lazy val V = new {
   val hammock: String          = "0.10.0"
   val doobie: String           = "0.8.8"
   val flyway: String           = "6.2.0"
-  val refined: String          = "0.9.10"
+  val refined: String          = "0.9.12"
   val slf4j: String            = "1.7.30"
 }
 
