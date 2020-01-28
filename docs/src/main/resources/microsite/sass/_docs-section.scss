@@ -1,0 +1,167 @@
+// Docs
+// -----------------------------------------------
+// -----------------------------------------------
+body {
+  color: $text-color;
+}
+
+.docs {
+  font-family: $base-font-family;
+  background: $white;
+
+  .pull-right {
+    display: none;
+  }
+
+  #sidebar-wrapper {
+    background-image: none;
+    background-color: $sidebar-background;
+
+    #sidebar-brand {
+      background-color: $sidebar-active-color;
+
+      a {
+        color: $text-color;
+        font-family: $base-font-family;
+
+        .brand-wrapper {
+          width: $logo-size;
+          height: $logo-size;
+        }
+
+        span {
+          left: 93px;
+          font-size: $brand-font-size;
+        }
+      }
+    }
+
+    .sidebar-nav {
+      .sidebar-nav-item {
+        .sub-section {
+          background: $sidebar-active-color;
+
+          a {
+            &.active {
+              color: $text-color;
+              box-shadow: 0.25rem 0 $main-color inset;
+            }
+          }
+        }
+
+        a, button {
+          @include links($text-color, $text-color, rgba($text-color, 0.8), $text-color);
+        }
+
+        .fa {
+          color: $text-color;
+        }
+
+        &.active {
+          > a, button {
+            box-shadow: 0.25rem 0 $main-color inset;
+            background-color: $sidebar-active-color;
+          }
+        }
+
+        &.open {
+          > a, button {
+            background: $sidebar-head-active-color;
+          }
+        }
+      }
+    }
+  }
+
+  #page-content-wrapper {
+
+    .nav {
+      background: #fff;
+
+      a {
+        color: $text-color;
+
+        &:hover {
+          color: rgba($text-color, 0.8);
+        }
+      }
+
+      ul {
+        li {
+          .label {
+            color: $text-color;
+          }
+        }
+      }
+    }
+
+    .sidebar-toggle {
+      color: $text-color;
+
+      &:hover {
+        color: $text-color;
+      }
+    }
+
+    section {
+      padding: $base-point-grid;
+    }
+  }
+
+  #content {
+    p {
+      line-height: 1.5;
+    }
+  }
+
+  h1, h2, h3, h4, h5, h6,
+  .h1, .h2, .h3, .h4, .h5, .h6 {
+    font-weight: $headings-font-weight;
+    color: $text-color;
+  }
+
+  h1 {
+      font-size: 2.5rem;
+      border-bottom: 1px solid $border-color;
+  }
+  h2 {
+      font-size:  2rem;
+      border-bottom: 1px solid $border-color;
+  }
+  h3 {
+      font-size: 1.5rem;
+  }
+  h4 {
+      font-size: 1.25rem;
+  }
+  h5 {
+      font-size: 1.125rem;
+  }
+  h6 {
+      font-size: 1rem;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+      margin: {
+          top: ($base-point-grid * 3);
+          bottom: ($base-point-grid * 2);
+      }
+
+      &:first-child {
+        margin-top: 0;
+      }
+  }
+
+}
+
+.close {
+  &::after,
+  &::before {
+    background-color: $text-color;
+  }
+}
