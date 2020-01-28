@@ -1,0 +1,69 @@
+// Code
+// ----------------------------------------------
+// ----------------------------------------------
+p code,
+ul code {
+    padding: 2px $base-point-grid;
+    background: rgba($gray-primary, 0.1);
+    font-family: $code-font-family;
+    border-radius: 2px;
+}
+
+
+.highlight pre {
+  background:  rgba($main-color, 0.06);
+  padding: ($base-point-grid * 3);
+  overflow: auto;
+  margin-bottom: ($base-point-grid * 2);
+}
+
+
+code {
+    font-family: $code-font-family;
+}
+
+table > tbody > tr > td, table > tbody > tr, table > thead > tr > td, table > thead > tr, table > tfoot > tr > td, table > tfoot > tr {
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: 1px solid rgba($main-color, 0.3);
+  padding: none;
+}
+
+table > tbody > tr > th, table > thead > tr > th, table > tfoot > tr > th {
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: 3px solid rgba($main-color, 0.3);
+  padding: none;
+}
+
+table {
+  font-size: 1rem;
+  text-align: left;
+  overflow-x: auto;
+  border: none;
+
+  th {
+    border-radius: 0;
+    border-bottom: 3px solid rgba($main-color, 0.3);
+    font-weight: $font-semibold;
+  }
+
+  tr {
+    border-radius: 0;
+  }
+
+  th,
+  td {
+    padding: $base-point-grid $base-point-grid * 4;
+
+    &:first-of-type {
+      padding-left: $base-point-grid * 2;
+    }
+
+    &:last-of-type {
+      padding-right: $base-point-grid * 2;
+    }
+  }
+}

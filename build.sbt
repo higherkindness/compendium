@@ -72,26 +72,20 @@ lazy val docs = project
   .settings(noPublishSettings)
   .settings(
     micrositeName := "Compendium",
-    micrositeDescription := "Schema catalog service",
+    micrositeDescription := "IDL protocol management and distribution at speed of light",
     micrositeBaseUrl := "/compendium",
     micrositeGithubOwner := "higherkindness",
     micrositeGithubRepo := "compendium",
-    micrositeHighlightTheme := "tomorrow",
+    micrositeHighlightTheme := "dracula",
+    micrositeDocumentationUrl := "docs",
     micrositeOrganizationHomepage := "http://www.47deg.com",
-    includeFilter in Jekyll := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.swf" | "*.md",
+    includeFilter in Jekyll := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.swf" | "*.md" | "*.svg",
     micrositeGithubToken := getEnvVar(orgGithubTokenSetting.value),
     micrositePushSiteWith := GitHub4s,
-    micrositeExtraMdFiles := Map(
-      file("README.md") -> ExtraMdFileConfig(
-        "index.md",
-        "home",
-        Map("title" -> "Home", "section" -> "home", "position" -> "0")
-      ),
-      file("CHANGELOG.md") -> ExtraMdFileConfig(
-        "changelog.md",
-        "home",
-        Map("title" -> "changelog", "section" -> "changelog", "position" -> "99")
-      )
+    micrositePalette := Map(
+      "brand-primary"     -> "#3d5afe",
+      "brand-secondary"   -> "#0125ed",
+      "white-color"       -> "#FFF"
     ),
     scalacOptions in console ~= filterConsoleScalacOptions,
     scalacOptions in doc ~= filterConsoleScalacOptions,

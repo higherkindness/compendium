@@ -1,0 +1,55 @@
+// Variables
+// -----------------------------------------------
+// -----------------------------------------------
+// Google Fonts
+// -----------------------------------------------
+@import url('https://fonts.googleapis.com/css?family=Cairo:400,600,700&display=swap');
+
+// Colors
+// -----------------------------------------------
+$main-color: #3c59fe;
+$masthead-background: #f3f5ff;
+$text-color: #1f1c49;
+$footer-text-color: rgba(255,255,255,0.5);
+$white: #FFF;
+$sidebar-background: #d5dbff;
+$sidebar-active-color: #ccd3ff;
+$sidebar-head-active-color: lighten($main-color, 4%);
+$gray-primary: rgb(31, 28, 73);
+
+// Typography
+// -----------------------------------------------
+$base-font-family: 'Cairo', sans-serif;
+$header-font-family: $base-font-family;
+$code-font-family: 'Source Code Pro', monospace;
+$headings-font-weight: 600;
+
+// Sizes
+$logo-size: 70px;
+$base-point-grid: 8px;
+$brand-font-size: 1.5rem;
+$font-semibold: 600;
+// Hover
+//------------------------------------------------
+@mixin links($link, $visited, $hover, $active) {
+  & {
+    color: $link;
+
+    &:visited {
+      color: $visited;
+    }
+
+    &:hover {
+      color: $hover;
+    }
+
+    &:active,
+    &:focus {
+      color: $active;
+    }
+  }
+}
+
+// Border
+// -----------------------------------------------
+$border-color: rgba($gray-primary, 0.1);
