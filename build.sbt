@@ -22,7 +22,6 @@ lazy val V = new {
   val http4s: String           = "0.21.0-RC2"
   val shapeless: String        = "2.3.3"
   val pureConfig: String       = "0.12.2"
-  val hammock: String          = "0.10.0"
   val doobie: String           = "0.8.8"
   val flyway: String           = "6.2.1"
   val refined: String          = "0.9.12"
@@ -30,43 +29,20 @@ lazy val V = new {
 }
 
 lazy val root = project
-  .in(file("."))
-  .settings(name := "compendium")
-  .settings(commonSettings)
-  .settings(noPublishSettings)
-  .aggregate(server, client, common)
-
-lazy val common = project
-  .in(file("modules/common"))
-  .settings(commonSettings)
-  .settings(
-    name := "compendium-common"
-  )
-
-lazy val server = project
   .enablePlugins(UniversalPlugin, JavaAppPackaging, BuildInfoPlugin)
-  .in(file("modules/server"))
+  .in(file("."))
   .settings(commonSettings)
   .settings(serverSettings)
+  .settings(noPublishSettings)
   .settings(
     buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
     buildInfoPackage := "buildinfo",
     name := "compendium-server"
   )
-  .dependsOn(common)
-
-lazy val client = project
-  .in(file("modules/client"))
-  .settings(commonSettings)
-  .settings(clientSettings)
-  .settings(
-    name := "compendium-client"
-  )
-  .dependsOn(common)
 
 lazy val docs = project
   .in(file("docs"))
-  .dependsOn(server, client)
+  .dependsOn(root)
   .settings(moduleName := "compendium-docs")
   .settings(commonSettings)
   .settings(noPublishSettings)
@@ -172,14 +148,6 @@ lazy val commonSettings = Seq(
   )
 ) ++ compilerPlugins
 
-//Settings
-lazy val clientSettings = Seq(
-  libraryDependencies ++= Seq(
-    "com.pepegar" %% "hammock-core"            % V.hammock,
-    "com.pepegar" %% "hammock-asynchttpclient" % V.hammock,
-    "com.pepegar" %% "hammock-circe"           % V.hammock
-  )
-)
 
 lazy val serverSettings = Seq(
   parallelExecution in Test := false,
@@ -206,8 +174,3 @@ val noPublishSettings = Seq(
   publishArtifact := false,
   skip in publish := true
 )
-
-// check for library updates whenever the project is [re]load
-// format: OFF
-//onLoad in Global := { s => "dependencyUpdates" :: s }
-// format: ON
