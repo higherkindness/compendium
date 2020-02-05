@@ -16,28 +16,65 @@
 
 package higherkindness.compendium.core
 
+import java.io.{File, PrintWriter}
+
 import cats.effect.Sync
 import cats.implicits._
-import higherkindness.compendium.models.Protocol
+import higherkindness.compendium.models.{IdlName, Protocol}
 import higherkindness.compendium.models.transformer.types.SchemaParseException
+import higherkindness.droste.data.Mu
+import higherkindness.skeuomorph.protobuf.ParseProto.ProtoSource
+import higherkindness.skeuomorph.protobuf.ProtobufF
+import higherkindness.skeuomorph.protobuf.ParseProto._
 import org.apache.avro.Schema
 
+import higherkindness.skeuomorph.protobuf
+
 trait ProtocolUtils[F[_]] {
-  def validateProtocol(protocol: Protocol): F[Protocol]
+  def validateProtocol(protocol: Protocol, schema: IdlName): F[Protocol]
 }
 
 object ProtocolUtils {
 
-  private def parser: Schema.Parser = new Schema.Parser()
+  private def parserAvro: Schema.Parser = new Schema.Parser()
+
+  private def parserProtobuf[F[_]: Sync](raw: String): F[protobuf.Protocol[Mu[ProtobufF]]] = {
+    for {
+      tmpFile <- writeTempFile(raw)
+      p <- parseProto[F, Mu[ProtobufF]].parse(
+        ProtoSource(tmpFile.getName, tmpFile.getAbsolutePath.replaceAll(tmpFile.getName, ""))
+      )
+    } yield p
+  }
+
+  private def writeTempFile[F[_]: Sync](msg: String): F[File] = {
+    F.delay {
+      val file = File.createTempFile("protoTempFile", ".proto")
+      file.deleteOnExit
+      val pw = new PrintWriter(file)
+      pw.write(msg)
+      pw.close()
+      file
+    }
+  }
 
   def impl[F[_]: Sync]: ProtocolUtils[F] = new ProtocolUtils[F] {
-    override def validateProtocol(protocol: Protocol): F[Protocol] =
+    override def validateProtocol(protocol: Protocol, schema: IdlName): F[Protocol] =
       if (protocol.raw.trim.isEmpty)
         F.raiseError(SchemaParseException("Protocol is empty"))
       else
-        F.catchNonFatal(parser.parse(protocol.raw))
-          .map(_ => protocol)
-          .handleErrorWith(e => F.raiseError(SchemaParseException(e.getMessage)))
+        schema match {
+          case IdlName.Avro =>
+            F.catchNonFatal(parserAvro.parse(protocol.raw))
+              .map(_ => protocol)
+              .handleErrorWith(e => F.raiseError(SchemaParseException(e.getMessage)))
+          case IdlName.Protobuf =>
+            parserProtobuf(protocol.raw)
+              .map(_ => protocol)
+              .handleErrorWith(e => F.raiseError(SchemaParseException(e.getMessage)))
+
+          case _ => F.raiseError(SchemaParseException("Schema type not implemented yet"))
+        }
   }
 
   def apply[F[_]: ProtocolUtils]: ProtocolUtils[F] = F

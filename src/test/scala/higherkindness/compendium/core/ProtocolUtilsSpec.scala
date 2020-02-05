@@ -21,7 +21,7 @@ import java.io.InputStream
 import cats.effect.IO
 import cats.syntax.apply._
 import higherkindness.compendium.CompendiumArbitrary._
-import higherkindness.compendium.models.Protocol
+import higherkindness.compendium.models.{IdlName, Protocol}
 import higherkindness.compendium.models.transformer.types.SchemaParseException
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
@@ -33,30 +33,57 @@ object ProtocolUtilsSpec extends Specification with ScalaCheck {
   private val validator = ProtocolUtils.impl[IO]
 
   "Protocol validator" >> {
-    "Given a raw protocol text returns the same protocol if it validates correctly" >> {
+    "[Avro] Given a raw protocol text returns the same protocol if it validates correctly" >> {
       val stream: InputStream = getClass.getResourceAsStream("/correct.avro")
       val text: String        = scala.io.Source.fromInputStream(stream).getLines.mkString
       val protocol: Protocol  = Protocol(text)
 
-      validator.validateProtocol(protocol).unsafeRunSync === protocol
+      validator.validateProtocol(protocol, IdlName.Avro).unsafeRunSync === protocol
     }
 
-    "Given a raw protocol text raises an error if the protocol is incorrect" >> prop {
+    "[Avro] Given a raw protocol text raises an error if the protocol is incorrect" >> prop {
       protocol: Protocol =>
         validator
-          .validateProtocol(protocol)
+          .validateProtocol(protocol, IdlName.Avro)
           .unsafeRunSync must throwA[SchemaParseException]
     }
 
-    "Given multiple protocols validates them sequentially" >> {
+    "[Avro] Given multiple protocols validates them sequentially" >> {
       val stream: InputStream = getClass.getResourceAsStream("/correct.avro")
       val text: String        = scala.io.Source.fromInputStream(stream).getLines.mkString
       val protocol: Protocol  = Protocol(text)
 
-      val validation = validator.validateProtocol(protocol) *> validator.validateProtocol(protocol)
+      val validation = validator.validateProtocol(protocol, IdlName.Avro) *> validator
+        .validateProtocol(protocol, IdlName.Avro)
 
       validation.unsafeRunSync should not(throwA[SchemaParseException])
     }
+
+    "[Proto] Given a raw protocol text returns the same protocol if it validates correctly" >> {
+      val stream: InputStream = getClass.getResourceAsStream("/correct.proto")
+      val text: String        = scala.io.Source.fromInputStream(stream).getLines.mkString
+      val protocol: Protocol  = Protocol(text)
+      validator.validateProtocol(protocol, IdlName.Protobuf).unsafeRunSync === protocol
+    }
+
+    "[Proto] Given a raw protocol text raises an error if the protocol is incorrect" >> {
+      val stream: InputStream = getClass.getResourceAsStream("/correct.avro")
+      val text: String        = scala.io.Source.fromInputStream(stream).getLines.mkString
+      val protocol: Protocol  = Protocol(text)
+      validator
+        .validateProtocol(protocol, IdlName.Protobuf)
+        .unsafeRunSync must throwA[SchemaParseException]
+    }
+
+    "[Proto] Given a raw protocol text raises an error if the protocol is incorrect II" >> {
+      val stream: InputStream = getClass.getResourceAsStream("/wrong.proto")
+      val text: String        = scala.io.Source.fromInputStream(stream).getLines.mkString
+      val protocol: Protocol  = Protocol(text)
+      validator
+        .validateProtocol(protocol, IdlName.Protobuf)
+        .unsafeRunSync must throwA[SchemaParseException]
+    }
+
   }
 
 }

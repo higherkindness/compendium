@@ -17,10 +17,10 @@
 package higherkindness.compendium.core
 
 import cats.effect.IO
-import higherkindness.compendium.models.Protocol
+import higherkindness.compendium.models.{IdlName, Protocol}
 import mouse.all._
 
 class ProtocolUtilsStub(val pro: Protocol, val valid: Boolean) extends ProtocolUtils[IO] {
-  def validateProtocol(protocol: Protocol): IO[Protocol] =
+  def validateProtocol(protocol: Protocol, schema: IdlName): IO[Protocol] =
     valid.fold(IO(pro), IO.raiseError(new org.apache.avro.SchemaParseException("Error")))
 }

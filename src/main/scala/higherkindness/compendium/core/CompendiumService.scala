@@ -45,7 +45,7 @@ object CompendiumService {
           idlName: IdlName
       ): F[ProtocolVersion] =
         for {
-          _       <- ProtocolUtils[F].validateProtocol(protocol)
+          _       <- ProtocolUtils[F].validateProtocol(protocol, idlName)
           version <- MetadataStorage[F].store(id, idlName)
           _       <- Storage[F].store(id, version, protocol)
         } yield version
