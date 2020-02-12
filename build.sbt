@@ -11,7 +11,7 @@ lazy val V = new {
   val catsScalacheck: String   = "0.2.0"
   val contextApplied: String   = "0.1.2"
   val mouse: String            = "0.24"
-  val circe: String            = "0.12.3"
+  val circe: String            = "0.13.0"
   val kindProjector: String    = "0.10.3"
   val paradise: String         = "2.1.1"
   val scala: String            = "2.12.10"
@@ -23,7 +23,7 @@ lazy val V = new {
   val shapeless: String        = "2.3.3"
   val pureConfig: String       = "0.12.2"
   val doobie: String           = "0.8.8"
-  val flyway: String           = "6.2.1"
+  val flyway: String           = "6.2.2"
   val refined: String          = "0.9.12"
   val slf4j: String            = "1.7.30"
 }
