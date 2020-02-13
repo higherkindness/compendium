@@ -60,9 +60,9 @@ lazy val docs = project
     micrositeGithubToken := getEnvVar(orgGithubTokenSetting.value),
     micrositePushSiteWith := GitHub4s,
     micrositePalette := Map(
-      "brand-primary"     -> "#3d5afe",
-      "brand-secondary"   -> "#0125ed",
-      "white-color"       -> "#FFF"
+      "brand-primary"   -> "#3d5afe",
+      "brand-secondary" -> "#0125ed",
+      "white-color"     -> "#FFF"
     ),
     scalacOptions in console ~= filterConsoleScalacOptions,
     scalacOptions in doc ~= filterConsoleScalacOptions,
@@ -149,7 +149,6 @@ lazy val commonSettings = Seq(
     // format: ON
   )
 ) ++ compilerPlugins
-
 
 lazy val serverSettings = Seq(
   parallelExecution in Test := false,
