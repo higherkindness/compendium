@@ -15,7 +15,7 @@ lazy val V = new {
   val circe: String            = "0.13.0"
   val kindProjector: String    = "0.10.3"
   val paradise: String         = "2.1.1"
-  val scala: String            = "2.13.1"
+  val scala: String            = "2.12.10"
   val skeumorph: String        = "0.0.20"
   val specs2: String           = "4.8.3"
   val enumeratum: String       = "1.5.15"
@@ -87,7 +87,7 @@ lazy val commonSettings = Seq(
     organizationEmail = "hello@47deg.com"
   ),
   startYear := Some(2018),
-  scalaVersion := "2.12.10",
+  scalaVersion := V.scala,
   crossScalaVersions := Seq(scalaVersion.value),
   ThisBuild / scalacOptions -= "-Xplugin-require:macroparadise",
   libraryDependencies ++= Seq(
