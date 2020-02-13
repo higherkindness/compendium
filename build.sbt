@@ -8,6 +8,7 @@ import sbtorgpolicies.templates.badges._
 lazy val V = new {
   val betterMonadicFor: String = "0.3.1"
   val cats: String             = "2.1.0"
+  val catsEffect: String       = "2.1.1"
   val catsScalacheck: String   = "0.2.0"
   val contextApplied: String   = "0.1.2"
   val mouse: String            = "0.24"
@@ -91,6 +92,7 @@ lazy val commonSettings = Seq(
   ThisBuild / scalacOptions -= "-Xplugin-require:macroparadise",
   libraryDependencies ++= Seq(
     %%("cats-core", V.cats),
+    %%("cats-effect", V.catsEffect),
     "org.typelevel" %% "mouse" % V.mouse,
     %%("shapeless", V.shapeless),
     %%("pureconfig", V.pureConfig),
