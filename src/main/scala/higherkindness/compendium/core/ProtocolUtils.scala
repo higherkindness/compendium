@@ -18,17 +18,17 @@ package higherkindness.compendium.core
 
 import java.io.{File, PrintWriter}
 
-import cats.effect.Sync
+import cats.effect.{Resource, Sync}
 import cats.implicits._
 import higherkindness.compendium.models.{IdlName, Protocol}
 import higherkindness.compendium.models.transformer.types.SchemaParseException
 import higherkindness.droste.data.Mu
-import higherkindness.skeuomorph.protobuf.ParseProto.ProtoSource
-import higherkindness.skeuomorph.protobuf.ProtobufF
+import higherkindness.skeuomorph.openapi.{schema, JsonSchemaF}
+import higherkindness.skeuomorph.openapi.ParseOpenApi.{JsonSource, parseJsonOpenApi, _}
+
+import higherkindness.skeuomorph.protobuf.{ProtobufF, Protocol => ProtobufProtocol}
 import higherkindness.skeuomorph.protobuf.ParseProto._
 import org.apache.avro.Schema
-
-import higherkindness.skeuomorph.protobuf
 
 trait ProtocolUtils[F[_]] {
   def validateProtocol(protocol: Protocol, schema: IdlName): F[Protocol]
@@ -38,7 +38,7 @@ object ProtocolUtils {
 
   private def parserAvro: Schema.Parser = new Schema.Parser()
 
-  private def parserProtobuf[F[_]: Sync](raw: String): F[protobuf.Protocol[Mu[ProtobufF]]] = {
+  private def parserProtobuf[F[_]: Sync](raw: String): F[ProtobufProtocol[Mu[ProtobufF]]] = {
     for {
       tmpFile <- writeTempFile(raw)
       p <- parseProto[F, Mu[ProtobufF]].parse(
@@ -47,33 +47,64 @@ object ProtocolUtils {
     } yield p
   }
 
+  private def parseOpenApi[F[_]: Sync](
+      raw: String
+  ): F[Either[Throwable, schema.OpenApi[Mu[JsonSchemaF]]]] = {
+    for {
+      tmpFile <- writeTempFile(raw)
+      _       <- parseJsonOpenApi[F, Mu[JsonSchemaF]].parse(JsonSource(tmpFile)).attempt
+      yoapi   <- parseYamlOpenApi[F, Mu[JsonSchemaF]].parse(YamlSource(tmpFile)).attempt
+    } yield yoapi
+  }
+
   private def writeTempFile[F[_]: Sync](msg: String): F[File] = {
-    F.delay {
-      val file = File.createTempFile("protoTempFile", ".proto")
-      file.deleteOnExit
-      val pw = new PrintWriter(file)
-      pw.write(msg)
-      pw.close()
-      file
-    }
+    Resource
+      .make(F.delay {
+        val file = File.createTempFile("protoTempFile", ".proto")
+        file.deleteOnExit
+        file
+      })({ file: File =>
+        F.delay {
+          val pw = new PrintWriter(file)
+          pw.write(msg)
+          pw.close()
+        }
+      })
+      .use((file: File) => F.delay(file))
   }
 
   def impl[F[_]: Sync]: ProtocolUtils[F] = new ProtocolUtils[F] {
+
     override def validateProtocol(protocol: Protocol, schema: IdlName): F[Protocol] =
       if (protocol.raw.trim.isEmpty)
         F.raiseError(SchemaParseException("Protocol is empty"))
       else
         schema match {
           case IdlName.Avro =>
-            F.catchNonFatal(parserAvro.parse(protocol.raw))
+            F.delay(parserAvro.parse(protocol.raw))
               .map(_ => protocol)
-              .handleErrorWith(e => F.raiseError(SchemaParseException(e.getMessage)))
+              .handleErrorWith(e =>
+                F.raiseError(
+                  SchemaParseException("Avro schema provided not valid. " + e.getMessage)
+                )
+              )
           case IdlName.Protobuf =>
             parserProtobuf(protocol.raw)
               .map(_ => protocol)
-              .handleErrorWith(e => F.raiseError(SchemaParseException(e.getMessage)))
-
-          case _ => F.raiseError(SchemaParseException("Schema type not implemented yet"))
+              .handleErrorWith(e =>
+                F.raiseError(
+                  SchemaParseException("Protobuf schema provided not valid. " + e.getMessage)
+                )
+              )
+          case IdlName.OpenApi =>
+            parseOpenApi(protocol.raw)
+              .map(_.fold(e => {
+                F.raiseError(
+                  SchemaParseException("OpenApi schema provided not valid. " + e.getMessage)
+                )
+                protocol
+              }, _ => protocol))
+          case _ => F.raiseError(SchemaParseException(s"$schema type not implemented yet"))
         }
   }
 
