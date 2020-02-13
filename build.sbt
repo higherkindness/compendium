@@ -8,6 +8,7 @@ import sbtorgpolicies.templates.badges._
 lazy val V = new {
   val betterMonadicFor: String = "0.3.1"
   val cats: String             = "2.1.0"
+  val catsEffect: String       = "2.1.1"
   val catsScalacheck: String   = "0.2.0"
   val contextApplied: String   = "0.1.2"
   val mouse: String            = "0.24"
@@ -19,7 +20,7 @@ lazy val V = new {
   val specs2: String           = "4.8.3"
   val enumeratum: String       = "1.5.15"
   val enumeratumCirce: String  = "1.5.22"
-  val http4s: String           = "0.21.0-RC2"
+  val http4s: String           = "0.21.0"
   val shapeless: String        = "2.3.3"
   val pureConfig: String       = "0.12.2"
   val doobie: String           = "0.8.8"
@@ -59,9 +60,9 @@ lazy val docs = project
     micrositeGithubToken := getEnvVar(orgGithubTokenSetting.value),
     micrositePushSiteWith := GitHub4s,
     micrositePalette := Map(
-      "brand-primary"     -> "#3d5afe",
-      "brand-secondary"   -> "#0125ed",
-      "white-color"       -> "#FFF"
+      "brand-primary"   -> "#3d5afe",
+      "brand-secondary" -> "#0125ed",
+      "white-color"     -> "#FFF"
     ),
     scalacOptions in console ~= filterConsoleScalacOptions,
     scalacOptions in doc ~= filterConsoleScalacOptions,
@@ -86,11 +87,12 @@ lazy val commonSettings = Seq(
     organizationEmail = "hello@47deg.com"
   ),
   startYear := Some(2018),
-  scalaVersion := "2.12.10",
+  scalaVersion := V.scala,
   crossScalaVersions := Seq(scalaVersion.value),
   ThisBuild / scalacOptions -= "-Xplugin-require:macroparadise",
   libraryDependencies ++= Seq(
     %%("cats-core", V.cats),
+    %%("cats-effect", V.catsEffect),
     "org.typelevel" %% "mouse" % V.mouse,
     %%("shapeless", V.shapeless),
     %%("pureconfig", V.pureConfig),
@@ -114,7 +116,7 @@ lazy val commonSettings = Seq(
     %%("specs2-scalacheck", V.specs2) % Test,
     %%("doobie-specs2", V.doobie)     % Test,
     "io.chrisdavenport"               %% "cats-scalacheck" % V.catsScalacheck % Test,
-    "io.chrisdavenport"               %% "testcontainers-specs2" % "0.1.0" % Test,
+    "io.chrisdavenport"               %% "testcontainers-specs2" % "0.2.0-M2" % Test,
     "org.testcontainers"              % "postgresql" % "1.12.5" % Test
   ),
   orgScriptTaskListSetting := List(
@@ -147,7 +149,6 @@ lazy val commonSettings = Seq(
     // format: ON
   )
 ) ++ compilerPlugins
-
 
 lazy val serverSettings = Seq(
   parallelExecution in Test := false,
