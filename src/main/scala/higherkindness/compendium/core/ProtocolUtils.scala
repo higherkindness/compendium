@@ -23,9 +23,6 @@ import cats.implicits._
 import higherkindness.compendium.models.{IdlName, Protocol}
 import higherkindness.compendium.models.transformer.types.SchemaParseException
 import higherkindness.droste.data.Mu
-import higherkindness.skeuomorph.openapi.{schema, JsonSchemaF}
-import higherkindness.skeuomorph.openapi.ParseOpenApi.{JsonSource, parseJsonOpenApi, _}
-
 import higherkindness.skeuomorph.protobuf.{ProtobufF, Protocol => ProtobufProtocol}
 import higherkindness.skeuomorph.protobuf.ParseProto._
 import org.apache.avro.Schema
@@ -45,16 +42,6 @@ object ProtocolUtils {
         ProtoSource(tmpFile.getName, tmpFile.getAbsolutePath.replaceAll(tmpFile.getName, ""))
       )
     } yield p
-  }
-
-  private def parseOpenApi[F[_]: Sync](
-      raw: String
-  ): F[Either[Throwable, schema.OpenApi[Mu[JsonSchemaF]]]] = {
-    for {
-      tmpFile <- writeTempFile(raw)
-      _       <- parseJsonOpenApi[F, Mu[JsonSchemaF]].parse(JsonSource(tmpFile)).attempt
-      yoapi   <- parseYamlOpenApi[F, Mu[JsonSchemaF]].parse(YamlSource(tmpFile)).attempt
-    } yield yoapi
   }
 
   private def writeTempFile[F[_]: Sync](msg: String): F[File] = {
@@ -96,14 +83,6 @@ object ProtocolUtils {
                   SchemaParseException("Protobuf schema provided not valid. " + e.getMessage)
                 )
               )
-          case IdlName.OpenApi =>
-            parseOpenApi(protocol.raw)
-              .map(_.fold(e => {
-                F.raiseError(
-                  SchemaParseException("OpenApi schema provided not valid. " + e.getMessage)
-                )
-                protocol
-              }, _ => protocol))
           case _ => F.raiseError(SchemaParseException(s"$schema type not implemented yet"))
         }
   }
