@@ -33,32 +33,32 @@ trait ProtocolUtils[F[_]] {
 
 object ProtocolUtils {
 
+  final case class FilePrintWriter(file: File, pw: PrintWriter)
+
   private def parserAvro: Schema.Parser = new Schema.Parser()
 
   private def parserProtobuf[F[_]: Sync](raw: String): F[ProtobufProtocol[Mu[ProtobufF]]] = {
     for {
       tmpFile <- writeTempFile(raw)
       p <- parseProto[F, Mu[ProtobufF]].parse(
-        ProtoSource(tmpFile.getName, tmpFile.getAbsolutePath.replaceAll(tmpFile.getName, ""))
+        ProtoSource(
+          tmpFile.file.getName,
+          tmpFile.file.getAbsolutePath.replaceAll(tmpFile.file.getName, "")
+        )
       )
     } yield p
   }
 
-  private def writeTempFile[F[_]: Sync](msg: String): F[File] = {
+  private def writeTempFile[F[_]: Sync](msg: String): F[FilePrintWriter] =
     Resource
       .make(F.delay {
         val file = File.createTempFile("protoTempFile", ".proto")
-        file.deleteOnExit
-        file
-      })({ file: File =>
-        F.delay {
-          val pw = new PrintWriter(file)
-          pw.write(msg)
-          pw.close()
-        }
-      })
-      .use((file: File) => F.delay(file))
-  }
+        file.deleteOnExit()
+        FilePrintWriter(file, new PrintWriter(file))
+      }) { fpw: FilePrintWriter =>
+        F.delay(fpw.pw.close())
+      }
+      .use((fpw: FilePrintWriter) => F.delay(fpw.pw.write(msg)).as(fpw))
 
   def impl[F[_]: Sync]: ProtocolUtils[F] = new ProtocolUtils[F] {
 
