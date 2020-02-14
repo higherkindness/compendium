@@ -23,8 +23,12 @@ import cats.implicits._
 import higherkindness.compendium.models.{IdlName, Protocol}
 import higherkindness.compendium.models.transformer.types.SchemaParseException
 import higherkindness.droste.data.Mu
-import higherkindness.skeuomorph.openapi.{schema, JsonSchemaF}
+import higherkindness.skeuomorph.openapi.schema
+//import higherkindness.skeuomorph.Parser
+//import higherkindness.skeuomorph.openapi.JsonSchemaF.Fixed
+import higherkindness.skeuomorph.openapi.JsonSchemaF
 import higherkindness.skeuomorph.openapi.ParseOpenApi.{JsonSource, parseJsonOpenApi, _}
+//import higherkindness.skeuomorph.openapi.schema.OpenApi
 import higherkindness.skeuomorph.protobuf.{ProtobufF, Protocol => ProtobufProtocol}
 import higherkindness.skeuomorph.protobuf.ParseProto._
 import org.apache.avro.Schema
@@ -41,7 +45,7 @@ object ProtocolUtils {
 
   private def parserProtobuf[F[_]: Sync](raw: String): F[ProtobufProtocol[Mu[ProtobufF]]] = {
     for {
-      tmpFile <- writeTempFile(raw)
+      tmpFile <- writeTempFile(raw, ".proto")
       p <- parseProto[F, Mu[ProtobufF]].parse(
         ProtoSource(
           tmpFile.file.getName,
@@ -53,20 +57,24 @@ object ProtocolUtils {
 
   private def parseOpenApi[F[_]: Sync](
       raw: String
-  ): F[schema.OpenApi[Mu[JsonSchemaF]]] = {
-    {
-      for {
-        tmpFile <- writeTempFile(raw)
-        yoapi   <- parseYamlOpenApi[F, Mu[JsonSchemaF]].parse(YamlSource(tmpFile.file)).attempt
-        joapi   <- parseJsonOpenApi[F, Mu[JsonSchemaF]].parse(JsonSource(tmpFile.file))
-      } yield yoapi.getOrElse(joapi)
+  ): F[schema.OpenApi[Mu[JsonSchemaF]]] =
+    raw match {
+      case json if json.startsWith("{") => {
+        writeTempFile(raw, ".json").flatMap(tmpFile =>
+          parseJsonOpenApi[F, Mu[JsonSchemaF]].parse(JsonSource(tmpFile.file))
+        )
+      }
+      case _ => {
+        writeTempFile(raw, ".yaml").flatMap(tmpFile =>
+          parseYamlOpenApi[F, Mu[JsonSchemaF]].parse(YamlSource(tmpFile.file))
+        )
+      }
     }
-  }
 
-  private def writeTempFile[F[_]: Sync](msg: String): F[FilePrintWriter] =
+  private def writeTempFile[F[_]: Sync](msg: String, extension: String): F[FilePrintWriter] =
     Resource
       .make(F.delay {
-        val file = File.createTempFile("protoTempFile", ".proto")
+        val file = File.createTempFile("protoTempFile", extension)
         file.deleteOnExit()
         FilePrintWriter(file, new PrintWriter(file))
       }) { fpw: FilePrintWriter =>

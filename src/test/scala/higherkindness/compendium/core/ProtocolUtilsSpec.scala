@@ -84,6 +84,40 @@ object ProtocolUtilsSpec extends Specification with ScalaCheck {
         .unsafeRunSync must throwA[SchemaParseException]
     }
 
+    "[Openapi-json] Given a raw protocol text returns the same protocol if it validates correctly" >> {
+      val stream: InputStream = getClass.getResourceAsStream("/correct-oapi.json")
+      val text: String        = scala.io.Source.fromInputStream(stream).getLines.mkString
+      val protocol: Protocol  = Protocol(text)
+
+      validator.validateProtocol(protocol, IdlName.OpenApi).unsafeRunSync === protocol
+    }
+
+    "[Openapi-yaml] Given a raw protocol text returns the same protocol if it validates correctly" >> {
+      val stream: InputStream = getClass.getResourceAsStream("/correct-oapi.yaml")
+      val text: String        = scala.io.Source.fromInputStream(stream).getLines.mkString
+      val protocol: Protocol  = Protocol(text)
+
+      validator.validateProtocol(protocol, IdlName.OpenApi).unsafeRunSync === Protocol(text)
+    }
+
+    "[Openapi] Given a raw protocol text raises an error if the protocol is incorrect I" >> {
+      val stream: InputStream = getClass.getResourceAsStream("/correct.avro")
+      val text: String        = scala.io.Source.fromInputStream(stream).getLines.mkString
+      val protocol: Protocol  = Protocol(text)
+
+      validator
+        .validateProtocol(protocol, IdlName.OpenApi)
+        .unsafeRunSync must throwA[SchemaParseException]
+    }
+    "[Openapi] Given a raw protocol text raises an error if the protocol is incorrect II" >> {
+      val stream: InputStream = getClass.getResourceAsStream("/wrong-oapi.yaml")
+      val text: String        = scala.io.Source.fromInputStream(stream).getLines.mkString
+      val protocol: Protocol  = Protocol(text)
+
+      validator
+        .validateProtocol(protocol, IdlName.OpenApi)
+        .unsafeRunSync must throwA[SchemaParseException]
+    }
   }
 
 }
