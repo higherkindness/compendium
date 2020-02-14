@@ -16,28 +16,75 @@
 
 package higherkindness.compendium.core
 
-import cats.effect.Sync
+import java.io.{File, PrintWriter}
+
+import cats.effect.{Resource, Sync}
 import cats.implicits._
-import higherkindness.compendium.models.Protocol
+import higherkindness.compendium.models.{IdlName, Protocol}
 import higherkindness.compendium.models.transformer.types.SchemaParseException
+import higherkindness.droste.data.Mu
+import higherkindness.skeuomorph.protobuf.{ProtobufF, Protocol => ProtobufProtocol}
+import higherkindness.skeuomorph.protobuf.ParseProto._
 import org.apache.avro.Schema
 
 trait ProtocolUtils[F[_]] {
-  def validateProtocol(protocol: Protocol): F[Protocol]
+  def validateProtocol(protocol: Protocol, schema: IdlName): F[Protocol]
 }
 
 object ProtocolUtils {
 
-  private def parser: Schema.Parser = new Schema.Parser()
+  final case class FilePrintWriter(file: File, pw: PrintWriter)
+
+  private def parserAvro: Schema.Parser = new Schema.Parser()
+
+  private def parserProtobuf[F[_]: Sync](raw: String): F[ProtobufProtocol[Mu[ProtobufF]]] = {
+    for {
+      tmpFile <- writeTempFile(raw)
+      p <- parseProto[F, Mu[ProtobufF]].parse(
+        ProtoSource(
+          tmpFile.file.getName,
+          tmpFile.file.getAbsolutePath.replaceAll(tmpFile.file.getName, "")
+        )
+      )
+    } yield p
+  }
+
+  private def writeTempFile[F[_]: Sync](msg: String): F[FilePrintWriter] =
+    Resource
+      .make(F.delay {
+        val file = File.createTempFile("protoTempFile", ".proto")
+        file.deleteOnExit()
+        FilePrintWriter(file, new PrintWriter(file))
+      }) { fpw: FilePrintWriter =>
+        F.delay(fpw.pw.close())
+      }
+      .use((fpw: FilePrintWriter) => F.delay(fpw.pw.write(msg)).as(fpw))
 
   def impl[F[_]: Sync]: ProtocolUtils[F] = new ProtocolUtils[F] {
-    override def validateProtocol(protocol: Protocol): F[Protocol] =
+
+    override def validateProtocol(protocol: Protocol, schema: IdlName): F[Protocol] =
       if (protocol.raw.trim.isEmpty)
         F.raiseError(SchemaParseException("Protocol is empty"))
       else
-        F.catchNonFatal(parser.parse(protocol.raw))
-          .map(_ => protocol)
-          .handleErrorWith(e => F.raiseError(SchemaParseException(e.getMessage)))
+        schema match {
+          case IdlName.Avro =>
+            F.delay(parserAvro.parse(protocol.raw))
+              .map(_ => protocol)
+              .handleErrorWith(e =>
+                F.raiseError(
+                  SchemaParseException("Avro schema provided not valid. " + e.getMessage)
+                )
+              )
+          case IdlName.Protobuf =>
+            parserProtobuf(protocol.raw)
+              .map(_ => protocol)
+              .handleErrorWith(e =>
+                F.raiseError(
+                  SchemaParseException("Protobuf schema provided not valid. " + e.getMessage)
+                )
+              )
+          case _ => F.raiseError(SchemaParseException(s"$schema type not implemented yet"))
+        }
   }
 
   def apply[F[_]: ProtocolUtils]: ProtocolUtils[F] = F
