@@ -51,7 +51,7 @@ jobs:
         - if [[ -d $HOME/docker ]]; then ls $HOME/docker/*.tar.gz | xargs -I {file} sh -c "zcat {file} | docker load"; fi
       script:
         - export VERSION=$(cut -d'=' -f2  version.sbt | sed -e 's/^[ \t]*//;s/"//g')
-        - docker build --build-arg PROJECT=server --build-arg VERSION=$VERSION -t $DOCKER_USER/compendium:$VERSION -t $DOCKER_USER/compendium:latest .
+        - docker build --build-arg VERSION=$VERSION -t $DOCKER_USER/compendium:$VERSION -t $DOCKER_USER/compendium:latest .
     - stage: publish-docker
       name: docker publish
       sudo: required
