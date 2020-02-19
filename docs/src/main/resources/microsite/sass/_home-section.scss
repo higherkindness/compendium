@@ -1,0 +1,89 @@
+// Home
+// -----------------------------------------------
+// -----------------------------------------------
+.features .feature-item .first-feature-icon-wrapper, .features .feature-item .fourth-feature-icon-wrapper, .features .feature-item .second-feature-icon-wrapper, .features .feature-item .third-feature-icon-wrapper {
+  width: 156px;
+  height: 156px;
+}
+
+#navigation .navbar-wrapper .navigation-brand .brand .icon-wrapper {
+  width: $logo-size;
+  height: $logo-size;
+}
+
+#navigation .navbar-wrapper .navigation-brand .brand .brand-title {
+  font-size: $brand-font-size;
+  left: 93px;
+}
+
+#navigation {
+  font-family: $base-font-family;
+}
+
+.home {
+  font-family: $base-font-family;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: $base-font-family;
+}
+
+// Masthead
+// -----------------------------------------------
+// -----------------------------------------------
+#masthead {
+  background: none;
+  background-color: $masthead-background;
+  color: $text-color;
+
+  .masthead-button {
+    border: 2px solid $main-color;
+    background-color: $main-color;
+    border-radius: 130px;
+
+    &:hover {
+      background-color: $masthead-background;
+      color: $main-color;
+    }
+  }
+}
+
+// Main
+// -----------------------------------------------
+// -----------------------------------------------
+#site-main {
+  background-color: $white;
+  font-family: $base-font-family;
+}
+
+.features-image {
+  height: 140%;
+}
+
+.feature-item-header {
+  h4 {
+    font-size: 1.429rem;
+    font-weight: $font-semibold;
+  }
+}
+
+// Footer
+// -----------------------------------------------
+// -----------------------------------------------
+#site-footer {
+  font-family: $base-font-family;
+  background-color: $main-color;
+  color: $footer-text-color;
+
+  .row {
+    a {
+      color: rgba(255,255,255,0.8);
+      text-decoration: none;
+
+      &:hover {
+        color: $footer-text-color;
+        text-decoration: underline;
+      }
+    }
+  }
+}

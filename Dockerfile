@@ -1,18 +1,13 @@
-FROM hseeberger/scala-sbt as builder
-ARG PROJECT
+FROM hseeberger/scala-sbt:8u242_1.3.7_2.12.10 as builder
 WORKDIR /build
-COPY project project
-COPY build.sbt .
-RUN sbt update
 COPY . .
-RUN sbt $PROJECT/universal:packageBin
+RUN sbt universal:packageZipTarball
 
-FROM openjdk:8u181-jre-slim
+FROM openjdk:8u242-jre-slim
 ARG VERSION
-ARG PROJECT
 ENV version=$VERSION
-ENV name=compendium-$PROJECT
-COPY --from=builder /build/modules/$PROJECT/target/universal/. .
-RUN unzip -o ./${name}-$VERSION.zip
+ENV name=compendium-server
+COPY --from=builder /build/target/universal/. .
+RUN tar -zxvf ./${name}-$VERSION.tgz
 RUN chmod +x ${name}-$VERSION/bin/$name
 ENTRYPOINT ${name}-$version/bin/$name

@@ -1,0 +1,15 @@
+options:
+  - title: Start
+    url: /docs/
+
+  - title: Verification
+    url: /docs/verification/
+
+  - title: Compile
+    url: /docs/compile/
+
+  - title: Generation
+    url: /docs/generation/
+
+  - title: Integration
+    url: /docs/integration/

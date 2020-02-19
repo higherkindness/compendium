@@ -18,14 +18,12 @@ services:
       - 8080
     ports:
       - 8080:8080
-    links:
-      - db
     depends_on:
       - db
     environment:
-      POSTGRES_JDBC_URL: 'jdbc:postgresql://db:5432/postgres'
-      POSTGRES_USERNAME: 'postgres'
-      POSTGRES_PASSWORD: 'postgres'
+      COMPENDIUM_METADATA_STORAGE_JDBC_URL: 'jdbc:postgresql://db:5432/postgres'
+      COMPENDIUM_METADATA_STORAGE_USERNAME: 'postgres'
+      COMPENDIUM_METADATA_STORAGE_PASSWORD: 'postgres'
 
 
 volumes:

@@ -1,3 +1,6 @@
+env:
+  - DOCKER_USER=47deg
+
 jobs:
   include:
     - stage: build
@@ -5,9 +8,9 @@ jobs:
       sudo: false
       language: scala
       jdk:
-        - oraclejdk8
+        - openjdk8
       scala:
-        - 2.12.8
+        - 2.12.10
       before_cache:
         - find $HOME/.sbt -name "*.lock" -type f -delete
         - find $HOME/.ivy2/cache -name "ivydata-*.properties" -type f -delete
@@ -28,11 +31,11 @@ jobs:
         # Load cached docker images
         - if [[ -d $HOME/docker ]]; then ls $HOME/docker/*.tar.gz | xargs -I {file} sh -c "zcat {file} | docker load"; fi
       install:
-        - rvm use 2.3.3 --install --fuzzy
+        - rvm use 2.6.5 --install --fuzzy
         - gem update --system
         - gem install sass
-        - gem install jekyll-watch -v 2.1.2
-        - gem install jekyll -v 3.8.3
+        - gem install jekyll-watch -v 2.2.1
+        - gem install jekyll -v 4
       script:
         - sbt ++$TRAVIS_SCALA_VERSION orgScriptCI
       after_success:
