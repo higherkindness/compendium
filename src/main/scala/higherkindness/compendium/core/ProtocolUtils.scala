@@ -55,9 +55,7 @@ object ProtocolUtils {
         val file = File.createTempFile("protoTempFile", ".proto")
         file.deleteOnExit()
         FilePrintWriter(file, new PrintWriter(file))
-      }) { fpw: FilePrintWriter =>
-        F.delay(fpw.pw.close())
-      }
+      }) { fpw: FilePrintWriter => F.delay(fpw.pw.close()) }
       .use((fpw: FilePrintWriter) => F.delay(fpw.pw.write(msg)).as(fpw))
 
   def impl[F[_]: Sync]: ProtocolUtils[F] = new ProtocolUtils[F] {
