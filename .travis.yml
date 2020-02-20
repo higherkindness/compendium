@@ -5,7 +5,6 @@ jobs:
   include:
     - stage: build
       name: build and test
-      sudo: false
       language: scala
       jdk:
         - openjdk8
@@ -35,7 +34,6 @@ jobs:
         - sbt ++$TRAVIS_SCALA_VERSION orgAfterCISuccess
     - stage: build
       name: docker build
-      sudo: required
       services:
         - docker
       before_cache:
@@ -54,7 +52,6 @@ jobs:
         - docker build --build-arg VERSION=$VERSION -t $DOCKER_USER/compendium:$VERSION -t $DOCKER_USER/compendium:latest .
     - stage: publish-docker
       name: docker publish
-      sudo: required
       services:
         - docker
       script: skip
