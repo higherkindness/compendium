@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS protocols (
+CREATE TABLE protocols (
     id CHARACTER VARYING(255) NOT NULL,
     version INTEGER NOT NULL,
     protocol BYTEA,

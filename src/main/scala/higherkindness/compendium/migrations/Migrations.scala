@@ -31,12 +31,13 @@ object Migrations {
 
   def makeMigrations[F[_]: Sync](conf: DatabaseStorageConfig, migrations: List[Location]): F[Int] =
     F.delay {
-        Flyway
+        val flyway = Flyway
           .configure()
           .dataSource(conf.jdbcUrl, conf.username, conf.password)
           .locations(migrations: _*)
           .load()
-          .migrate()
+        flyway.repair()
+        flyway.migrate()
       }
       .attempt
       .flatMap {

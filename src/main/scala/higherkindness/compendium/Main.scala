@@ -50,14 +50,14 @@ object CompendiumStreamApp {
       conf               <- Stream.eval(ConfigSource.default.at("compendium").loadF[F, CompendiumServerConfig])
       metadataMigrations <- Stream.eval(Migrations.metadataLocation)
       dataMigrations     <- Stream.eval(Migrations.dataLocation)
-      _ <- Stream.eval(
-        Migrations.makeMigrations(conf.metadata.storage, List(metadataMigrations))
-      )
       _ <- conf.protocols.storage match {
         case db: DatabaseStorageConfig =>
           Stream.eval(Migrations.makeMigrations(db, List(dataMigrations)))
         case _: FileStorageConfig => Stream.empty
       }
+      _ <- Stream.eval(
+        Migrations.makeMigrations(conf.metadata.storage, List(metadataMigrations))
+      )
       implicit0(storage: Storage[F]) <- Stream.resource(initStorage[F](conf.protocols.storage))
       metadataTransactor             <- Stream.resource(createTransactor(conf.metadata.storage))
       implicit0(metadataStore: MetadataStorage[F])   = PgMetadataStorage[F](metadataTransactor)
