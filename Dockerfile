@@ -1,4 +1,4 @@
-FROM hseeberger/scala-sbt:8u242_1.3.7_2.12.10 as builder
+FROM hseeberger/scala-sbt:11.0.6_1.3.8_2.12.10 as builder
 WORKDIR /build
 COPY . .
 RUN sbt universal:packageZipTarball
