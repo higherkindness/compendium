@@ -4,7 +4,7 @@ env:
 jobs:
   include:
     - stage: build
-      sudo: false
+      name: build and test
       language: scala
       jdk:
         - openjdk8
@@ -15,9 +15,9 @@ jobs:
         - find $HOME/.ivy2/cache -name "ivydata-*.properties" -type f -delete
       cache:
         directories:
-          - "$HOME/.ivy2/cache"
-          - "$HOME/.coursier/cache"
-          - "$HOME/.sbt"
+          - $HOME/.ivy2/cache
+          - $HOME/.coursier/cache
+          - $HOME/.sbt
       before_install:
         - if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then openssl aes-256-cbc
           -K $encrypted_0b1d2d2bb383_key -iv $encrypted_0b1d2d2bb383_iv -in secring.gpg.enc -out secring.gpg -d; fi
@@ -32,13 +32,29 @@ jobs:
         - sbt ++$TRAVIS_SCALA_VERSION orgScriptCI
       after_success:
         - sbt ++$TRAVIS_SCALA_VERSION orgAfterCISuccess
-    - stage: publish-docker
-      sudo: required
+    - stage: build
+      name: docker build
       services:
         - docker
+      before_cache:
+        - >
+          mkdir -p $HOME/docker && docker images -a --filter='dangling=false' --format '{{.Repository}}:{{.Tag}} {{.ID}}'
+          | xargs -n 2 -t sh -c 'test -e $HOME/docker/$1.tar.gz || docker save $0 | gzip -2 > $HOME/docker/$1.tar.gz' 
+      cache:
+        bundler: true
+        directories:
+          - $HOME/docker
+      before_script:
+        # Load cached docker images
+        - if [[ -d $HOME/docker ]]; then ls $HOME/docker/*.tar.gz | xargs -I {file} sh -c "zcat {file} | docker load"; fi
       script:
         - export VERSION=$(cut -d'=' -f2  version.sbt | sed -e 's/^[ \t]*//;s/"//g')
         - docker build --build-arg VERSION=$VERSION -t $DOCKER_USER/compendium:$VERSION -t $DOCKER_USER/compendium:latest .
+    - stage: publish-docker
+      name: docker publish
+      services:
+        - docker
+      script: skip
       deploy:
         provider: script
         script: bash docker_push.sh $DOCKER_PASSWORD $DOCKER_USER
