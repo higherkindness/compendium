@@ -50,11 +50,8 @@ jobs:
       script:
         - export VERSION=$(cut -d'=' -f2  version.sbt | sed -e 's/^[ \t]*//;s/"//g')
         - docker build --build-arg VERSION=$VERSION -t $DOCKER_USER/compendium:$VERSION -t $DOCKER_USER/compendium:latest .
-    - stage: publish-docker
-      name: docker publish
-      services:
-        - docker
-      script: skip
       deploy:
         provider: script
         script: bash docker_push.sh $DOCKER_PASSWORD $DOCKER_USER
+        on:
+          branch: master
