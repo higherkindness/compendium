@@ -3,7 +3,7 @@ env:
 
 jobs:
   include:
-    - stage: build
+    - stage: build & publish
       name: build and test
       language: scala
       jdk:
@@ -32,8 +32,8 @@ jobs:
         - sbt ++$TRAVIS_SCALA_VERSION orgScriptCI
       after_success:
         - sbt ++$TRAVIS_SCALA_VERSION orgAfterCISuccess
-    - stage: build
-      name: docker build
+    - stage: build & publish
+      name: docker build & publish
       services:
         - docker
       before_cache:
