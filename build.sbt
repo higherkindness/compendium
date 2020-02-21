@@ -72,8 +72,6 @@ lazy val docs = project
   .enablePlugins(MicrositesPlugin)
 
 pgpPassphrase := Some(getEnvVar("PGP_PASSPHRASE").getOrElse("").toCharArray)
-pgpPublicRing := file(s"$gpgFolder/pubring.gpg")
-pgpSecretRing := file(s"$gpgFolder/secring.gpg")
 
 //General Settings
 lazy val commonSettings = Seq(
