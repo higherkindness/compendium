@@ -47,7 +47,10 @@ object CompendiumStreamApp {
 
   def stream[F[_]: ConcurrentEffect: Timer: ContextShift]: Stream[F, ExitCode] =
     for {
-      conf                           <- Stream.eval(ConfigSource.default.at("compendium").loadF[F, CompendiumServerConfig])
+      blocker <- Stream.resource(Blocker[F])
+      conf <- Stream.eval(
+        ConfigSource.default.at("compendium").loadF[F, CompendiumServerConfig](blocker)
+      )
       migrations                     <- Stream.eval(Migrations.metadataLocation)
       _                              <- Stream.eval(Migrations.makeMigrations(conf.metadata.storage, List(migrations)))
       implicit0(storage: Storage[F]) <- Stream.resource(initStorage[F](conf.protocols.storage))
