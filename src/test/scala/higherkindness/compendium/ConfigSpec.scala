@@ -16,7 +16,7 @@
 
 package higherkidness.compendium
 
-import cats.effect.IO
+import cats.effect.{Blocker, IO}
 import com.typesafe.config.ConfigFactory
 import higherkindness.compendium.models.config._
 import org.specs2.mutable.Specification
@@ -24,7 +24,12 @@ import pureconfig._
 import pureconfig.generic.auto._
 import pureconfig.module.catseffect.syntax._
 
+import scala.concurrent.ExecutionContext.global
+
 class ConfigSpec extends Specification {
+
+  implicit val cs = IO.contextShift(global)
+  val blocker     = Blocker.liftExecutionContext(global)
 
   private def configWithStorageBlock(storageBlock: String): String =
     s"""
@@ -63,7 +68,7 @@ class ConfigSpec extends Specification {
 
     ConfigSource
       .fromConfig(ConfigFactory.parseString(config))
-      .loadF[IO, CompendiumServerConfig]
+      .loadF[IO, CompendiumServerConfig](blocker)
       .attempt
       .unsafeRunSync() must beRight[CompendiumServerConfig]
   }
@@ -86,7 +91,7 @@ class ConfigSpec extends Specification {
 
     ConfigSource
       .fromConfig(ConfigFactory.parseString(config))
-      .loadF[IO, CompendiumServerConfig]
+      .loadF[IO, CompendiumServerConfig](blocker)
       .attempt
       .unsafeRunSync() must beRight[CompendiumServerConfig]
   }
