@@ -1,9 +1,18 @@
 pull_request_rules:
-  - name: Automatic merge scala-steward PRs when CI is passing
+  - name: Automatic merge for scala-steward PRs - patch
     conditions:
       - author=scala-steward
       - status-success=continuous-integration/travis-ci/pr
       - body~=labels:.*semver-patch
+    actions:
+      merge:
+        method: squash
+  - name: Automatic merge for scala-steward PRs - minor
+    condictions:
+      - author=scala-steward
+      - status-success=continuous-integration/travis-ci/pr
+      - body~=labels:.*semver-minor
+      - "#approved-reviews-by>=1"
     actions:
       merge:
         method: squash
