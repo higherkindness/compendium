@@ -1,6 +1,6 @@
 ---
 layout: docs
-title: Compendium
+title: Intro
 permalink: /docs/
 ---
 
