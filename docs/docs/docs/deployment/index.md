@@ -20,7 +20,7 @@ In order to deploy Compendium, it is necessary to provide an storage for both me
 
 ## Compendium configuration variables
 
-Compendium service offers multiple variables that allows user to configure how the service is deployed. All variables are defined at compendium's [application.conf][applicationconf].
+Compendium service offers multiple variables that allows user to configure how the service is deployed. All variables are defined at Compendium's [application.conf][applicationconf].
 
 #### Metadata Storage configuration:
 
