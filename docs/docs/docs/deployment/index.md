@@ -8,7 +8,7 @@ url: /docs/deployment
 
 ## Requirements
 
-In order to deploy compendium, it is necessary to provide an storage for both, metadata and protocols. **Each one will use its own database** to store the necessary information.
+In order to deploy Compendium, it is necessary to provide an storage for both metadata and protocols. **Each one will use its own database** to store the necessary information.
 
 #### Supported storages for metadata:
 
