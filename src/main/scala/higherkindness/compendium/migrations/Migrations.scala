@@ -27,7 +27,8 @@ object Migrations {
 
   def metadataLocation[F[_]: Sync]: F[Location] =
     Sync[F].delay(new Location("db/migration/metadata"))
-  def dataLocation[F[_]: Sync]: F[Location] = Sync[F].delay(new Location("db/migration/data"))
+  def dataLocation[F[_]: Sync]: F[Location] =
+    Sync[F].delay(new Location("db/migration/data"))
 
   def makeMigrations[F[_]: Sync](conf: DatabaseStorageConfig, migrations: List[Location]): F[Int] =
     F.delay {

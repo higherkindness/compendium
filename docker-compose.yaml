@@ -1,31 +1,31 @@
-version: '3'
+version: '3.7'
 
 services:
   db:
     image: postgres:latest
-    container_name: "postgres"
-    restart: always
+    container_name: "compendium-postgres"
+    expose:
+      - 5432
     ports:
       - 5432:5432
     environment:
+      POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: 'postgres'
     volumes:
-      - database_data:/var/lib/postgresql/data
+      - ".docker-compose/initdb.d:/docker-entrypoint-initdb.d"
 
   compendium:
     image: 47deg/compendium:latest
-    expose:
-      - 8080
+    container_name: "compendium-server"
     ports:
       - 8080:8080
     depends_on:
       - db
     environment:
-      COMPENDIUM_METADATA_STORAGE_JDBC_URL: 'jdbc:postgresql://db:5432/postgres'
+      COMPENDIUM_METADATA_STORAGE_JDBC_URL: 'jdbc:postgresql://localhost:5432/compendium_metadata'
       COMPENDIUM_METADATA_STORAGE_USERNAME: 'postgres'
       COMPENDIUM_METADATA_STORAGE_PASSWORD: 'postgres'
-
-
-volumes:
-  database_data:
-    driver: local
+      COMPENDIUM_PROTOCOLS_STORAGE_TYPE: 'DATABASE'
+      COMPENDIUM_PROTOCOLS_STORAGE_JDBC_URL: 'jdbc:postgresql://localhost:5432/compendium_protocols'
+      COMPENDIUM_PROTOCOLS_STORAGE_USERNAME: 'postgres'
+      COMPENDIUM_PROTOCOLS_STORAGE_PASSWORD: 'postgres'

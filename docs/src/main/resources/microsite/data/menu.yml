@@ -1,3 +1,10 @@
 options:
   - title: Intro
     url: /docs/
+
+  - title: Deployment
+    url: /docs/deployment
+    menu_section: deployment
+    nested_options:
+      - title: Docker
+        url: /docs/deployment/docker

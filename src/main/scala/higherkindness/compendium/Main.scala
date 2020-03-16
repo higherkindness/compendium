@@ -51,11 +51,10 @@ object CompendiumStreamApp {
       conf <- Stream.eval(
         ConfigSource.default.at("compendium").loadF[F, CompendiumServerConfig](blocker)
       )
-      migrations                     <- Stream.eval(Migrations.metadataLocation)
-      _                              <- Stream.eval(Migrations.makeMigrations(conf.metadata.storage, List(migrations)))
-      implicit0(storage: Storage[F]) <- Stream.resource(initStorage[F](conf.protocols.storage))
-      metadataTransactor             <- Stream.resource(createTransactor(conf.metadata.storage))
-      implicit0(metadataStore: MetadataStorage[F])   = PgMetadataStorage[F](metadataTransactor)
+
+      implicit0(storage: Storage[F])             <- initProtocolStorage[F](conf.protocols)
+      implicit0(metaStorage: MetadataStorage[F]) <- initMetadataStorage[F](conf.metadata)
+
       implicit0(utils: ProtocolUtils[F])             = ProtocolUtils.impl[F]
       implicit0(transformer: ProtocolTransformer[F]) = SkeuomorphProtocolTransformer[F]
       implicit0(compendium: CompendiumService[F])    = CompendiumService.impl[F]
@@ -65,13 +64,28 @@ object CompendiumStreamApp {
       code <- CompendiumServerStream.serverStream(conf.http, app)
     } yield code
 
-  private def initStorage[F[_]: Async: ContextShift](
-      storageConfig: StorageConfig
-  ): Resource[F, Storage[F]] =
-    storageConfig match {
-      case fsc: FileStorageConfig      => Resource.pure[F, Storage[F]](FileStorage[F](fsc))
-      case dbsc: DatabaseStorageConfig => createTransactor(dbsc).map(PgStorage[F])
+  private def initProtocolStorage[F[_]: Async: ContextShift](
+      protocolConf: CompendiumProtocolConfig
+  ): Stream[F, Storage[F]] =
+    protocolConf.storage match {
+      case fsc: FileStorageConfig =>
+        Stream.emit(FileStorage[F](fsc))
+      case dbsc: DatabaseStorageConfig =>
+        Stream.eval(
+          Migrations.dataLocation.flatMap(l => Migrations.makeMigrations(dbsc, l :: Nil))
+        ) >>
+          Stream.resource(createTransactor(dbsc).map(PgStorage[F](_)))
     }
+
+  private def initMetadataStorage[F[_]: Async: ContextShift](
+      metadataConf: CompendiumMetadataConfig
+  ): Stream[F, MetadataStorage[F]] =
+    Stream.eval(
+      Migrations.metadataLocation.flatMap(l =>
+        Migrations.makeMigrations(metadataConf.storage, l :: Nil)
+      )
+    ) >>
+      Stream.resource(createTransactor(metadataConf.storage).map(PgMetadataStorage[F](_)))
 
   private def createTransactor[F[_]: Async: ContextShift](
       conf: DatabaseStorageConfig

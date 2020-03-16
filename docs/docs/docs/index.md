@@ -1,7 +1,7 @@
 ---
 layout: docs
 title: Intro
-permalink: /docs/
+url: /docs/
 ---
 
 
