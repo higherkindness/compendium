@@ -28,13 +28,31 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ~/.cache/coursier
-          key: sbt-coursier-cache
+          key: sbt-coursier-cache-microsite
       - name: Cache SBT
         uses: actions/cache@v1
         with:
           path: ~/.sbt
-          key: sbt-${{ hashFiles('**/build.sbt') }}
+          key: sbt-microsite-${{ hashFiles('**/build.sbt') }}
       - name: Install Jekyll
         run: gem install jekyll -v 4
       - name: Build microsite
         run: sbt docs/makeMicrosite
+
+  formatting:
+    name: Check formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: olafurpg/setup-scala@v5
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+      - name: Cache SBT
+        uses: actions/cache@v1
+        with:
+          path: ~/.sbt
+          key: sbt-scalafmt-${{ hashFiles('**/project/plugins.sbt') }}
+      - name: Check sbt files
+        run: sbt scalafmtSbtCheck
+      - name: Check scala files
+        run: sbt scalafmtCheckAll
