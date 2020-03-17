@@ -56,7 +56,6 @@ jobs:
         run: sbt scalafmtSbtCheck
       - name: Check scala files
         run: sbt scalafmtCheckAll
-      - run: sbt scalafmtCheckAll scalafmtSbtCheck
 
   validate:
     name: Compile & Test
@@ -65,7 +64,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: olafurpg/setup-scala@v5
         with:
-          java-version: ${{ JAVA_VERSION }}
+          java-version: ${{ env.JAVA_VERSION }}
       - name: Cache Coursier
         uses: actions/cache@v1
         with:
