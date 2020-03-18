@@ -95,6 +95,11 @@ paths:
       responses:
         "201":
           description: successfully saved the protocol
+          headers:
+            Location:
+              schema:
+                type: string
+              description: location of the uploaded protocol
           content:
             application/json:
               schema:
