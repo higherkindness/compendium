@@ -164,7 +164,7 @@ paths:
           description: the desired target protocol type of the transformation - must be one
             of avro, protobuf, mu, openapi, or scala
           schema:
-            $ref: "#/components/schemas/IdlName"
+            $ref: "#/components/schemas/IdlNameTarget"
         - name: version
           in: query
           required: false
@@ -205,13 +205,18 @@ components:
           description: the library artifact version
     IdlName:
       type: string
-      description: the names of the set of protocols supported in compendium
+      description: the names of the set of protocols supported to upload to compendium
       enum:
         - avro
         - protobuf
         - mu
         - openapi
         - scala
+    IdlNameTarget:
+      type: string
+      description: the names of the set of protocols supported in compendium to be target
+      enum:
+        - mu
     Protocol:
       type: object
       required:
