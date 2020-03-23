@@ -103,7 +103,7 @@ paths:
         "400":
           description: Bad request
         "404":
-          description: Not found
+          description: The protocol was not found
         "500":
           description: Internal server error
     get:
