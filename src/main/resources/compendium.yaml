@@ -137,7 +137,7 @@ paths:
           description: The protocol was not found for the requested id
         "500":
           description: Internal server error
-  "/protocol/{protocolId}/transformation":
+  "/v0/protocol/{protocolId}/transformation":
     get:
       tags:
         - protocol
