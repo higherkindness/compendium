@@ -10,9 +10,6 @@ info:
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
-externalDocs:
-  description: Learn more about Compendium
-  url: https://higherkindness.io/compendium
 servers:
   - url: '{protocol}://{host}:{port}'
     variables:
