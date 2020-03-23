@@ -115,9 +115,7 @@ paths:
         - name: protocolId
           in: path
           required: true
-          description: the id of the protocol - can be a string of any alphanumeric
-            character, dash (-), or period (.) with a length less than or equal to 255
-            characters
+          description: the id of the protocol
           schema:
             $ref: "#/components/schemas/ProtocolId"
         - name: version
@@ -149,9 +147,7 @@ paths:
         - name: protocolId
           in: path
           required: true
-          description: the id of the protocol - can be a string of any alphanumeric
-            character, dash (-), or period (.) with a length less than or equal to 255
-            characters
+          description: the id of the protocol
           schema:
             $ref: "#/components/schemas/ProtocolId"
         - name: target
