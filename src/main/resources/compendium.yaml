@@ -14,7 +14,7 @@ externalDocs:
   description: Learn more about Compendium
   url: https://github.com/higherkindness/compendium
 servers:
-  - url: '{protocol}://{host}:{port}/{urlPrefix}'
+  - url: '{protocol}://{host}:{port}'
     variables:
       protocol:
         enum:
@@ -25,8 +25,6 @@ servers:
         default: localhost
       port:
         default: "8080"
-      urlPrefix:
-        default: v0
 tags:
   - name: health
     description: health ping
