@@ -76,8 +76,7 @@ paths:
         - name: idlName
           in: query
           required: true
-          description: the name of the type of protocol being saved - must be one of avro,
-            protobuf, mu, openapi, or scala
+          description: the name of the type of protocol being saved
           schema:
             $ref: "#/components/schemas/IdlName"
       requestBody:
@@ -121,7 +120,7 @@ paths:
         - name: version
           in: query
           required: false
-          description: the version number of the requested protocol (must be greater than 0)
+          description: the version number of the requested protocol
           schema:
             type: integer
             minimum: 1
@@ -153,14 +152,13 @@ paths:
         - name: target
           in: query
           required: true
-          description: the desired target protocol type of the transformation - must be one
-            of avro, protobuf, mu, openapi, or scala
+          description: the desired target protocol type of the transformation
           schema:
             $ref: "#/components/schemas/IdlNameTarget"
         - name: version
           in: query
           required: false
-          description: the version number of the requested protocol - must be greater than 0
+          description: the version number of the requested protocol
           schema:
             type: integer
             minimum: 1
