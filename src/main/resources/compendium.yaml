@@ -199,9 +199,6 @@ components:
       enum:
         - avro
         - protobuf
-        - mu
-        - openapi
-        - scala
     IdlNameTarget:
       type: string
       description: the names of the set of protocols supported in compendium to be target
