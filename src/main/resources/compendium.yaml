@@ -94,6 +94,7 @@ paths:
             Location:
               schema:
                 type: string
+                format: uri
               description: location of the uploaded protocol
           content:
             application/json:
