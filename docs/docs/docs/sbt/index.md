@@ -8,9 +8,7 @@ url: /docs/sbt
 
 `sbt-compendium` is a plugin that provides a client to communicate with [Compendium](https://github.com/higherkindness/compendium) service. It currently support:
 
-
 - Retrieval of protocols
-
 
 To start using `sbt-compendium`, add the following line in `project/plugin.sbt`:
 
