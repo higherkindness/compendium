@@ -12,7 +12,7 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
 externalDocs:
   description: Learn more about Compendium
-  url: https://github.com/higherkindness/compendium
+  url: https://higherkindness.io/compendium
 servers:
   - url: '{protocol}://{host}:{port}'
     variables:
