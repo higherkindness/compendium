@@ -24,7 +24,7 @@ lazy val V = new {
   val shapeless: String        = "2.3.3"
   val pureConfig: String       = "0.12.3"
   val doobie: String           = "0.8.8"
-  val flyway: String           = "6.3.1"
+  val flyway: String           = "6.3.2"
   val refined: String          = "0.9.13"
   val slf4j: String            = "1.7.30"
 }
