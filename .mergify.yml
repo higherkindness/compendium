@@ -3,6 +3,7 @@ pull_request_rules:
     conditions:
       - author=scala-steward
       - status-success=continuous-integration/travis-ci/pr
+      - status-success=CI / Microsite (pull_request)
       - body~=labels:.*semver-patch
     actions:
       merge:
@@ -11,6 +12,7 @@ pull_request_rules:
     conditions:
       - author=scala-steward
       - status-success=continuous-integration/travis-ci/pr
+      - status-success=CI / Microsite (pull_request)
       - body~=labels:.*semver-minor
       - "#approved-reviews-by>=1"
     actions:
