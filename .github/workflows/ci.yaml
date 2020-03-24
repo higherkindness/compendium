@@ -1,7 +1,10 @@
 ---
 name: CI
 
-on: push
+on:
+  push:
+    branches-ignore:
+      - 'master'
 
 env:
   JAVA_VERSION: adopt@v8
