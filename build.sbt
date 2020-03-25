@@ -161,9 +161,9 @@ lazy val serverSettings = Seq(
 
 lazy val compilerPlugins = Seq(
   libraryDependencies ++= Seq(
-    compilerPlugin("org.typelevel"   % "kind-projector"      % V.kindProjector cross CrossVersion.full),
-    compilerPlugin("com.olegpy"      %% "better-monadic-for" % V.betterMonadicFor),
-    compilerPlugin("org.augustjune"  %% "context-applied"    % V.contextApplied)
+    compilerPlugin("org.typelevel"  % "kind-projector"      % V.kindProjector cross CrossVersion.full),
+    compilerPlugin("com.olegpy"     %% "better-monadic-for" % V.betterMonadicFor),
+    compilerPlugin("org.augustjune" %% "context-applied"    % V.contextApplied)
   )
 )
 
