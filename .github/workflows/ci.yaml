@@ -79,6 +79,10 @@ jobs:
         with:
           name: target
           path: ./target
+      - uses: actions/upload-artifact@v1
+        with:
+          name: project
+          path: ./project
 
   package:
     name: Package
@@ -102,6 +106,9 @@ jobs:
       - uses: actions/download-artifact@v1
         with:
           name: target
+      - uses: actions/download-artifact@v1
+        with:
+          name: project
       - name: Package
         run: sbt universal:packageZipTarball
       - uses: actions/upload-artifact@v1
