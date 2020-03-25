@@ -2,15 +2,14 @@
 name: Release
 on:
   push:
-    branches:
-      - master
+    branches: master
 
 env:
-  CI: true
   RUBY_VERSION: '2.6'
   JAVA_VERSION: adopt@v8
 
 jobs:
+
   publish-microsite:
     name: Publish microsite
     runs-on: ubuntu-latest
