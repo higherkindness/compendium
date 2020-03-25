@@ -102,9 +102,10 @@ jobs:
       - uses: actions/download-artifact@v1
         with:
           name: target
+          path: ./target
       - name: Package
         run: sbt universal:packageZipTarball
       - uses: actions/upload-artifact@v1
         with:
           name: package-zip
-          artifact: ./target/universal
+          path: ./target/universal
