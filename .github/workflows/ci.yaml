@@ -1,7 +1,10 @@
 ---
 name: CI
 
-on: [pull_request, push]
+on:
+  push:
+    branches: master
+  pull_request:
 
 env:
   JAVA_VERSION: adopt@v8
@@ -10,7 +13,7 @@ env:
 jobs:
 
   microsite:
-    name: Microsite
+    name: microsite
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -35,8 +38,8 @@ jobs:
       - name: Build microsite
         run: sbt docs/makeMicrosite
 
-  formatting:
-    name: Check formatting
+  format:
+    name: format
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -53,8 +56,8 @@ jobs:
       - name: Check scala files
         run: sbt scalafmtCheckAll
 
-  compile:
-    name: Compile & Test
+  validate:
+    name: validate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -75,43 +78,3 @@ jobs:
         run: sbt compile test:compile
       - name: Test
         run: sbt test
-      - uses: actions/upload-artifact@v1
-        with:
-          name: target
-          path: ./target
-      - uses: actions/upload-artifact@v1
-        with:
-          name: project
-          path: ./project
-
-  package:
-    name: Package
-    needs: compile
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: olafurpg/setup-scala@v5
-        with:
-          java-version: ${{ env.JAVA_VERSION }}
-      - name: Cache Coursier
-        uses: actions/cache@v1
-        with:
-          path: ~/.cache/coursier
-          key: sbt-coursier-cache-${{ hashFiles('**/build.sbt') }}
-      - name: Cache SBT
-        uses: actions/cache@v1
-        with:
-          path: ~/.sbt
-          key: sbt-${{ hashFiles('**/build.sbt') }}
-      - uses: actions/download-artifact@v1
-        with:
-          name: target
-      - uses: actions/download-artifact@v1
-        with:
-          name: project
-      - name: Package
-        run: sbt universal:packageZipTarball
-      - uses: actions/upload-artifact@v1
-        with:
-          name: package-zip
-          path: ./target/universal
