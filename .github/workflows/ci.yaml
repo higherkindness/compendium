@@ -65,7 +65,7 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ~/.cache/coursier
-          key: sbt-coursier-cache
+          key: sbt-coursier-cache-${{ hashFiles('**/build.sbt') }}
       - name: Cache SBT
         uses: actions/cache@v1
         with:
@@ -93,7 +93,7 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ~/.cache/coursier
-          key: sbt-coursier-cache
+          key: sbt-coursier-cache-${{ hashFiles('**/build.sbt') }}
       - name: Cache SBT
         uses: actions/cache@v1
         with:
