@@ -56,8 +56,8 @@ jobs:
       - name: Check scala files
         run: sbt scalafmtCheckAll
 
-  validate:
-    name: validate
+  test:
+    name: compile and test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
