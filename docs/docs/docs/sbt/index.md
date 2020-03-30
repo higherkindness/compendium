@@ -24,6 +24,8 @@ addSbtPlugin("io.higherkindness" %% "sbt-compendium" % <version>)
 | `compendiumSrcGenServerPort` | _Integer_ | Compendium server port | `47047` |
 | `compendiumSrcGenFormatSchema` | _IdlName_ | Schema type to download | `IdlName.Avro` |
 | `compendiumSrcGenProtocolIdentifiers` | _Seq[ProtocolAndVersion]_ | Protocol identifiers to retrieve from compendium. `ProtocolAndVersion` provides two values: `name` (mandatory) that corresponds with the identifier used to store the protocol and `version` (optional) | `Nil` |
+| `compendiumSrcGenProtobufCompressionType` | CompressionTypeGen | Compression type for protobuf code generation | `NoCompressionGen` |
+|`compendiumSrcGenProtobufStreamingImpl`| StreamingImplementation | Streaming implementation for protobuf code generation | `Fs2Stream` |
 
 The configuration works as follows:
 
@@ -39,6 +41,9 @@ The configuration works as follows:
    `ProtocolAndVersion` provides two values: `name` (mandatory) that
    corresponds with the identifier used to store the protocol and
    `version` (optional). Default: Nil
+-  `compendiumSrcGenProtobufCompressionType`: *CompressionTypeGen*. Only for protobuf schema. Supported: `NoCompressionGen`, `GzipGen`.
+-  `compendiumSrcGenProtobufStreamingImpl`: *StreamingImplementation*. Only for protobuf schema. Supported: `Fs2Stream`, `MonixObservable`.
+
 
 
 ## How to use it
