@@ -17,7 +17,8 @@ https://compendium-example.com/protocol/myProtocol?idlName=avro
 
 For more infromation about this endpoint, check the [api](https://???)
 
-The list of IDLs allowd by Compendoum can be found [here](./supported_idls)
+# Versioning
+All the storaged schemas will be versioned. Currently the versioning is incremental. When a schema is storaged, the version of the schema is returned as a body response.
 
 # Supported IDLs for Stroing
 These are the allowed IDLs that can be stored in Compendium so far:
@@ -28,4 +29,3 @@ These are the allowed IDLs that can be stored in Compendium so far:
  | Protobuf | Yes       |
  | Mu       | No        |
  | OpenAPI  | No        |
- | Scala    | No        |

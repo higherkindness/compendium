@@ -8,3 +8,13 @@ options:
     nested_options:
       - title: Docker
         url: /docs/deployment/docker
+
+  - title: Features
+    url: /docs/features
+    menu_section: features
+    nested_options:
+      - title: Storage
+        url: /docs/features/storage
+        
+      - title: Translations
+        url: /docs/features/translations
