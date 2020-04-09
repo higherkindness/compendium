@@ -1,0 +1,242 @@
+openapi: 3.0.0
+info:
+  description: Compendium is a service for schema storage, conversion, version management,
+    and client generation. It supports a RESTful interface for storing and
+    serving schemas like Avro, Protobuf, OpenAPI, and Mu.
+  version: 0.0.1
+  title: Compendium
+  contact:
+    email: contact@higherkindness.io
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: '{protocol}://{host}:{port}'
+    variables:
+      protocol:
+        enum:
+          - http
+          - https
+        default: http
+      host:
+        default: localhost
+      port:
+        default: "8080"
+tags:
+  - name: health
+    description: health ping
+  - name: protocol
+    description: Operations on protocols
+    externalDocs:
+      description: Learn more
+      url: https://github.com/higherkindness/compendium
+paths:
+  "/health":
+    get:
+      servers:
+        - url: '{protocol}://{host}:{port}'
+          description: Override base path for health response endpoint
+          variables:
+            protocol:
+              default: http
+            host:
+              default: localhost
+            port:
+              default: "8080"
+      tags:
+        - health
+      summary: health response endpoint
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+          description: Service is healthy
+        "400":
+          description: Bad request
+        "404":
+          description: Not found
+        "500":
+          description: Internal server error
+  "/v0/protocol/{protocolId}":
+    post:
+      tags:
+        - protocol
+      summary: store a protocol
+      parameters:
+        - name: protocolId
+          in: path
+          required: true
+          description: the id of the protocol - can be a string of any alphanumeric
+            character, dash (-), or period (.) with a length less than or equal to 255
+            characters
+          schema:
+            $ref: "#/components/schemas/ProtocolId"
+        - name: idlName
+          in: query
+          required: true
+          description: the name of the type of protocol being saved
+          schema:
+            $ref: "#/components/schemas/IdlName"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Protocol"
+        description: the protocol to be saved
+        required: true
+      responses:
+        "201":
+          description: successfully saved the protocol
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+              description: location of the uploaded protocol
+          content:
+            application/json:
+              schema:
+                description: an integer representing the protocol version
+                type: integer
+        "400":
+          description: Bad request
+        "404":
+          description: The protocol was not found
+        "500":
+          description: Internal server error
+    get:
+      tags:
+        - protocol
+      summary: get a stored protocol by id
+      parameters:
+        - name: protocolId
+          in: path
+          required: true
+          description: the id of the protocol
+          schema:
+            $ref: "#/components/schemas/ProtocolId"
+        - name: version
+          in: query
+          required: false
+          description: the version number of the requested protocol
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Protocol"
+        "400":
+          description: Bad request
+        "404":
+          description: The protocol was not found for the requested id
+        "500":
+          description: Internal server error
+  "/v0/protocol/{protocolId}/transformation":
+    get:
+      tags:
+        - protocol
+      summary: get a protocol by id and transform it into a different format
+      parameters:
+        - name: protocolId
+          in: path
+          required: true
+          description: the id of the protocol
+          schema:
+            $ref: "#/components/schemas/ProtocolId"
+        - name: target
+          in: query
+          required: true
+          description: the desired target protocol type of the transformation
+          schema:
+            $ref: "#/components/schemas/IdlNameTarget"
+        - name: version
+          in: query
+          required: false
+          description: the version number of the requested protocol
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        "200":
+          description: successful transformation from one stored protocol to another
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FullProtocol"
+        "400":
+          description: Bad request
+        "404":
+          description: The protocol was not found for the requested id
+        "500":
+          description: Internal server error
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - serviceId
+        - version
+      properties:
+        status:
+          type: string
+          description: the status representing the health of the build
+        serviceId:
+          type: string
+          description: the name of the library artifact
+        version:
+          type: string
+          description: the library artifact version
+    IdlName:
+      type: string
+      description: the names of the set of protocols supported to upload to compendium
+      enum:
+        - avro
+        - protobuf
+    IdlNameTarget:
+      type: string
+      description: the names of the set of protocols supported in compendium to be target
+      enum:
+        - mu
+    Protocol:
+      type: object
+      required:
+        - raw
+      properties:
+        raw:
+          type: string
+          description: the raw representation of a protocol
+    ProtocolId:
+      type: string
+      maxLength: 255
+      pattern: ^[\w-\.]+$
+    ProtocolMetadata:
+      type: object
+      required:
+        - id
+        - idlName
+        - version
+      properties:
+        id:
+          $ref: "#/components/schemas/ProtocolId"
+        idlName:
+          $ref: "#/components/schemas/IdlName"
+        version:
+          type: integer
+          minimum: 1
+    FullProtocol:
+      type: object
+      required:
+        - protocol
+        - protocolMetadata
+      properties:
+        protocol:
+          $ref: "#/components/schemas/Protocol"
+        protcolMetadata:
+          $ref: "#/components/schemas/ProtocolMetadata"

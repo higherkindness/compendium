@@ -10,21 +10,21 @@ lazy val V = new {
   val cats: String             = "2.1.1"
   val catsEffect: String       = "2.1.2"
   val catsScalacheck: String   = "0.2.0"
-  val contextApplied: String   = "0.1.2"
+  val contextApplied: String   = "0.1.3"
   val mouse: String            = "0.24"
   val circe: String            = "0.13.0"
-  val kindProjector: String    = "0.10.3"
+  val kindProjector: String    = "0.11.0"
   val paradise: String         = "2.1.1"
-  val scala: String            = "2.12.10"
-  val skeumorph: String        = "0.0.20"
-  val specs2: String           = "4.9.2"
+  val scala: String            = "2.13.1"
+  val skeumorph: String        = "0.0.22"
+  val specs2: String           = "4.9.3"
   val enumeratum: String       = "1.5.15"
   val enumeratumCirce: String  = "1.5.23"
-  val http4s: String           = "0.21.1"
+  val http4s: String           = "0.21.3"
   val shapeless: String        = "2.3.3"
   val pureConfig: String       = "0.12.3"
-  val doobie: String           = "0.8.8"
-  val flyway: String           = "6.3.1"
+  val doobie: String           = "0.9.0"
+  val flyway: String           = "6.3.2"
   val refined: String          = "0.9.13"
   val slf4j: String            = "1.7.30"
 }
@@ -38,7 +38,8 @@ lazy val root = project
   .settings(
     buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
     buildInfoPackage := "buildinfo",
-    name := "compendium-server"
+    name := "compendium-server",
+    scalacOptions -= "-Xfuture"
   )
 
 lazy val docs = project
@@ -160,10 +161,9 @@ lazy val serverSettings = Seq(
 
 lazy val compilerPlugins = Seq(
   libraryDependencies ++= Seq(
-    compilerPlugin("org.typelevel"   % "kind-projector"      % V.kindProjector cross CrossVersion.binary),
-    compilerPlugin("com.olegpy"      %% "better-monadic-for" % V.betterMonadicFor),
-    compilerPlugin("org.scalamacros" % "paradise"            % V.paradise cross CrossVersion.patch),
-    compilerPlugin("org.augustjune"  %% "context-applied"    % V.contextApplied)
+    compilerPlugin("org.typelevel"  % "kind-projector"      % V.kindProjector cross CrossVersion.full),
+    compilerPlugin("com.olegpy"     %% "better-monadic-for" % V.betterMonadicFor),
+    compilerPlugin("org.augustjune" %% "context-applied"    % V.contextApplied)
   )
 )
 

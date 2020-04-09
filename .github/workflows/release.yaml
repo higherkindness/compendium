@@ -1,0 +1,43 @@
+---
+name: Release
+on:
+  push:
+    branches: master
+
+env:
+  RUBY_VERSION: '2.6'
+  JAVA_VERSION: adopt@v8
+
+jobs:
+
+  publish-microsite:
+    name: Publish microsite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: olafurpg/setup-scala@v5
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+      - uses: actions/setup-ruby@v1
+        with:
+          ruby-version: ${{ env.RUBY_VERSION }}
+      - name: Cache Coursier
+        uses: actions/cache@v1
+        with:
+          path: ~/.cache/coursier
+          key: sbt-coursier-cache
+      - name: Cache SBT
+        uses: actions/cache@v1
+        with:
+          path: ~/.sbt
+          key: sbt-${{ hashFiles('**/build.sbt') }}
+      - name: Install Jekyll
+        run: gem install jekyll -v 4
+      - name: Build
+        run: sbt docs/makeMicrosite
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/target/site
+          commit_message: ${{ github.event.head_commit.message }}

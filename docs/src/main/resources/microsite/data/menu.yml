@@ -2,6 +2,15 @@ options:
   - title: Intro
     url: /docs/
 
+  - title: Features
+    url: /docs/features
+    menu_section: features
+    nested_options:
+      - title: Storage
+        url: /docs/features/storage
+      - title: Translations
+        url: /docs/features/translations
+
   - title: Deployment
     url: /docs/deployment
     menu_section: deployment
@@ -9,12 +18,5 @@ options:
       - title: Docker
         url: /docs/deployment/docker
 
-  - title: Features
-    url: /docs/features
-    menu_section: features
-    nested_options:
-      - title: Storage
-        url: /docs/features/storage
-        
-      - title: Translations
-        url: /docs/features/translations
+  - title: Sbt plugin
+    url: /docs/sbt
