@@ -51,7 +51,7 @@ lazy val docs = project
   .settings(
     micrositeName := "Compendium",
     micrositeDescription := "IDL protocol management and distribution at speed of light",
- //   micrositeBaseUrl := "/compendium",
+    micrositeBaseUrl := "/compendium",
     micrositeGithubOwner := "higherkindness",
     micrositeGithubRepo := "compendium",
     micrositeHighlightTheme := "dracula",
