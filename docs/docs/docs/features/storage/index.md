@@ -15,8 +15,6 @@ For storing an schema you just need to do a `POST` request to this endpoint spec
 https://compendium-example.com/protocol/myProtocol?idlName=avro
 ```
 
-For more infromation about this endpoint, check the [api](https://???)
-
 # Versioning
 All the storaged schemas will be versioned. Currently the versioning is incremental. When a schema is storaged, the version of the schema is returned as a body response.
 

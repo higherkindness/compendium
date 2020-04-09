@@ -3,7 +3,6 @@ options:
     url: /docs/
 
   - title: Features
-    url: /docs/features
     menu_section: features
     nested_options:
       - title: Storage
