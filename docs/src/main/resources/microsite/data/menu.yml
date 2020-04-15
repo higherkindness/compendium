@@ -2,6 +2,14 @@ options:
   - title: Intro
     url: /docs/
 
+  - title: Features
+    menu_section: features
+    nested_options:
+      - title: Storage
+        url: /docs/features/storage
+      - title: Translations
+        url: /docs/features/translations
+
   - title: Deployment
     url: /docs/deployment
     menu_section: deployment
