@@ -1,0 +1,75 @@
+<!DOCTYPE html><html><head><title>Compendium: Transformations</title><meta charset="utf-8" /><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="47 Degrees" /><meta name="description" content="IDL protocol management and distribution at speed of light" /><meta name="og:image" content="/compendium/img/poster.png" /><meta name="image" property="og:image" content="/compendium/img/poster.png" /><meta name="og:title" content="Compendium: Transformations" /><meta name="title" property="og:title" content="Compendium: Transformations" /><meta name="og:site_name" content="Compendium" /><meta name="og:url" content="https://higherkindness.github.io/compendium-server/" /><meta name="og:type" content="website" /><meta name="og:description" content="IDL protocol management and distribution at speed of light" /><link rel="icon" type="image/png" href="/compendium/img/favicon.png" /><meta name="twitter:title" content="Compendium: Transformations" /><meta name="twitter:image" content="/compendium/img/poster.png" /><meta name="twitter:description" content="IDL protocol management and distribution at speed of light" /><meta name="twitter:card" content="summary_large_image" /><link rel="icon" type="image/png" sizes="16x16" href="/compendium/img/favicon16x16.png" /><link rel="icon" type="image/png" sizes="24x24" href="/compendium/img/favicon24x24.png" /><link rel="icon" type="image/png" sizes="32x32" href="/compendium/img/favicon32x32.png" /><link rel="icon" type="image/png" sizes="48x48" href="/compendium/img/favicon48x48.png" /><link rel="icon" type="image/png" sizes="57x57" href="/compendium/img/favicon57x57.png" /><link rel="icon" type="image/png" sizes="60x60" href="/compendium/img/favicon60x60.png" /><link rel="icon" type="image/png" sizes="64x64" href="/compendium/img/favicon64x64.png" /><link rel="icon" type="image/png" sizes="70x70" href="/compendium/img/favicon70x70.png" /><link rel="icon" type="image/png" sizes="72x72" href="/compendium/img/favicon72x72.png" /><link rel="icon" type="image/png" sizes="76x76" href="/compendium/img/favicon76x76.png" /><link rel="icon" type="image/png" sizes="96x96" href="/compendium/img/favicon96x96.png" /><link rel="icon" type="image/png" sizes="114x114" href="/compendium/img/favicon114x114.png" /><link rel="icon" type="image/png" sizes="120x120" href="/compendium/img/favicon120x120.png" /><link rel="icon" type="image/png" sizes="128x128" href="/compendium/img/favicon128x128.png" /><link rel="icon" type="image/png" sizes="144x144" href="/compendium/img/favicon144x144.png" /><link rel="icon" type="image/png" sizes="150x150" href="/compendium/img/favicon150x150.png" /><link rel="icon" type="image/png" sizes="152x152" href="/compendium/img/favicon152x152.png" /><link rel="icon" type="image/png" sizes="196x196" href="/compendium/img/favicon196x196.png" /><link rel="icon" type="image/png" sizes="310x310" href="/compendium/img/favicon310x310.png" /><link rel="icon" type="image/png" sizes="310x150" href="/compendium/img/favicon310x150.png" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" /><link rel="stylesheet" href="/compendium/highlight/styles/dracula.css" /><link rel="stylesheet" href="/compendium/css/light-style.css" /><link rel="stylesheet" href="/compendium/css/override-style.css" /></head><body class="docs"><div id="wrapper"><div id="sidebar-wrapper"><div id="sidebar-brand"><a href="/compendium/" class="brand"><div class="brand-wrapper"></div><span>Compendium</span></a><button id="main-toggle" class="sidebar-toggle"><span class="close"></span></button></div><div class="sidebar-nav"> <div class="sidebar-nav-item  "><a href="/compendium/docs/" title="Intro" class="">Intro</a></div> <div class="sidebar-nav-item  open"><button type="button" title="Features" class="button drop-nested">Features</button><i class="fa fa-angle-right"></i><div class="sub-section"> <a href="/compendium/docs/features/storage" title="Storage" class="">Storage</a> <a href="/compendium/docs/features/translations" title="Translations" class="active">Translations</a></div></div> <div class="sidebar-nav-item  "><a href="/compendium/docs/deployment" title="Deployment" class="drop-nested">Deployment</a><i class="fa fa-angle-right"></i><div class="sub-section"> <a href="/compendium/docs/deployment/docker" title="Docker" class="">Docker</a></div></div> <div class="sidebar-nav-item  "><a href="/compendium/docs/sbt" title="Sbt plugin" class="">Sbt plugin</a></div></div></div><div id="page-content-wrapper"><div class="nav"><div class="container-fluid"><div class="row"><div class="col-lg-12"><div class="action-menu pull-left clearfix"><a href="#menu-toggle" id="menu-toggle"><i class="fa fa-bars" aria-hidden="true"></i></a></div><ul class="pull-right"><li id="gh-eyes-item" class="hidden-xs"><a href="https://github.com/higherkindness/compendium" target="_blank" rel="noopener noreferrer"><i class="fa fa-eye"></i><span>Watchers<span id="eyes" class="label label-default">--</span></span></a></li><li id="gh-stars-item" class="hidden-xs"><a href="https://github.com/higherkindness/compendium" target="_blank" rel="noopener noreferrer"><i class="fa fa-star-o"></i><span>Stars<span id="stars" class="label label-default">--</span></span></a></li></ul></div></div></div></div><div id="content" data-github-owner="higherkindness" data-github-repo="compendium"><div class="content-wrapper"><section><h1 id="translations">Translations</h1>
+<p>Compendion not oly can be used as a schema storage, but a schema translator. Compendium is able to translate from one IDL to another. So, as an instance, if you have a schema defined in Avro, but you need it in Mu, Compendium will take care of translate it for you.</p>
+
+<h1 id="translating-a-schema">Translating a Schema</h1>
+<p>Translate an schema can not be more easier now. The schema must be stroaged before being translated, to know how to store a schema visit <a href="/docs/features/storage">this page</a>.</p>
+
+<p>Now the schema exists in the storage, you just need to run a <code class="highlighter-rouge">GET</code> request to this endpoint:</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>https://compendium-example.com/protocol/myProtocol/transformation?target=mu&amp;version=0.0.1
+</code></pre></div></div>
+
+<p>The result will be the schema translated to mu, in it’s version 0.0.1</p>
+
+<h1 id="supported-transformations-between-idls">Supported Transformations between IDLs</h1>
+<p>In this matrix you can see all the allowd transformations by Compendium so far:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>From/To</th>
+      <th>Avro</th>
+      <th>Protobuf</th>
+      <th>Mu</th>
+      <th>OpenAPI</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Avro</td>
+      <td>-</td>
+      <td>No</td>
+      <td>Yes</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>Protobuf</td>
+      <td>No</td>
+      <td>-</td>
+      <td>Yes</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>Mu</td>
+      <td>No</td>
+      <td>No</td>
+      <td>-</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>OpenAPI</td>
+      <td>No</td>
+      <td>No</td>
+      <td>No</td>
+      <td>-</td>
+    </tr>
+  </tbody>
+</table>
+</section></div></div></div></div><script src="/compendium/highlight/highlight.pack.js"></script><script>
+// For all code blocks, copy the language from the containing div
+// to the inner code tag (where hljs expects it to be)
+const langPrefix = 'language-';
+document.querySelectorAll(`div[class^='${langPrefix}']`).forEach(function(div) {
+  div.classList.forEach(function(cssClass) {
+    if (cssClass.startsWith(langPrefix)) {
+      const lang = cssClass.substring(langPrefix.length);
+      div.querySelectorAll('pre code').forEach(function(code) {
+        code.classList.add(lang);
+      });
+    }
+  });
+});
+
+hljs.configure({languages:['scala','java','bash']});
+hljs.initHighlightingOnLoad();
+      </script><script>console.info('\x57\x65\x62\x73\x69\x74\x65\x20\x62\x75\x69\x6c\x74\x20\x77\x69\x74\x68\x3a\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x5f\x5f\x20\x20\x20\x20\x5f\x5f\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x5f\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x5f\x20\x5f\x5f\x0a\x20\x20\x20\x5f\x5f\x5f\x5f\x5f\x2f\x20\x2f\x5f\x20\x20\x2f\x20\x2f\x5f\x20\x20\x20\x20\x20\x20\x5f\x5f\x5f\x5f\x20\x5f\x5f\x5f\x20\x20\x28\x5f\x29\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x20\x20\x5f\x5f\x5f\x5f\x5f\x28\x5f\x29\x20\x2f\x5f\x5f\x5f\x5f\x20\x20\x5f\x5f\x5f\x5f\x5f\x0a\x20\x20\x2f\x20\x5f\x5f\x5f\x2f\x20\x5f\x5f\x20\x5c\x2f\x20\x5f\x5f\x2f\x5f\x5f\x5f\x5f\x5f\x2f\x20\x5f\x5f\x20\x60\x5f\x5f\x20\x5c\x2f\x20\x2f\x20\x5f\x5f\x5f\x2f\x20\x5f\x5f\x5f\x2f\x20\x5f\x5f\x20\x5c\x2f\x20\x5f\x5f\x5f\x2f\x20\x2f\x20\x5f\x5f\x2f\x20\x5f\x20\x5c\x2f\x20\x5f\x5f\x5f\x2f\x0a\x20\x28\x5f\x5f\x20\x20\x29\x20\x2f\x5f\x2f\x20\x2f\x20\x2f\x5f\x2f\x5f\x5f\x5f\x5f\x5f\x2f\x20\x2f\x20\x2f\x20\x2f\x20\x2f\x20\x2f\x20\x2f\x20\x2f\x5f\x5f\x2f\x20\x2f\x20\x20\x2f\x20\x2f\x5f\x2f\x20\x28\x5f\x5f\x20\x20\x29\x20\x2f\x20\x2f\x5f\x2f\x20\x20\x5f\x5f\x28\x5f\x5f\x20\x20\x29\x0a\x2f\x5f\x5f\x5f\x5f\x2f\x5f\x2e\x5f\x5f\x5f\x2f\x5c\x5f\x5f\x2f\x20\x20\x20\x20\x20\x2f\x5f\x2f\x20\x2f\x5f\x2f\x20\x2f\x5f\x2f\x5f\x2f\x5c\x5f\x5f\x5f\x2f\x5f\x2f\x20\x20\x20\x5c\x5f\x5f\x5f\x5f\x2f\x5f\x5f\x5f\x5f\x2f\x5f\x2f\x5c\x5f\x5f\x2f\x5c\x5f\x5f\x5f\x2f\x5f\x5f\x5f\x5f\x2f\x0a\x0a\x68\x74\x74\x70\x73\x3a\x2f\x2f\x34\x37\x64\x65\x67\x2e\x67\x69\x74\x68\x75\x62\x2e\x69\x6f\x2f\x73\x62\x74\x2d\x6d\x69\x63\x72\x6f\x73\x69\x74\x65\x73')</script><script>((window.gitter = {}).chat = {}).options = {
+room: 'higherkindness/compendium'};</script><script src="https://sidecar.gitter.im/dist/sidecar.v1.js"></script><script src="/compendium/js/docs.js"></script></body></html>
