@@ -17,7 +17,6 @@
 package higherkindness.compendium.storage
 
 import cats.effect.IO
-import cats.syntax.apply._
 import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
 import higherkindness.compendium.models._
 import org.specs2.matcher.Matchers
