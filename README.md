@@ -1,43 +1,25 @@
 [comment]: # (Start Badges)
 
-[![Build Status](https://travis-ci.org/higherkindness/compendium.svg?branch=master)](https://travis-ci.org/higherkindness/compendium) [![License](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://raw.githubusercontent.com/higherkindness/compendium/master/LICENSE) [![GitHub Issues](https://img.shields.io/github/issues/higherkindness/compendium.svg)](https://github.com/higherkindness/compendium/issues)
+![Release](https://github.com/higherkindness/compendium/workflows/Release/badge.svg?branch=master)
+![Docker Image Version (latest semver)](https://img.shields.io/docker/v/47deg/compendium?sort=semver)
+![Docker Image Size (latest semver)](https://img.shields.io/docker/image-size/47deg/compendium?sort=semver)
+![GitHub issues](https://img.shields.io/github/issues/higherkindness/compendium)
+![License](https://img.shields.io/github/license/higherkindness/compendium?color=blue)
+![Gitter](https://img.shields.io/gitter/room/higerkindness/compendium)
 [![Scala Steward badge](https://img.shields.io/badge/Scala_Steward-helping-blue.svg?style=flat&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAQCAMAAAARSr4IAAAAVFBMVEUAAACHjojlOy5NWlrKzcYRKjGFjIbp293YycuLa3pYY2LSqql4f3pCUFTgSjNodYRmcXUsPD/NTTbjRS+2jomhgnzNc223cGvZS0HaSD0XLjbaSjElhIr+AAAAAXRSTlMAQObYZgAAAHlJREFUCNdNyosOwyAIhWHAQS1Vt7a77/3fcxxdmv0xwmckutAR1nkm4ggbyEcg/wWmlGLDAA3oL50xi6fk5ffZ3E2E3QfZDCcCN2YtbEWZt+Drc6u6rlqv7Uk0LdKqqr5rk2UCRXOk0vmQKGfc94nOJyQjouF9H/wCc9gECEYfONoAAAAASUVORK5CYII=)](https://scala-steward.org)
-[![Mergify Status](https://img.shields.io/endpoint.svg?url=https://gh.mergify.io/badges/higherkindness/compendium&style=flat)](https://mergify.io)
+![Mergify Status](https://img.shields.io/endpoint.svg?url=https://gh.mergify.io/badges/higherkindness/compendium&style=flat)
 
 [comment]: # (End Badges)
 
 # What is compendium?
+
 compendium is a standalone solution, implemented as an HTTP service, that provides **storage, conversion and client generation for your schemas in a format-agnostic fashion**.
 
-## Features and comparison with Schema Registry
+# Documentation
 
-|Feature                          |compendium |Schema Registry|
-|-------------------------------  |-----------|---------------|
-|RESTful interface                |yes        |yes            |
-|Schema storage                   |yes        |yes            |
-|Schema versioning                |yes        |yes            |
-|Pluggable storage backends       |yes        |no (Kafka)     |
-|Format-agnostic                  |yes        |no (Avro)      |
-|Conversion between formats       |yes        |no             |
-|Client code generation           |yes        |no             |
+The full documentation is available at https://higherkindness.io/compendium
 
-Pluggable storage backends means that you can use whatever storage fits your needs, being filesystem and PostgreSQL the current out of the box backends provided by compendium at the moment.
-
-Format-agnostic ensures that you can use any of the most popular schema formats, ranging from binaries like Avro and Protocol Buffers, to more web related like OpenAPI, in a transparent manner.
-
-Conversion between formats saves a ton of work trying to manually adapt schemas that you are already using, while retaining type safety and ensuring formats compatibility.
-
-Finally, code generation (currently only Scala) is a very interesting feature that allows putting into use all those stored schemas without worrying about their future changes and evolutions.
-
-# How to use compendium
-
-compendium can be used calling the RESTful interface directly, just as you would use other schema solutions like Schema Registry.
-
-## SBT plugin (Scala)
-
-In order to use code generation, an SBT plugin is also provided [here](https://github.com/higherkindness/sbt-compendium). This plugin handles all the hassle of calling the compendium server, leaving Scala files in the managed sources folders for your SBT project, ready to be compiled.
-
-# Examples
+# Demo
 
 Take a look at this [example](https://github.com/higherkindness/compendium-example) to get a grasp on how to integrate your projects with compendium, making use of SBT plugin to generate Scala code from schemas.
 
@@ -50,7 +32,7 @@ Please review the [Contribution document](CONTRIBUTING.md) for information on ho
 
 compendium is designed and developed by 47 Degrees
 
-Copyright © 2018-2019 47 Degrees. <http://47deg.com>
+Copyright © 2018-2020 47 Degrees. <http://47deg.com>
 
 Licensed under Apache License. See [LICENSE](LICENSE) for terms.
 
