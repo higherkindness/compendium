@@ -19,7 +19,6 @@ package higherkindness.compendium.core
 import java.io.InputStream
 
 import cats.effect.IO
-import cats.syntax.apply._
 import higherkindness.compendium.CompendiumArbitrary._
 import higherkindness.compendium.models.{IdlName, Protocol}
 import higherkindness.compendium.models.transformer.types.SchemaParseException
