@@ -30,56 +30,59 @@ import scala.meta._
 
 object SkeuomorphProtocolTransformer {
 
-  def apply[F[_]: Sync]: ProtocolTransformer[F] = new ProtocolTransformer[F] {
+  def apply[F[_]: Sync]: ProtocolTransformer[F] =
+    new ProtocolTransformer[F] {
 
-    import higherkindness.compendium.transformer.protobuf.parsing._
+      import higherkindness.compendium.transformer.protobuf.parsing._
 
-    private def protobufToMu(
-        source: ProtoSource,
-        oldMetadata: ProtocolMetadata,
-        streamCtor: (Type, Type) => Type.Apply
-    ): F[FullProtocol] =
-      protobuf.ParseProto
-        .parseProto[F, Mu[protobuf.ProtobufF]]
-        .parse(source)
-        .map(protobuf => mu.Protocol.fromProtobufProto(mu.CompressionType.Identity, true)(protobuf))
-        .flatMap(p =>
-          Sync[F]
-            .fromEither(mu.codegen.protocol(p, streamCtor).leftMap(TransformError).map(_.syntax))
-        )
-        .map(p => FullProtocol(oldMetadata.copy(idlName = IdlName.Mu), Protocol(p)))
+      private def protobufToMu(
+          source: ProtoSource,
+          oldMetadata: ProtocolMetadata,
+          streamCtor: (Type, Type) => Type.Apply
+      ): F[FullProtocol] =
+        protobuf.ParseProto
+          .parseProto[F, Mu[protobuf.ProtobufF]]
+          .parse(source)
+          .map(protobuf =>
+            mu.Protocol.fromProtobufProto(mu.CompressionType.Identity, true)(protobuf)
+          )
+          .flatMap(p =>
+            Sync[F]
+              .fromEither(mu.codegen.protocol(p, streamCtor).leftMap(TransformError).map(_.syntax))
+          )
+          .map(p => FullProtocol(oldMetadata.copy(idlName = IdlName.Mu), Protocol(p)))
 
-    private def skeuomorphTransformation(fp: FullProtocol, target: IdlName): F[FullProtocol] = {
-      val streamCtor: (Type, Type) => Type.Apply = {
-        case (f, a) => t"_root_.fs2.Stream[$f, $a]"
+      private def skeuomorphTransformation(fp: FullProtocol, target: IdlName): F[FullProtocol] = {
+        val streamCtor: (Type, Type) => Type.Apply = {
+          case (f, a) => t"_root_.fs2.Stream[$f, $a]"
+        }
+
+        (fp.metadata.idlName, target) match {
+          // (from, to)
+          case _ if fp.metadata.idlName.entryName == target.entryName => Sync[F].pure(fp)
+          case (IdlName.Avro, IdlName.Mu) =>
+            for {
+              avroProto      <- F.delay(AvroProtocol.parse(fp.protocol.raw))
+              skeuoAvroProto <- F.delay(avro.Protocol.fromProto(avroProto))
+              muProto <- F.delay(
+                mu.Protocol.fromAvroProtocol(mu.CompressionType.Identity, true)(skeuoAvroProto)
+              )
+              proto <- F.fromEither(
+                mu.codegen.protocol(muProto, streamCtor).leftMap(TransformError).map(_.syntax)
+              )
+            } yield {
+              val targetMetadata = fp.metadata.copy(idlName = IdlName.Mu)
+              val targetProto    = Protocol(proto)
+              FullProtocol(targetMetadata, targetProto)
+            }
+          case (IdlName.Protobuf, IdlName.Mu) =>
+            transformProtobuf(fp.protocol.raw)(protobufToMu(_, fp.metadata, streamCtor))
+        }
+
       }
 
-      (fp.metadata.idlName, target) match {
-        // (from, to)
-        case _ if fp.metadata.idlName.entryName == target.entryName => Sync[F].pure(fp)
-        case (IdlName.Avro, IdlName.Mu) =>
-          for {
-            avroProto      <- F.delay(AvroProtocol.parse(fp.protocol.raw))
-            skeuoAvroProto <- F.delay(avro.Protocol.fromProto(avroProto))
-            muProto <- F.delay(
-              mu.Protocol.fromAvroProtocol(mu.CompressionType.Identity, true)(skeuoAvroProto)
-            )
-            proto <- F.fromEither(
-              mu.codegen.protocol(muProto, streamCtor).leftMap(TransformError).map(_.syntax)
-            )
-          } yield {
-            val targetMetadata = fp.metadata.copy(idlName = IdlName.Mu)
-            val targetProto    = Protocol(proto)
-            FullProtocol(targetMetadata, targetProto)
-          }
-        case (IdlName.Protobuf, IdlName.Mu) =>
-          transformProtobuf(fp.protocol.raw)(protobufToMu(_, fp.metadata, streamCtor))
-      }
-
+      override def transform(protocol: FullProtocol, target: IdlName): F[FullProtocol] =
+        skeuomorphTransformation(protocol, target)
     }
-
-    override def transform(protocol: FullProtocol, target: IdlName): F[FullProtocol] =
-      skeuomorphTransformation(protocol, target)
-  }
 
 }

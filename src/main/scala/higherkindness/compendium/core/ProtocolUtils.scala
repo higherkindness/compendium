@@ -58,32 +58,33 @@ object ProtocolUtils {
       }) { fpw: FilePrintWriter => F.delay(fpw.pw.close()) }
       .use((fpw: FilePrintWriter) => F.delay(fpw.pw.write(msg)).as(fpw))
 
-  def impl[F[_]: Sync]: ProtocolUtils[F] = new ProtocolUtils[F] {
+  def impl[F[_]: Sync]: ProtocolUtils[F] =
+    new ProtocolUtils[F] {
 
-    override def validateProtocol(protocol: Protocol, schema: IdlName): F[Protocol] =
-      if (protocol.raw.trim.isEmpty)
-        F.raiseError(SchemaParseException("Protocol is empty"))
-      else
-        schema match {
-          case IdlName.Avro =>
-            F.delay(parserAvro.parse(protocol.raw))
-              .map(_ => protocol)
-              .handleErrorWith(e =>
-                F.raiseError(
-                  SchemaParseException("Avro schema provided not valid. " + e.getMessage)
+      override def validateProtocol(protocol: Protocol, schema: IdlName): F[Protocol] =
+        if (protocol.raw.trim.isEmpty)
+          F.raiseError(SchemaParseException("Protocol is empty"))
+        else
+          schema match {
+            case IdlName.Avro =>
+              F.delay(parserAvro.parse(protocol.raw))
+                .map(_ => protocol)
+                .handleErrorWith(e =>
+                  F.raiseError(
+                    SchemaParseException("Avro schema provided not valid. " + e.getMessage)
+                  )
                 )
-              )
-          case IdlName.Protobuf =>
-            parserProtobuf(protocol.raw)
-              .map(_ => protocol)
-              .handleErrorWith(e =>
-                F.raiseError(
-                  SchemaParseException("Protobuf schema provided not valid. " + e.getMessage)
+            case IdlName.Protobuf =>
+              parserProtobuf(protocol.raw)
+                .map(_ => protocol)
+                .handleErrorWith(e =>
+                  F.raiseError(
+                    SchemaParseException("Protobuf schema provided not valid. " + e.getMessage)
+                  )
                 )
-              )
-          case _ => F.raiseError(SchemaParseException(s"$schema type not implemented yet"))
-        }
-  }
+            case _ => F.raiseError(SchemaParseException(s"$schema type not implemented yet"))
+          }
+    }
 
   def apply[F[_]: ProtocolUtils]: ProtocolUtils[F] = F
 }
