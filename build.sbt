@@ -107,16 +107,16 @@ lazy val commonSettings = Seq(
     %%("doobie-core", V.doobie),
     %%("doobie-postgres", V.doobie),
     %%("doobie-hikari", V.doobie),
-    "org.tpolecat"                    %% "doobie-refined" % V.doobie,
-    "com.beachape"                    %% "enumeratum" % V.enumeratum,
-    "com.beachape"                    %% "enumeratum-circe" % V.enumeratumCirce,
-    "org.flywaydb"                    % "flyway-core" % V.flyway,
+    "org.tpolecat"                   %% "doobie-refined"        % V.doobie,
+    "com.beachape"                   %% "enumeratum"            % V.enumeratum,
+    "com.beachape"                   %% "enumeratum-circe"      % V.enumeratumCirce,
+    "org.flywaydb"                    % "flyway-core"           % V.flyway,
     %%("specs2-core", V.specs2)       % Test,
     %%("specs2-scalacheck", V.specs2) % Test,
     %%("doobie-specs2", V.doobie)     % Test,
-    "io.chrisdavenport"               %% "cats-scalacheck" % V.catsScalacheck % Test,
-    "io.chrisdavenport"               %% "testcontainers-specs2" % "0.2.0-M2" % Test,
-    "org.testcontainers"              % "postgresql" % "1.14.1" % Test
+    "io.chrisdavenport"              %% "cats-scalacheck"       % V.catsScalacheck % Test,
+    "io.chrisdavenport"              %% "testcontainers-specs2" % "0.2.0-M2"       % Test,
+    "org.testcontainers"              % "postgresql"            % "1.14.1"         % Test
   ),
   orgScriptTaskListSetting := List(
     (clean in Global).asRunnableItemFull,
@@ -152,7 +152,7 @@ lazy val commonSettings = Seq(
 lazy val serverSettings = Seq(
   parallelExecution in Test := false,
   libraryDependencies ++= Seq(
-    "org.slf4j"         % "slf4j-simple"        % V.slf4j,
+    "org.slf4j"          % "slf4j-simple"       % V.slf4j,
     "eu.timepit"        %% "refined"            % V.refined,
     "eu.timepit"        %% "refined-scalacheck" % V.refined,
     "io.chrisdavenport" %% "cats-scalacheck"    % V.catsScalacheck % Test
@@ -161,7 +161,7 @@ lazy val serverSettings = Seq(
 
 lazy val compilerPlugins = Seq(
   libraryDependencies ++= Seq(
-    compilerPlugin("org.typelevel"  % "kind-projector"      % V.kindProjector cross CrossVersion.full),
+    compilerPlugin("org.typelevel"   % "kind-projector"     % V.kindProjector cross CrossVersion.full),
     compilerPlugin("com.olegpy"     %% "better-monadic-for" % V.betterMonadicFor),
     compilerPlugin("org.augustjune" %% "context-applied"    % V.contextApplied)
   )

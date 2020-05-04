@@ -64,7 +64,9 @@ object RootService {
           response     <- Ok(fullProtocol.protocol)
         } yield response
 
-      case GET -> Root / "protocol" / id / "transformation" :? TargetParam(idlNameValidated) +& ProtoVersion(
+      case GET -> Root / "protocol" / id / "transformation" :? TargetParam(
+            idlNameValidated
+          ) +& ProtoVersion(
             maybeVersionValidated
           ) =>
         for {
