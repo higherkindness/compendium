@@ -34,7 +34,9 @@ trait CompendiumService[F[_]] {
 
 object CompendiumService {
 
-  implicit def impl[F[_]: Sync: Storage: MetadataStorage: ProtocolUtils: ProtocolTransformer]: CompendiumService[
+  implicit def impl[
+      F[_]: Sync: Storage: MetadataStorage: ProtocolUtils: ProtocolTransformer
+  ]: CompendiumService[
     F
   ] =
     new CompendiumService[F] {
