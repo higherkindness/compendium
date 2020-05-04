@@ -93,7 +93,8 @@ object CompendiumStreamApp {
     for {
       ce      <- ExecutionContexts.fixedThreadPool[F](10)
       blocker <- Blocker[F]
-      xa <- HikariTransactor
-        .fromHikariConfig[F](DatabaseStorageConfig.getHikariConfig(conf), ce, blocker)
+      xa <-
+        HikariTransactor
+          .fromHikariConfig[F](DatabaseStorageConfig.getHikariConfig(conf), ce, blocker)
     } yield xa
 }
