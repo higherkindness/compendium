@@ -24,7 +24,7 @@ lazy val V = new {
   val shapeless: String        = "2.3.3"
   val pureConfig: String       = "0.12.3"
   val doobie: String           = "0.9.0"
-  val flyway: String           = "6.4.1"
+  val flyway: String           = "6.4.2"
   val refined: String          = "0.9.14"
   val slf4j: String            = "1.7.30"
 }
@@ -116,7 +116,7 @@ lazy val commonSettings = Seq(
     %%("doobie-specs2", V.doobie)     % Test,
     "io.chrisdavenport"              %% "cats-scalacheck"       % V.catsScalacheck % Test,
     "io.chrisdavenport"              %% "testcontainers-specs2" % "0.2.0-M2"       % Test,
-    "org.testcontainers"              % "postgresql"            % "1.14.1"         % Test
+    "org.testcontainers"              % "postgresql"            % "1.14.2"         % Test
   ),
   orgScriptTaskListSetting := List(
     (clean in Global).asRunnableItemFull,
