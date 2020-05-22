@@ -26,7 +26,7 @@ class SkeuomorphProtocolTransformerSpec extends Specification {
 
   import protocols._
 
-  val transformer = SkeuomorphProtocolTransformer[IO]
+  val transformer     = SkeuomorphProtocolTransformer[IO]
   val protocolVersion = ProtocolVersion.initial
 
   "Skeuomorph based protocol transformer" should {

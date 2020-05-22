@@ -25,7 +25,7 @@ import higherkindness.compendium.models._
 
 class PgMetadataStorageSpec extends PGHelper(Metadata) {
 
-  private lazy val pg = PgMetadataStorage[IO](transactor)
+  private lazy val pg         = PgMetadataStorage[IO](transactor)
   private val protocolVersion = ProtocolVersion.initial
 
   "Postgres Service" should {

@@ -35,8 +35,8 @@ class StorageQueriesSpec extends PGHelper(Data) with IOChecker {
 
   trait context extends Scope {
     val protocolId = ProtocolId("my.test.protocol.id")
-    val version = ProtocolVersion.initial
-    val protocol = Protocol("Raw protocol content")
+    val version    = ProtocolVersion.initial
+    val protocol   = Protocol("Raw protocol content")
   }
 
 }
