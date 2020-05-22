@@ -17,19 +17,24 @@
 package higherkindness.compendium.metadata
 
 import cats.effect.IO
-import higherkindness.compendium.models.{IdlName, ProtocolMetadata, ProtocolNotFound}
-import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
+import higherkindness.compendium.models._
+import higherkindness.compendium.core.refinements.ProtocolId
+import higherkindness.compendium.core.refinements
 
-class MetadataStorageStub(val exists: Boolean, metadata: Option[ProtocolMetadata] = None)
-    extends MetadataStorage[IO] {
-  override def store(id: ProtocolId, idlNames: IdlName): IO[ProtocolVersion] =
-    IO.pure(metadata.map(_.version).getOrElse(ProtocolVersion(1)))
-  override def exists(id: ProtocolId): IO[Boolean] = IO.pure(exists)
-  override def ping: IO[Boolean]                   = IO.pure(exists)
+class MetadataStorageStub(val exists: Boolean, metadata: Option[ProtocolMetadata] = None) extends MetadataStorage[IO] {
 
-  override def retrieve(id: ProtocolId): IO[ProtocolMetadata] =
+  private val prtocolVersion = ProtocolVersion.initial
+
+  def store(id: ProtocolId, protocolVersion: ProtocolVersion, idlNames: IdlName): IO[ProtocolVersion] =
+    IO.pure(metadata.map(_.version).getOrElse(prtocolVersion))
+  def exists(id: ProtocolId): IO[Boolean] = IO.pure(exists)
+  def ping: IO[Boolean]                   = IO.pure(exists)
+
+  def retrieve(id: ProtocolId): IO[ProtocolMetadata] =
     metadata.fold(IO.raiseError[ProtocolMetadata](ProtocolNotFound("Protocol not found")))(mp =>
       if (mp.id == id) IO(mp)
       else IO.raiseError[ProtocolMetadata](ProtocolNotFound("Protocol not found"))
     )
+
+  def versionOf(id: refinements.ProtocolId): IO[Option[ProtocolVersion]] = IO.pure(Some(prtocolVersion))
 }

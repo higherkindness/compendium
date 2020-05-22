@@ -16,14 +16,15 @@
 
 package higherkindness.compendium.metadata
 
-import higherkindness.compendium.models.{IdlName, ProtocolMetadata}
-import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
+import higherkindness.compendium.models._
+import higherkindness.compendium.core.refinements.ProtocolId
 
 trait MetadataStorage[F[_]] {
-  def store(id: ProtocolId, idlName: IdlName): F[ProtocolVersion]
+  def store(id: ProtocolId, protocolVersion: ProtocolVersion, idlName: IdlName): F[ProtocolVersion]
   def retrieve(id: ProtocolId): F[ProtocolMetadata]
   def exists(id: ProtocolId): F[Boolean]
   def ping: F[Boolean]
+  def versionOf(id: ProtocolId): F[Option[ProtocolVersion]]
 }
 
 object MetadataStorage {

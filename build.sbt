@@ -114,6 +114,7 @@ lazy val commonSettings = Seq(
     %%("specs2-core", V.specs2)       % Test,
     %%("specs2-scalacheck", V.specs2) % Test,
     %%("doobie-specs2", V.doobie)     % Test,
+    "org.specs2"                     %% "specs2-cats"           % V.specs2         % Test,
     "io.chrisdavenport"              %% "cats-scalacheck"       % V.catsScalacheck % Test,
     "io.chrisdavenport"              %% "testcontainers-specs2" % "0.2.0-M2"       % Test,
     "org.testcontainers"              % "postgresql"            % "1.14.2"         % Test

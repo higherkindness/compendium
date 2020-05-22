@@ -17,10 +17,10 @@
 package higherkindness.compendium.metadata.pg
 
 import doobie.implicits._
-import doobie.{Query0, Update0}
+import doobie._
 import higherkindness.compendium.core.doobie.implicits._
 import higherkindness.compendium.core.refinements.ProtocolId
-import higherkindness.compendium.models.ProtocolMetadata
+import higherkindness.compendium.models._
 
 object Queries {
 
@@ -29,11 +29,11 @@ object Queries {
           SELECT exists (SELECT true FROM metaprotocols WHERE id=$id)
        """.query[Boolean]
 
-  def store(id: ProtocolId, idl_name: String): Update0 =
+  def store(id: ProtocolId, protocol_version: ProtocolVersion, idl_name: String): Update0 =
     sql"""
           INSERT INTO metaprotocols (id, idl_name, version)
-          VALUES ($id, $idl_name::idl, 1)
-          ON CONFLICT (id) DO UPDATE SET version = metaprotocols.version + 1
+          VALUES ($id, $idl_name::idl, $protocol_version)
+          ON CONFLICT (id) DO UPDATE SET version = ${protocol_version.incRevision}
           RETURNING version
        """.update
 
@@ -44,4 +44,9 @@ object Queries {
 
   def checkConn: Query0[Boolean] =
     sql"SELECT exists (SELECT 1)".query[Boolean]
+
+  val checkVersion: Query[ProtocolId, ProtocolVersion] =
+    Query(
+      "SELECT version from metaprotocols WHERE id = ?"
+    )
 }

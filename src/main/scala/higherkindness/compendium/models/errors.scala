@@ -18,8 +18,7 @@ package higherkindness.compendium.models
 
 abstract class CompendiumError(error: String) extends Exception(error)
 
-final case class FileNotFound(fileName: String)
-    extends CompendiumError(s"File with name $fileName not found")
+final case class FileNotFound(fileName: String)    extends CompendiumError(s"File with name $fileName not found")
 final case class ProtocolIdError(msg: String)      extends CompendiumError(msg)
 final case class ProtocolVersionError(msg: String) extends CompendiumError(msg)
 final case class ProtocolNotFound(msg: String)     extends CompendiumError(msg)

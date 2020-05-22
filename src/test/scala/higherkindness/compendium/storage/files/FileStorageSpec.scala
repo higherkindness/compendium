@@ -21,9 +21,9 @@ import java.nio.file.Paths
 
 import cats.effect.IO
 import higherkindness.compendium.CompendiumArbitrary._
-import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
+import higherkindness.compendium.core.refinements.ProtocolId
 import higherkindness.compendium.models.config.FileStorageConfig
-import higherkindness.compendium.models.{FullProtocol, Protocol, ProtocolMetadata}
+import higherkindness.compendium.models._
 import higherkindness.compendium.storage.{files, Storage}
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
@@ -71,14 +71,13 @@ object FileStorageSpec extends Specification with ScalaCheck with BeforeAfterAll
       io.unsafeRunSync() should beTrue
     }
 
-    "Successfully stores and recovers a file" >> prop {
-      (metadata: ProtocolMetadata, protocol: Protocol) =>
-        val file = for {
-          _ <- fileStorage.store(metadata.id, metadata.version, protocol)
-          f <- fileStorage.retrieve(metadata)
-        } yield f
+    "Successfully stores and recovers a file" >> prop { (metadata: ProtocolMetadata, protocol: Protocol) =>
+      val file = for {
+        _ <- fileStorage.store(metadata.id, metadata.version, protocol)
+        f <- fileStorage.retrieve(metadata)
+      } yield f
 
-        file.unsafeRunSync() must_=== FullProtocol(metadata, protocol)
+      file.unsafeRunSync() must_=== FullProtocol(metadata, protocol)
     }
 
     "Returns true if there is a file" >> prop { (metadata: ProtocolMetadata, protocol: Protocol) =>

@@ -16,6 +16,6 @@
 
 package higherkindness.compendium.models
 
-import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
+import higherkindness.compendium.core.refinements.ProtocolId
 
 case class ProtocolMetadata(id: ProtocolId, idlName: IdlName, version: ProtocolVersion)

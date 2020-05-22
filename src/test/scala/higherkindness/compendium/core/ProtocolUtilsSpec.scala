@@ -40,11 +40,10 @@ object ProtocolUtilsSpec extends Specification with ScalaCheck {
       validator.validateProtocol(protocol, IdlName.Avro).unsafeRunSync === protocol
     }
 
-    "[Avro] Given a raw protocol text raises an error if the protocol is incorrect" >> prop {
-      protocol: Protocol =>
-        validator
-          .validateProtocol(protocol, IdlName.Avro)
-          .unsafeRunSync must throwA[SchemaParseException]
+    "[Avro] Given a raw protocol text raises an error if the protocol is incorrect" >> prop { protocol: Protocol =>
+      validator
+        .validateProtocol(protocol, IdlName.Avro)
+        .unsafeRunSync must throwA[SchemaParseException]
     }
 
     "[Avro] Given multiple protocols validates them sequentially" >> {

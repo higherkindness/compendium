@@ -39,10 +39,12 @@ object RootService {
       F.fromValidated(idlNameValidated.leftMap(errs => UnknownIdlName(errs.toList.mkString)))
 
     def versionValidation(
-        maybeVersionValidated: Option[ValidatedNel[ParseFailure, ProtocolVersion]]
+        maybeVersionValidated: Option[ValidatedNel[ParseFailure, ProtocolVersionRefined]]
     ): F[Option[ProtocolVersion]] =
       maybeVersionValidated.traverse { validated =>
-        val validation = validated.leftMap(errs => ProtocolVersionError(errs.toList.mkString))
+        val validation = validated
+          .leftMap(errs => ProtocolVersionError(errs.toList.mkString))
+          .andThen(v => ProtocolVersion.fromString(v.value).toValidated)
         F.fromValidated(validation)
       }
 
@@ -53,7 +55,7 @@ object RootService {
           idlName    <- idlValidation(idlNameValidated)
           protocol   <- req.as[Protocol]
           version    <- CompendiumService[F].storeProtocol(protocolId, protocol, idlName)
-          response   <- Created(version.value)
+          response   <- Created(version.show)
         } yield response.putHeaders(Location(req.uri.withPath(s"${req.uri.path}")))
 
       case GET -> Root / "protocol" / id :? ProtoVersion(maybeVersionValidated) =>

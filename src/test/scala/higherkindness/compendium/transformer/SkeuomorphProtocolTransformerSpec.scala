@@ -17,7 +17,7 @@
 package higherkindness.compendium.transformer
 
 import cats.effect.IO
-import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
+import higherkindness.compendium.core.refinements.ProtocolId
 import higherkindness.compendium.models._
 import higherkindness.compendium.transformer.skeuomorph.SkeuomorphProtocolTransformer
 import org.specs2.mutable.Specification
@@ -27,10 +27,11 @@ class SkeuomorphProtocolTransformerSpec extends Specification {
   import protocols._
 
   val transformer = SkeuomorphProtocolTransformer[IO]
+  val protocolVersion = ProtocolVersion.initial
 
   "Skeuomorph based protocol transformer" should {
     "Transform a simple Avro Schema to Mu" >> {
-      val protocolMetadata = ProtocolMetadata(ProtocolId("id"), IdlName.Avro, ProtocolVersion(1))
+      val protocolMetadata = ProtocolMetadata(ProtocolId("id"), IdlName.Avro, protocolVersion)
       val fullProtocol     = FullProtocol(protocolMetadata, Protocol(simpleAvroExample))
 
       val transformResult = transformer.transform(fullProtocol, IdlName.Mu)
@@ -40,7 +41,7 @@ class SkeuomorphProtocolTransformerSpec extends Specification {
 
     "Transform a simple Protobuf Schema to Mu" >> {
       val protocolMetadata =
-        ProtocolMetadata(ProtocolId("id"), IdlName.Protobuf, ProtocolVersion(1))
+        ProtocolMetadata(ProtocolId("id"), IdlName.Protobuf, protocolVersion)
       val fullProtocol = FullProtocol(protocolMetadata, Protocol(simpleProtobufExample))
 
       val transformResult = transformer.transform(fullProtocol, IdlName.Mu)

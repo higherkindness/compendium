@@ -17,7 +17,7 @@
 package higherkindness.compendium.storage
 
 import cats.effect.IO
-import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
+import higherkindness.compendium.core.refinements.ProtocolId
 import higherkindness.compendium.models._
 import org.specs2.matcher.Matchers
 
@@ -36,9 +36,7 @@ class StorageStub(
 
   override def retrieve(metadata: ProtocolMetadata): IO[FullProtocol] =
     if (metadata.id == identifier && metadata.version == protoVersion)
-      proto.fold(IO.raiseError[FullProtocol](ProtocolNotFound("Not Found")))(p =>
-        IO.pure(FullProtocol(metadata, p))
-      )
+      proto.fold(IO.raiseError[FullProtocol](ProtocolNotFound("Not Found")))(p => IO.pure(FullProtocol(metadata, p)))
     else IO.raiseError[FullProtocol](ProtocolNotFound("Not found"))
 
   override def exists(id: ProtocolId): IO[Boolean] =
