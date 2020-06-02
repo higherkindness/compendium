@@ -1,4 +1,4 @@
-addSbtPlugin("io.github.davidgregory084" % "sbt-tpolecat"        % "0.1.11")
+addSbtPlugin("io.github.davidgregory084" % "sbt-tpolecat"        % "0.1.12")
 addSbtPlugin("org.lyranthe.sbt"          % "partial-unification" % "1.1.2")
 addSbtPlugin("com.typesafe"              % "sbt-mima-plugin"     % "0.7.0")
 addSbtPlugin("com.47deg"                 % "sbt-org-policies"    % "0.13.3")
