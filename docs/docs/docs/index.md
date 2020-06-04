@@ -34,9 +34,11 @@ compendium can be used calling the RESTful interface directly, just as you would
 
 ## Compendium and [mu-scala](https://higherkindness.io/mu-scala/)
 
-[`mu-scala`](https://higherkindness.io/mu-scala/) is a suite of libraries and tools that help you build and maintain microservices and clients in a functional style. While it is possible to use Mu by hand-writing your service definitions, message classes and clients in Scala, it has a sbt plugin to generate this code from Protobuf/Avro/OpenAPI IDL files.
+[`mu-scala`](https://higherkindness.io/mu-scala/) is a suite of libraries and tools that help you build and maintain microservices and clients in a functional style. While it is possible to use Mu by hand-writing your service definitions, message classes and clients in Scala, it has an sbt plugin to generate this code from Protobuf/Avro/OpenAPI IDL files.
 
 In order to use code generation, an SBT plugin which integrates mu-scala and compendium is provided [here](https://github.com/higherkindness/sbt-mu-srcgen). This plugin handles all the hassle of calling the compendium server and generate Scala code to build a microservice.
+
+You can find further information in [this](https://higherkindness.io/mu-scala/guides/generate-sources-from-idl) docs section.
 
 # Examples
 
