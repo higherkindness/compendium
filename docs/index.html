@@ -62,9 +62,13 @@
 
 <p>compendium can be used calling the RESTful interface directly, just as you would use other schema solutions like Schema Registry.</p>
 
-<h2 id="sbt-plugin-scala">SBT plugin (Scala)</h2>
+<h2 id="compendium-and-mu-scala">Compendium and <a href="https://higherkindness.io/mu-scala/">mu-scala</a></h2>
 
-<p>In order to use code generation, an SBT plugin is also provided <a href="https://github.com/higherkindness/sbt-compendium">here</a>. This plugin handles all the hassle of calling the compendium server, leaving Scala files in the managed sources folders for your SBT project, ready to be compiled.</p>
+<p><a href="https://higherkindness.io/mu-scala/"><code class="highlighter-rouge">mu-scala</code></a> is a suite of libraries and tools that help you build and maintain microservices and clients in a functional style. While it is possible to use Mu by hand-writing your service definitions, message classes and clients in Scala, it has an sbt plugin to generate this code from Protobuf/Avro/OpenAPI IDL files.</p>
+
+<p>In order to use code generation, an SBT plugin which integrates mu-scala and compendium is provided <a href="https://github.com/higherkindness/sbt-mu-srcgen">here</a>. This plugin handles all the hassle of calling the compendium server and generate Scala code to build a microservice.</p>
+
+<p>You can find further information in <a href="https://higherkindness.io/mu-scala/guides/generate-sources-from-idl">this</a> docs section.</p>
 
 <h1 id="examples">Examples</h1>
 
