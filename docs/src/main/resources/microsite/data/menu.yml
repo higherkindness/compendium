@@ -16,6 +16,3 @@ options:
     nested_options:
       - title: Docker
         url: /docs/deployment/docker
-
-  - title: Sbt plugin
-    url: /docs/sbt
