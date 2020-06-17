@@ -32,14 +32,13 @@ object Migrations {
 
   def makeMigrations[F[_]: Sync](conf: DatabaseStorageConfig, migrations: List[Location]): F[Int] =
     F.delay {
-        Flyway
-          .configure()
-          .dataSource(conf.jdbcUrl, conf.username, conf.password)
-          .locations(migrations: _*)
-          .load()
-          .migrate()
-      }
-      .attempt
+      Flyway
+        .configure()
+        .dataSource(conf.jdbcUrl, conf.username, conf.password)
+        .locations(migrations: _*)
+        .load()
+        .migrate()
+    }.attempt
       .flatMap {
         case Right(count) => F.delay(count)
         case Left(error)  => F.raiseError(error)
