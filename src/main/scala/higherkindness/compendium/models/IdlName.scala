@@ -24,9 +24,10 @@ sealed trait IdlName extends EnumEntry
 object IdlName extends Enum[IdlName] with CirceEnum[IdlName] {
   val values = findValues
 
-  case object Avro     extends IdlName with Lowercase
-  case object Protobuf extends IdlName with Lowercase
-  case object Mu       extends IdlName with Lowercase
-  case object OpenApi  extends IdlName with Lowercase
-  case object Scala    extends IdlName with Lowercase
+  case object Avro        extends IdlName with Lowercase
+  case object Protobuf    extends IdlName with Lowercase
+  case object Mu          extends IdlName with Lowercase
+  case object OpenAPIYaml extends IdlName with Lowercase
+  case object OpenAPIJson extends IdlName with Lowercase
+  case object Scala       extends IdlName with Lowercase
 }
