@@ -15,7 +15,7 @@ lazy val V = new {
   val circe: String            = "0.13.0"
   val kindProjector: String    = "0.11.0"
   val paradise: String         = "2.1.1"
-  val scala: String            = "2.13.1"
+  val scala: String            = "2.13.2"
   val skeumorph: String        = "0.0.22"
   val specs2: String           = "4.10.0"
   val enumeratum: String       = "1.6.1"
@@ -90,15 +90,19 @@ lazy val commonSettings = Seq(
   crossScalaVersions := Seq(scalaVersion.value),
   ThisBuild / scalacOptions -= "-Xplugin-require:macroparadise",
   libraryDependencies ++= Seq(
-    %%("cats-core", V.cats),
-    %%("cats-effect", V.catsEffect),
-    "org.typelevel" %% "mouse" % V.mouse,
-    %%("shapeless", V.shapeless),
-    %%("pureconfig", V.pureConfig),
     "com.github.pureconfig" %% "pureconfig-generic"     % V.pureConfig,
     "com.github.pureconfig" %% "pureconfig-cats-effect" % V.pureConfig,
     "com.github.pureconfig" %% "pureconfig-enumeratum"  % V.pureConfig,
     "io.higherkindness"     %% "skeuomorph"             % V.skeumorph,
+    "org.tpolecat"                    %% "doobie-refined" % V.doobie,
+    "com.beachape"                    %% "enumeratum" % V.enumeratum,
+    "com.beachape"                    %% "enumeratum-circe" % V.enumeratumCirce,
+    "org.flywaydb"                    % "flyway-core" % V.flyway,
+    "org.typelevel" %% "mouse" % V.mouse,
+    %%("cats-core", V.cats),
+    %%("cats-effect", V.catsEffect),
+    %%("shapeless", V.shapeless),
+    %%("pureconfig", V.pureConfig),
     %%("http4s-dsl", V.http4s),
     %%("http4s-blaze-server", V.http4s),
     %%("http4s-circe", V.http4s),
@@ -107,16 +111,12 @@ lazy val commonSettings = Seq(
     %%("doobie-core", V.doobie),
     %%("doobie-postgres", V.doobie),
     %%("doobie-hikari", V.doobie),
-    "org.tpolecat"                   %% "doobie-refined"        % V.doobie,
-    "com.beachape"                   %% "enumeratum"            % V.enumeratum,
-    "com.beachape"                   %% "enumeratum-circe"      % V.enumeratumCirce,
-    "org.flywaydb"                    % "flyway-core"           % V.flyway,
     %%("specs2-core", V.specs2)       % Test,
     %%("specs2-scalacheck", V.specs2) % Test,
     %%("doobie-specs2", V.doobie)     % Test,
-    "io.chrisdavenport"              %% "cats-scalacheck"       % V.catsScalacheck % Test,
-    "io.chrisdavenport"              %% "testcontainers-specs2" % "0.2.0-M2"       % Test,
-    "org.testcontainers"              % "postgresql"            % "1.14.3"         % Test
+    "io.chrisdavenport"               %% "cats-scalacheck" % V.catsScalacheck % Test,
+    "io.chrisdavenport"               %% "testcontainers-specs2" % "0.2.0-M2" % Test,
+    "org.testcontainers"              % "postgresql" % "1.14.3" % Test
   ),
   orgScriptTaskListSetting := List(
     (clean in Global).asRunnableItemFull,
@@ -152,7 +152,7 @@ lazy val commonSettings = Seq(
 lazy val serverSettings = Seq(
   parallelExecution in Test := false,
   libraryDependencies ++= Seq(
-    "org.slf4j"          % "slf4j-simple"       % V.slf4j,
+    "org.slf4j"         % "slf4j-simple"        % V.slf4j,
     "eu.timepit"        %% "refined"            % V.refined,
     "eu.timepit"        %% "refined-scalacheck" % V.refined,
     "io.chrisdavenport" %% "cats-scalacheck"    % V.catsScalacheck % Test
@@ -161,7 +161,7 @@ lazy val serverSettings = Seq(
 
 lazy val compilerPlugins = Seq(
   libraryDependencies ++= Seq(
-    compilerPlugin("org.typelevel"   % "kind-projector"     % V.kindProjector cross CrossVersion.full),
+    compilerPlugin("org.typelevel"  % "kind-projector"      % V.kindProjector cross CrossVersion.full),
     compilerPlugin("com.olegpy"     %% "better-monadic-for" % V.betterMonadicFor),
     compilerPlugin("org.augustjune" %% "context-applied"    % V.contextApplied)
   )
