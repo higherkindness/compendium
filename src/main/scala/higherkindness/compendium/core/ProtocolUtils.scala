@@ -89,33 +89,35 @@ object ProtocolUtils {
             case IdlName.Avro =>
               F.delay(parserAvro.parse(protocol.raw))
                 .map(_ => protocol)
-                .handleErrorWith(
-                  e =>
-                    F.raiseError(
-                      SchemaParseException("Avro schema provided not valid. " + e.getMessage)
-                  ))
+                .handleErrorWith(e =>
+                  F.raiseError(
+                    SchemaParseException("Avro schema provided not valid. " + e.getMessage)
+                  )
+                )
             case IdlName.Protobuf =>
               parserProtobuf(protocol.raw)
                 .map(_ => protocol)
-                .handleErrorWith(
-                  e =>
-                    F.raiseError(
-                      SchemaParseException("Protobuf schema provided not valid. " + e.getMessage)
-                  ))
+                .handleErrorWith(e =>
+                  F.raiseError(
+                    SchemaParseException("Protobuf schema provided not valid. " + e.getMessage)
+                  )
+                )
             case IdlName.OpenAPIYaml =>
               parserOpenAPIYaml(protocol.raw)
                 .map(_ => protocol)
                 .handleErrorWith(e =>
                   F.raiseError(
                     SchemaParseException("OpenAPI YAML schema provided not valid. " + e.getMessage)
-                ))
+                  )
+                )
             case IdlName.OpenAPIJson =>
               parserOpenAPIJson(protocol.raw)
                 .map(_ => protocol)
                 .handleErrorWith(e =>
                   F.raiseError(
                     SchemaParseException("OpenAPI JSON schema provided not valid. " + e.getMessage)
-                ))
+                  )
+                )
             case _ => F.raiseError(SchemaParseException(s"$schema type not implemented yet"))
           }
     }
