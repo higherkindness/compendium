@@ -22,9 +22,7 @@ import higherkindness.compendium.models.{IdlName, Protocol}
 import higherkindness.compendium.models.transformer.types.SchemaParseException
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
+import java.io.InputStream
 
 object ProtocolUtilsSpec extends Specification with ScalaCheck {
 
@@ -34,9 +32,10 @@ object ProtocolUtilsSpec extends Specification with ScalaCheck {
 
   "Protocol validator" >> {
     "[Avro] Given a raw protocol text returns the same protocol if it validates correctly" >> {
-      val path: Path         = Paths.get(getClass.getResource("/correct.avro").toURI)
-      val text: String       = Files.readString(path)
-      val protocol: Protocol = Protocol(text)
+      val stream: InputStream = getClass.getResourceAsStream("/correct.avro")
+      val text: String        = scala.io.Source.fromInputStream(stream).getLines.mkString
+      val protocol: Protocol  = Protocol(text)
+      stream.close()
 
       validator.validateProtocol(protocol, IdlName.Avro).unsafeRunSync === protocol
     }
@@ -49,9 +48,10 @@ object ProtocolUtilsSpec extends Specification with ScalaCheck {
     }
 
     "[Avro] Given multiple protocols validates them sequentially" >> {
-      val path: Path         = Paths.get(getClass.getResource("/correct.avro").toURI)
-      val text: String       = Files.readString(path)
-      val protocol: Protocol = Protocol(text)
+      val stream: InputStream = getClass.getResourceAsStream("/correct.avro")
+      val text: String        = scala.io.Source.fromInputStream(stream).getLines.mkString
+      val protocol: Protocol  = Protocol(text)
+      stream.close()
 
       val validation = validator.validateProtocol(protocol, IdlName.Avro) *> validator
         .validateProtocol(protocol, IdlName.Avro)
@@ -60,79 +60,97 @@ object ProtocolUtilsSpec extends Specification with ScalaCheck {
     }
 
     "[Proto] Given a raw protocol text returns the same protocol if it validates correctly" >> {
-      val path: Path         = Paths.get(getClass.getResource("/correct.proto").toURI)
-      val text: String       = Files.readString(path)
-      val protocol: Protocol = Protocol(text)
+      val stream: InputStream = getClass.getResourceAsStream("/correct.proto")
+      val text: String        = scala.io.Source.fromInputStream(stream).getLines.mkString
+      val protocol: Protocol  = Protocol(text)
+      stream.close()
+
       validator.validateProtocol(protocol, IdlName.Protobuf).unsafeRunSync === protocol
     }
 
     "[Proto] Given a raw protocol text raises an error if idl specified is incorrect" >> {
-      val path: Path         = Paths.get(getClass.getResource("/correct.avro").toURI)
-      val text: String       = Files.readString(path)
-      val protocol: Protocol = Protocol(text)
+      val stream: InputStream = getClass.getResourceAsStream("/correct.avro")
+      val text: String        = scala.io.Source.fromInputStream(stream).getLines.mkString
+      val protocol: Protocol  = Protocol(text)
+      stream.close()
+
       validator
         .validateProtocol(protocol, IdlName.Protobuf)
         .unsafeRunSync must throwA[SchemaParseException]
     }
 
     "[Proto] Given a raw protocol text raises an error if the protocol is incorrect" >> {
-      val path: Path         = Paths.get(getClass.getResource("/wrong.proto").toURI)
-      val text: String       = Files.readString(path)
-      val protocol: Protocol = Protocol(text)
+      val stream: InputStream = getClass.getResourceAsStream("/wrong.proto")
+      val text: String        = scala.io.Source.fromInputStream(stream).getLines.mkString
+      val protocol: Protocol  = Protocol(text)
+      stream.close()
+
       validator
         .validateProtocol(protocol, IdlName.Protobuf)
         .unsafeRunSync must throwA[SchemaParseException]
     }
 
     "[OpenAPI - Yaml] Given a raw protocol text returns the same protocol if it validates correctly" >> {
-      val path: Path         = Paths.get(getClass.getResource("/correctYamlOpenAPI.yaml").toURI)
-      val text: String       = Files.readString(path)
-      val protocol: Protocol = Protocol(text)
+      val stream: InputStream = getClass.getResourceAsStream("/correctYamlOpenAPI.yaml")
+      val text: String        = scala.io.Source.fromInputStream(stream).getLines.mkString("\n")
+      val protocol: Protocol  = Protocol(text)
+      stream.close()
+
       validator
         .validateProtocol(protocol, IdlName.OpenAPIYaml)
         .unsafeRunSync === protocol
     }
 
     "[OpenAPI - Yaml] Given a raw protocol text raises an error if the protocol is incorrect" >> {
-      val path: Path         = Paths.get(getClass.getResource("/wrongYamlOpenAPI.yaml").toURI)
-      val text: String       = Files.readString(path)
-      val protocol: Protocol = Protocol(text)
+      val stream: InputStream = getClass.getResourceAsStream("/wrongYamlOpenAPI.yaml")
+      val text: String        = scala.io.Source.fromInputStream(stream).getLines.mkString("\n")
+      val protocol: Protocol  = Protocol(text)
+      stream.close()
+
       validator
         .validateProtocol(protocol, IdlName.OpenAPIYaml)
         .unsafeRunSync must throwA[SchemaParseException]
     }
 
     "[OpenAPI - Yaml] Given a raw protocol text raises an error if idl specified is incorrect" >> {
-      val path: Path         = Paths.get(getClass.getResource("/correctYamlOpenAPI.yaml").toURI)
-      val text: String       = Files.readString(path)
-      val protocol: Protocol = Protocol(text)
+      val stream: InputStream = getClass.getResourceAsStream("/correctYamlOpenAPI.yaml")
+      val text: String        = scala.io.Source.fromInputStream(stream).getLines.mkString("\n")
+      val protocol: Protocol  = Protocol(text)
+      stream.close()
+
       validator
         .validateProtocol(protocol, IdlName.Protobuf)
         .unsafeRunSync must throwA[SchemaParseException]
     }
 
     "[OpenAPI - JSON] Given a raw protocol text returns the same protocol if it validates correctly" >> {
-      val path: Path         = Paths.get(getClass.getResource("/correctJSONOpenAPI.json").toURI)
-      val text: String       = Files.readString(path)
-      val protocol: Protocol = Protocol(text)
+      val stream: InputStream = getClass.getResourceAsStream("/correctJSONOpenAPI.json")
+      val text: String        = scala.io.Source.fromInputStream(stream).getLines.mkString("\n")
+      val protocol: Protocol  = Protocol(text)
+      stream.close()
+
       validator
         .validateProtocol(protocol, IdlName.OpenAPIJson)
         .unsafeRunSync === protocol
     }
 
     "[OpenAPI - JSON] Given a raw protocol text raises an error if the protocol is incorrect" >> {
-      val path: Path         = Paths.get(getClass.getResource("/wrongJSONOpenAPI.json").toURI)
-      val text: String       = Files.readString(path)
-      val protocol: Protocol = Protocol(text)
+      val stream: InputStream = getClass.getResourceAsStream("/wrongJSONOpenAPI.json")
+      val text: String        = scala.io.Source.fromInputStream(stream).getLines.mkString("\n")
+      val protocol: Protocol  = Protocol(text)
+      stream.close()
+
       validator
         .validateProtocol(protocol, IdlName.OpenAPIJson)
         .unsafeRunSync must throwA[SchemaParseException]
     }
 
     "[OpenAPI - JSON] Given a raw protocol text raises an error if idl specified is incorrect" >> {
-      val path: Path         = Paths.get(getClass.getResource("/correctYamlOpenAPI.yaml").toURI)
-      val text: String       = Files.readString(path)
-      val protocol: Protocol = Protocol(text)
+      val stream: InputStream = getClass.getResourceAsStream("/correctYamlOpenAPI.yaml")
+      val text: String        = scala.io.Source.fromInputStream(stream).getLines.mkString("\n")
+      val protocol: Protocol  = Protocol(text)
+      stream.close()
+
       validator
         .validateProtocol(protocol, IdlName.Avro)
         .unsafeRunSync must throwA[SchemaParseException]
