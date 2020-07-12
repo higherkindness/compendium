@@ -8,7 +8,7 @@ import sbtorgpolicies.templates.badges._
 lazy val V = new {
   val betterMonadicFor: String = "0.3.1"
   val cats: String             = "2.1.1"
-  val catsEffect: String       = "2.1.3"
+  val catsEffect: String       = "2.1.4"
   val catsScalacheck: String   = "0.3.0"
   val contextApplied: String   = "0.1.4"
   val mouse: String            = "0.25"
