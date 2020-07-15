@@ -27,7 +27,7 @@ object IdlName extends Enum[IdlName] with CirceEnum[IdlName] {
   case object Avro        extends IdlName with Lowercase
   case object Protobuf    extends IdlName with Lowercase
   case object Mu          extends IdlName with Lowercase
-  case object OpenAPIYaml extends IdlName with Lowercase
+  case object OpenAPI     extends IdlName with Lowercase
   case object OpenAPIJson extends IdlName with Lowercase
   case object Scala       extends IdlName with Lowercase
 }
