@@ -1,7 +1,6 @@
 ALTER TYPE idl ADD VALUE 'openapiyaml';
-ALTER TYPE idl ADD VALUE 'openapijson';
 
-UPDATE metaprotocols SET idl_name = 'openapiyaml' WHERE idl_name = 'openapi'
+UPDATE metaprotocols SET idl_name = 'openapiyaml' WHERE idl_name = 'openapi';
 
 ALTER TYPE idl RENAME TO idl_old;
 

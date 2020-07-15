@@ -34,6 +34,7 @@ object Migrations {
     F.delay {
       Flyway
         .configure()
+        .mixed(true)
         .dataSource(conf.jdbcUrl, conf.username, conf.password)
         .locations(migrations: _*)
         .load()
