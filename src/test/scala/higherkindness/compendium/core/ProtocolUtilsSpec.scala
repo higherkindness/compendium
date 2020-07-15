@@ -97,7 +97,7 @@ object ProtocolUtilsSpec extends Specification with ScalaCheck {
       stream.close()
 
       validator
-        .validateProtocol(protocol, IdlName.OpenAPIYaml)
+        .validateProtocol(protocol, IdlName.OpenAPI)
         .unsafeRunSync === protocol
     }
 
@@ -108,7 +108,7 @@ object ProtocolUtilsSpec extends Specification with ScalaCheck {
       stream.close()
 
       validator
-        .validateProtocol(protocol, IdlName.OpenAPIYaml)
+        .validateProtocol(protocol, IdlName.OpenAPI)
         .unsafeRunSync must throwA[SchemaParseException]
     }
 

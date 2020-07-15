@@ -102,7 +102,7 @@ object ProtocolUtils {
                     SchemaParseException("Protobuf schema provided not valid. " + e.getMessage)
                   )
                 )
-            case IdlName.OpenAPIYaml =>
+            case IdlName.OpenAPI =>
               parserOpenAPIYaml(protocol.raw)
                 .map(_ => protocol)
                 .handleErrorWith(e =>
