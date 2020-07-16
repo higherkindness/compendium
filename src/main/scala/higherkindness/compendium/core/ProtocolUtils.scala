@@ -23,6 +23,9 @@ import cats.implicits._
 import higherkindness.compendium.models.{IdlName, Protocol}
 import higherkindness.compendium.models.transformer.types.SchemaParseException
 import higherkindness.droste.data.Mu
+import higherkindness.skeuomorph.openapi.{JsonSchemaF, ParseOpenApi}
+import higherkindness.skeuomorph.openapi.ParseOpenApi.{JsonSource, YamlSource}
+import higherkindness.skeuomorph.openapi.schema.OpenApi
 import higherkindness.skeuomorph.protobuf.{ProtobufF, Protocol => ProtobufProtocol}
 import higherkindness.skeuomorph.protobuf.ParseProto._
 import org.apache.avro.Schema
@@ -37,9 +40,9 @@ object ProtocolUtils {
 
   private def parserAvro: Schema.Parser = new Schema.Parser()
 
-  private def parserProtobuf[F[_]: Sync](raw: String): F[ProtobufProtocol[Mu[ProtobufF]]] = {
+  private def parserProtobuf[F[_]: Sync](raw: String): F[ProtobufProtocol[Mu[ProtobufF]]] =
     for {
-      tmpFile <- writeTempFile(raw)
+      tmpFile <- writeTempFile(raw, "protoTempFile", ".proto")
       p <- parseProto[F, Mu[ProtobufF]].parse(
         ProtoSource(
           tmpFile.file.getName,
@@ -47,15 +50,32 @@ object ProtocolUtils {
         )
       )
     } yield p
-  }
 
-  private def writeTempFile[F[_]: Sync](msg: String): F[FilePrintWriter] =
+  private def parserOpenAPIYaml[F[_]: Sync](raw: String): F[OpenApi[Mu[JsonSchemaF]]] =
+    for {
+      tmpFile <- writeTempFile(raw, "OpenAPITempFile", ".yaml")
+      p       <- ParseOpenApi.parseYamlOpenApi[F, Mu[JsonSchemaF]].parse(YamlSource(tmpFile.file))
+    } yield p
+
+  private def parserOpenAPIJson[F[_]: Sync](raw: String): F[OpenApi[Mu[JsonSchemaF]]] =
+    for {
+      tmpFile <- writeTempFile(raw, "OpenAPITempFile", ".json")
+      p       <- ParseOpenApi.parseJsonOpenApi[F, Mu[JsonSchemaF]].parse(JsonSource(tmpFile.file))
+    } yield p
+
+  private def writeTempFile[F[_]: Sync](
+      msg: String,
+      prefix: String,
+      suffix: String
+  ): F[FilePrintWriter] =
     Resource
       .make(F.delay {
-        val file = File.createTempFile("protoTempFile", ".proto")
+        val file = File.createTempFile(prefix, suffix)
         file.deleteOnExit()
         FilePrintWriter(file, new PrintWriter(file))
-      }) { fpw: FilePrintWriter => F.delay(fpw.pw.close()) }
+      }) { fpw: FilePrintWriter =>
+        F.delay(fpw.pw.close())
+      }
       .use((fpw: FilePrintWriter) => F.delay(fpw.pw.write(msg)).as(fpw))
 
   def impl[F[_]: Sync]: ProtocolUtils[F] =
@@ -80,6 +100,22 @@ object ProtocolUtils {
                 .handleErrorWith(e =>
                   F.raiseError(
                     SchemaParseException("Protobuf schema provided not valid. " + e.getMessage)
+                  )
+                )
+            case IdlName.OpenAPI =>
+              parserOpenAPIYaml(protocol.raw)
+                .map(_ => protocol)
+                .handleErrorWith(e =>
+                  F.raiseError(
+                    SchemaParseException("OpenAPI YAML schema provided not valid. " + e.getMessage)
+                  )
+                )
+            case IdlName.OpenAPIJson =>
+              parserOpenAPIJson(protocol.raw)
+                .map(_ => protocol)
+                .handleErrorWith(e =>
+                  F.raiseError(
+                    SchemaParseException("OpenAPI JSON schema provided not valid. " + e.getMessage)
                   )
                 )
             case _ => F.raiseError(SchemaParseException(s"$schema type not implemented yet"))
