@@ -22,14 +22,17 @@ import higherkindness.compendium.models.config._
 import org.http4s._
 import org.http4s.implicits._
 import org.http4s.server.blaze.BlazeServerBuilder
+import scala.concurrent.ExecutionContext
 
 object CompendiumServerStream {
+
+  val ec = ExecutionContext.global
 
   def serverStream[F[_]: ConcurrentEffect: Timer](
       httpConf: HttpConfig,
       service: HttpRoutes[F]
   ): Stream[F, ExitCode] = {
-    BlazeServerBuilder[F]
+    BlazeServerBuilder[F](ec)
       .bindHttp(httpConf.port, httpConf.host)
       .withHttpApp(service.orNotFound)
       .serve
