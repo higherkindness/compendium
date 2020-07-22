@@ -22,11 +22,10 @@ import higherkindness.compendium.models.config._
 import org.http4s._
 import org.http4s.implicits._
 import org.http4s.server.blaze.BlazeServerBuilder
-import scala.concurrent.ExecutionContext
 
 object CompendiumServerStream {
 
-  val ec = ExecutionContext.global
+  private val ec = scala.concurrent.ExecutionContext.global
 
   def serverStream[F[_]: ConcurrentEffect: Timer](
       httpConf: HttpConfig,
