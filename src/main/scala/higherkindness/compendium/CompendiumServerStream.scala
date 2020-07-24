@@ -25,11 +25,13 @@ import org.http4s.server.blaze.BlazeServerBuilder
 
 object CompendiumServerStream {
 
+  private val ec = scala.concurrent.ExecutionContext.global
+
   def serverStream[F[_]: ConcurrentEffect: Timer](
       httpConf: HttpConfig,
       service: HttpRoutes[F]
   ): Stream[F, ExitCode] = {
-    BlazeServerBuilder[F]
+    BlazeServerBuilder[F](ec)
       .bindHttp(httpConf.port, httpConf.host)
       .withHttpApp(service.orNotFound)
       .serve

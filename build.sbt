@@ -8,23 +8,23 @@ import sbtorgpolicies.templates.badges._
 lazy val V = new {
   val betterMonadicFor: String = "0.3.1"
   val cats: String             = "2.1.1"
-  val catsEffect: String       = "2.1.3"
+  val catsEffect: String       = "2.1.4"
   val catsScalacheck: String   = "0.3.0"
   val contextApplied: String   = "0.1.4"
   val mouse: String            = "0.25"
   val circe: String            = "0.13.0"
   val kindProjector: String    = "0.11.0"
   val paradise: String         = "2.1.1"
-  val scala: String            = "2.13.1"
+  val scala: String            = "2.13.2"
   val skeumorph: String        = "0.0.24"
   val specs2: String           = "4.10.0"
   val enumeratum: String       = "1.6.1"
   val enumeratumCirce: String  = "1.6.1"
-  val http4s: String           = "0.21.3"
+  val http4s: String           = "0.21.6"
   val shapeless: String        = "2.3.3"
-  val pureConfig: String       = "0.12.3"
+  val pureConfig: String       = "0.13.0"
   val doobie: String           = "0.9.0"
-  val flyway: String           = "6.4.4"
+  val flyway: String           = "6.5.1"
   val refined: String          = "0.9.14"
   val slf4j: String            = "1.7.30"
 }
@@ -99,6 +99,15 @@ lazy val commonSettings = Seq(
     "com.github.pureconfig" %% "pureconfig-cats-effect" % V.pureConfig,
     "com.github.pureconfig" %% "pureconfig-enumeratum"  % V.pureConfig,
     "io.higherkindness"     %% "skeuomorph"             % V.skeumorph,
+    "org.tpolecat"          %% "doobie-refined"         % V.doobie,
+    "com.beachape"          %% "enumeratum"             % V.enumeratum,
+    "com.beachape"          %% "enumeratum-circe"       % V.enumeratumCirce,
+    "org.flywaydb"           % "flyway-core"            % V.flyway,
+    "org.typelevel"         %% "mouse"                  % V.mouse,
+    %%("cats-core", V.cats),
+    %%("cats-effect", V.catsEffect),
+    %%("shapeless", V.shapeless),
+    %%("pureconfig", V.pureConfig),
     %%("http4s-dsl", V.http4s),
     %%("http4s-blaze-server", V.http4s),
     %%("http4s-circe", V.http4s),
@@ -107,10 +116,6 @@ lazy val commonSettings = Seq(
     %%("doobie-core", V.doobie),
     %%("doobie-postgres", V.doobie),
     %%("doobie-hikari", V.doobie),
-    "org.tpolecat"                   %% "doobie-refined"        % V.doobie,
-    "com.beachape"                   %% "enumeratum"            % V.enumeratum,
-    "com.beachape"                   %% "enumeratum-circe"      % V.enumeratumCirce,
-    "org.flywaydb"                    % "flyway-core"           % V.flyway,
     %%("specs2-core", V.specs2)       % Test,
     %%("specs2-scalacheck", V.specs2) % Test,
     %%("doobie-specs2", V.doobie)     % Test,
