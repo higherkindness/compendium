@@ -16,7 +16,7 @@ lazy val V = new {
   val kindProjector: String    = "0.11.0"
   val paradise: String         = "2.1.1"
   val scala: String            = "2.13.2"
-  val skeumorph: String        = "0.0.22"
+  val skeumorph: String        = "0.0.24"
   val specs2: String           = "4.10.0"
   val enumeratum: String       = "1.6.1"
   val enumeratumCirce: String  = "1.6.1"
@@ -90,6 +90,11 @@ lazy val commonSettings = Seq(
   crossScalaVersions := Seq(scalaVersion.value),
   ThisBuild / scalacOptions -= "-Xplugin-require:macroparadise",
   libraryDependencies ++= Seq(
+    %%("cats-core", V.cats),
+    %%("cats-effect", V.catsEffect),
+    "org.typelevel" %% "mouse" % V.mouse,
+    %%("shapeless", V.shapeless),
+    %%("pureconfig", V.pureConfig),
     "com.github.pureconfig" %% "pureconfig-generic"     % V.pureConfig,
     "com.github.pureconfig" %% "pureconfig-cats-effect" % V.pureConfig,
     "com.github.pureconfig" %% "pureconfig-enumeratum"  % V.pureConfig,
