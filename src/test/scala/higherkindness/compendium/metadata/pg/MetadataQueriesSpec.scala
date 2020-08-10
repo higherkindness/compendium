@@ -21,19 +21,22 @@ import higherkindness.compendium.core.refinements.ProtocolId
 import higherkindness.compendium.metadata.MigrationsMode.Metadata
 import higherkindness.compendium.metadata.PGHelper
 import org.specs2.specification.Scope
+import higherkindness.compendium.models.ProtocolVersion
 
 class MetadataQueriesSpec extends PGHelper(Metadata) with IOChecker {
 
   "MetadataQueries" should {
     "match db model" in new context {
       check(Queries.exists(protocolId))
-      check(Queries.store(protocolId, idlName))
+      check(Queries.store(protocolId, protocolVersion, idlName))
+      check(Queries.checkVersion)
     }
   }
 
   trait context extends Scope {
     val protocolId: ProtocolId = ProtocolId("my-test.protocol.id")
     val idlName: String        = "Protobuf"
+    val protocolVersion        = ProtocolVersion.initial
   }
 
 }

@@ -16,11 +16,11 @@
 
 package higherkindness.compendium.core.doobie
 
-import cats.instances.all._
+import cats.implicits._
 import doobie.util.{Get, Put}
 import doobie.util.meta.Meta
-import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
-import higherkindness.compendium.models.{IdlName, Protocol}
+import higherkindness.compendium.core.refinements.ProtocolId
+import higherkindness.compendium.models._
 
 object implicits {
 
@@ -33,6 +33,7 @@ object implicits {
 
   implicit val IdlNamesMeta: Meta[IdlName] = Meta[String].timap(IdlName.withName)(_.entryName)
 
-  implicit val protocolVersionPut: Put[ProtocolVersion] = Put[Int].contramap(_.value)
-  implicit val protocolVersionGet: Get[ProtocolVersion] = Get[Int].temap(ProtocolVersion.from)
+  implicit val protocolVersionPut: Put[ProtocolVersion] = Put[String].contramap(_.show)
+  implicit val protocolVersionGet: Get[ProtocolVersion] =
+    Get[String].temap(ProtocolVersion.fromString(_).leftMap(_.msg))
 }

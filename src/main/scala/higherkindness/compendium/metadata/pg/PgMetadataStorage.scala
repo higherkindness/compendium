@@ -20,29 +20,37 @@ import cats.effect.Async
 import doobie.implicits._
 import doobie.util.transactor.Transactor
 import higherkindness.compendium.core.doobie.implicits._
-import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
+import higherkindness.compendium.core.refinements.ProtocolId
+import higherkindness.compendium.models.ProtocolVersion
 import higherkindness.compendium.metadata.MetadataStorage
-import higherkindness.compendium.models.{IdlName, ProtocolMetadata, ProtocolNotFound}
+import higherkindness.compendium.models._
 
 object PgMetadataStorage {
 
   def apply[F[_]: Async](xa: Transactor[F]): MetadataStorage[F] =
     new MetadataStorage[F] {
 
-      override def store(id: ProtocolId, idlName: IdlName): F[ProtocolVersion] =
+      def store(
+          id: ProtocolId,
+          protocolVersion: ProtocolVersion,
+          idlName: IdlName
+      ): F[ProtocolVersion] =
         Queries
-          .store(id, idlName.entryName)
+          .store(id, protocolVersion, idlName.entryName)
           .withUniqueGeneratedKeys[ProtocolVersion]("version")
           .transact(xa)
 
-      override def retrieve(id: ProtocolId): F[ProtocolMetadata] =
+      def retrieve(id: ProtocolId): F[ProtocolMetadata] =
         F.handleErrorWith(Queries.retrieve(id).unique.transact(xa)) { e =>
           F.raiseError(ProtocolNotFound(e.getMessage))
         }
 
-      override def exists(id: ProtocolId): F[Boolean] =
+      def exists(id: ProtocolId): F[Boolean] =
         Queries.exists(id).unique.transact(xa)
 
-      override def ping: F[Boolean] = Queries.checkConn.unique.transact(xa)
+      def ping: F[Boolean] = Queries.checkConn.unique.transact(xa)
+
+      def versionOf(id: ProtocolId): F[Option[ProtocolVersion]] =
+        Queries.checkVersion.option(id).transact(xa)
     }
 }

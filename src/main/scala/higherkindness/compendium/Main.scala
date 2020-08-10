@@ -81,9 +81,7 @@ object CompendiumStreamApp {
       metadataConf: CompendiumMetadataConfig
   ): Stream[F, MetadataStorage[F]] =
     Stream.eval(
-      Migrations.metadataLocation.flatMap(l =>
-        Migrations.makeMigrations(metadataConf.storage, l :: Nil)
-      )
+      Migrations.metadataLocation.flatMap(l => Migrations.makeMigrations(metadataConf.storage, l :: Nil))
     ) >>
       Stream.resource(createTransactor(metadataConf.storage).map(PgMetadataStorage[F](_)))
 

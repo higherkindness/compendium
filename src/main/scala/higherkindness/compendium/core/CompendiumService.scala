@@ -18,7 +18,7 @@ package higherkindness.compendium.core
 
 import cats.effect.Sync
 import cats.implicits._
-import higherkindness.compendium.core.refinements._
+import higherkindness.compendium.core.refinements.ProtocolId
 import higherkindness.compendium.metadata.MetadataStorage
 import higherkindness.compendium.models._
 import higherkindness.compendium.storage.Storage
@@ -47,8 +47,10 @@ object CompendiumService {
           idlName: IdlName
       ): F[ProtocolVersion] =
         for {
-          _       <- ProtocolUtils[F].validateProtocol(protocol, idlName)
-          version <- MetadataStorage[F].store(id, idlName)
+          _               <- ProtocolUtils[F].validateProtocol(protocol, idlName)
+          existingVersion <- MetadataStorage[F].versionOf(id)
+          newVersion = existingVersion.getOrElse(ProtocolVersion.initial)
+          version <- MetadataStorage[F].store(id, newVersion, idlName)
           _       <- Storage[F].store(id, version, protocol)
         } yield version
 

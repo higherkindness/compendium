@@ -18,20 +18,21 @@ package higherkindness.compendium.storage.pg
 
 import cats.effect.IO
 import cats.implicits._
-import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
+import higherkindness.compendium.core.refinements.ProtocolId
 import higherkindness.compendium.metadata.MigrationsMode.Data
 import higherkindness.compendium.metadata.PGHelper
-import higherkindness.compendium.models.{FullProtocol, IdlName, Protocol, ProtocolMetadata}
+import higherkindness.compendium.models._
 
 class PgStorageSpec extends PGHelper(Data) {
 
-  private lazy val pgStorage = PgStorage[IO](transactor)
+  private lazy val pgStorage  = PgStorage[IO](transactor)
+  private val protocolVersion = ProtocolVersion.initial
 
   "Postgres Storage" should {
 
     "insert protocol correctly" in {
       val id        = ProtocolId("p1")
-      val version   = ProtocolVersion(1)
+      val version   = protocolVersion
       val metadata  = ProtocolMetadata(id, IdlName.Avro, version)
       val proto     = Protocol("the new protocol content")
       val fullProto = FullProtocol(metadata, proto)
@@ -44,8 +45,8 @@ class PgStorageSpec extends PGHelper(Data) {
 
     "update protocol correctly" in {
       val id        = ProtocolId("proto1")
-      val version1  = ProtocolVersion(1)
-      val version2  = ProtocolVersion(2)
+      val version1  = protocolVersion
+      val version2  = protocolVersion.incModel
       val proto1    = Protocol("The protocol one content")
       val proto2    = Protocol("The protocol two content")
       val metadata  = ProtocolMetadata(id, IdlName.Mu, version2)
@@ -66,7 +67,7 @@ class PgStorageSpec extends PGHelper(Data) {
 
     "return true when the protocol exists" in {
       val id      = ProtocolId("pId3")
-      val version = ProtocolVersion(1)
+      val version = protocolVersion
       val proto   = Protocol("Another protocol")
 
       val result: IO[Boolean] = pgStorage.store(id, version, proto) >> pgStorage.exists(id)

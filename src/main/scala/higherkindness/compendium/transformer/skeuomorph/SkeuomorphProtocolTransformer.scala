@@ -43,9 +43,7 @@ object SkeuomorphProtocolTransformer {
         protobuf.ParseProto
           .parseProto[F, Mu[protobuf.ProtobufF]]
           .parse(source)
-          .map(protobuf =>
-            mu.Protocol.fromProtobufProto(mu.CompressionType.Identity, true)(protobuf)
-          )
+          .map(protobuf => mu.Protocol.fromProtobufProto(mu.CompressionType.Identity, true)(protobuf))
           .flatMap(p =>
             Sync[F]
               .fromEither(mu.codegen.protocol(p, streamCtor).leftMap(TransformError).map(_.syntax))

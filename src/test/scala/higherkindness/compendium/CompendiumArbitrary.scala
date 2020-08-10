@@ -17,8 +17,8 @@
 package higherkindness.compendium
 
 import cats.syntax.apply._
-import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
-import higherkindness.compendium.models.{IdlName, Protocol, ProtocolMetadata}
+import higherkindness.compendium.core.refinements.ProtocolId
+import higherkindness.compendium.models._
 import org.scalacheck._
 import org.scalacheck.cats.implicits._
 
@@ -44,7 +44,7 @@ trait CompendiumArbitrary {
     (
       protocolIdArbitrary.arbitrary,
       idlNamesArbitrary.arbitrary,
-      Gen.choose(1, 99999).map(ProtocolVersion.unsafeFrom)
+      protocolVersionArb.arbitrary
     ).mapN(ProtocolMetadata.apply)
   }
 
@@ -54,6 +54,33 @@ trait CompendiumArbitrary {
       id2 <- Gen.alphaStr.suchThat(id => !id.equalsIgnoreCase(id1))
     } yield DifferentIdentifiers(id1, id2)
   }
+
+  private def genVersion[A](f: Int => A) = Gen.posNum[Int].map(f(_))
+
+  implicit val additionVersionArb: Arbitrary[AdditionVersion] = Arbitrary(
+    genVersion(AdditionVersion(_))
+  )
+
+  implicit val revisionVersionArb: Arbitrary[RevisionVersion] = Arbitrary(
+    genVersion(RevisionVersion(_))
+  )
+
+  implicit val modelVersionArb: Arbitrary[ModelVersion] = Arbitrary(
+    genVersion(ModelVersion(_))
+  )
+
+  implicit val protocolVersionArb: Arbitrary[ProtocolVersion] = Arbitrary(
+    (modelVersionArb.arbitrary, revisionVersionArb.arbitrary, additionVersionArb.arbitrary)
+      .mapN(ProtocolVersion.apply)
+  )
+
+  implicit val rawProtocolVersionArb: Arbitrary[String] = Arbitrary(
+    (Gen.posNum[Int], Gen.posNum[Int], Gen.posNum[Int]).mapN { case (f, m, t) => s"$f.$m.$t" }
+  )
+
+  implicit val invalidProtocolVersion: Arbitrary[String] = Arbitrary(
+    (Gen.alphaChar, Gen.alphaChar, Gen.alphaChar).mapN { case (f, m, t) => s"$f.$m.$t" }
+  )
 
 }
 

@@ -24,8 +24,8 @@ import eu.timepit.refined.boolean.{And, AnyOf}
 import eu.timepit.refined.char.LetterOrDigit
 import eu.timepit.refined.collection.{Forall, MaxSize}
 import eu.timepit.refined.generic.Equal
-import eu.timepit.refined.numeric.Positive
-import higherkindness.compendium.models.{ProtocolIdError, ProtocolVersionError}
+import eu.timepit.refined.string.MatchesRegex
+import higherkindness.compendium.models._
 import shapeless.{::, HNil}
 
 object refinements {
@@ -37,19 +37,20 @@ object refinements {
   type ProtocolIdConstraints = And[MaxProtocolIdSize, ValidProtocolIdChars]
 
   type ProtocolId = String Refined ProtocolIdConstraints
-
   object ProtocolId extends RefinedTypeOps[ProtocolId, String] {
     def parseOrRaise[F[_]: Sync](id: String): F[ProtocolId] =
       F.fromEither(ProtocolId.from(id).leftMap(ProtocolIdError))
   }
 
-  type ProtocolVersion = Int Refined Positive
+  /** An String that matches with format xx.yy.zz, xx.yy, xx */
+  type ProtocolVersionRefined =
+    String Refined MatchesRegex[W.`"""^(\\d+\\.)?(\\d+\\.)?(\\*|\\d+)$"""`.T]
+  object ProtocolVersionRefined extends RefinedTypeOps[ProtocolVersionRefined, String] {
 
-  object ProtocolVersion extends RefinedTypeOps[ProtocolVersion, Int] {
     def parseOrRaise[F[_]: Sync](version: String): F[ProtocolVersion] =
       for {
-        number       <- F.delay(version.toInt)
-        protoVersion <- F.fromEither(ProtocolVersion.from(number).leftMap(ProtocolVersionError))
-      } yield protoVersion
+        versionRefined  <- F.fromEither(ProtocolVersionRefined.from(version).leftMap(ProtocolVersionError))
+        protocolVersion <- F.fromEither(ProtocolVersion.fromString(versionRefined.value))
+      } yield protocolVersion
   }
 }

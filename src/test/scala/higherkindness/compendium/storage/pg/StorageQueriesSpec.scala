@@ -17,10 +17,10 @@
 package higherkindness.compendium.storage.pg
 
 import doobie.specs2._
-import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
+import higherkindness.compendium.core.refinements.ProtocolId
 import higherkindness.compendium.metadata.MigrationsMode.Data
 import higherkindness.compendium.metadata.PGHelper
-import higherkindness.compendium.models.Protocol
+import higherkindness.compendium.models._
 import org.specs2.specification.Scope
 
 class StorageQueriesSpec extends PGHelper(Data) with IOChecker {
@@ -35,7 +35,7 @@ class StorageQueriesSpec extends PGHelper(Data) with IOChecker {
 
   trait context extends Scope {
     val protocolId = ProtocolId("my.test.protocol.id")
-    val version    = ProtocolVersion(1)
+    val version    = ProtocolVersion.initial
     val protocol   = Protocol("Raw protocol content")
   }
 

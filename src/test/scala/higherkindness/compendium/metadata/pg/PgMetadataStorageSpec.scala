@@ -18,14 +18,15 @@ package higherkindness.compendium.metadata.pg
 
 import cats.effect.IO
 import cats.implicits._
-import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
+import higherkindness.compendium.core.refinements.ProtocolId
 import higherkindness.compendium.metadata.MigrationsMode.Metadata
 import higherkindness.compendium.metadata.PGHelper
-import higherkindness.compendium.models.{IdlName, ProtocolMetadata}
+import higherkindness.compendium.models._
 
 class PgMetadataStorageSpec extends PGHelper(Metadata) {
 
-  private lazy val pg = PgMetadataStorage[IO](transactor)
+  private lazy val pg         = PgMetadataStorage[IO](transactor)
+  private val protocolVersion = ProtocolVersion.initial
 
   "Postgres Service" should {
     "insert protocol correctly" in {
@@ -33,9 +34,9 @@ class PgMetadataStorageSpec extends PGHelper(Metadata) {
       val idlName: IdlName = IdlName.Avro
 
       val result: IO[ProtocolMetadata] =
-        pg.store(id, idlName) >> pg.retrieve(id)
+        pg.store(id, protocolVersion, idlName) >> pg.retrieve(id)
 
-      val expected = ProtocolMetadata(id, idlName, ProtocolVersion(1))
+      val expected = ProtocolMetadata(id, idlName, protocolVersion)
 
       result.unsafeRunSync must_=== expected
 
@@ -46,10 +47,10 @@ class PgMetadataStorageSpec extends PGHelper(Metadata) {
       val idlName: IdlName = IdlName.Avro
 
       val result: IO[ProtocolMetadata] =
-        pg.store(id, idlName) >> pg.store(id, idlName) >> pg
+        pg.store(id, protocolVersion, idlName) >> pg.store(id, protocolVersion, idlName) >> pg
           .retrieve(id)
 
-      val expected = ProtocolMetadata(id, idlName, ProtocolVersion(2))
+      val expected = ProtocolMetadata(id, idlName, protocolVersion.incRevision)
 
       result.unsafeRunSync must_=== expected
     }
@@ -65,7 +66,7 @@ class PgMetadataStorageSpec extends PGHelper(Metadata) {
       val idlName: IdlName = IdlName.Avro
 
       val result: IO[Boolean] =
-        pg.store(id, idlName) >> pg.exists(id)
+        pg.store(id, protocolVersion, idlName) >> pg.exists(id)
 
       result.unsafeRunSync must_=== true
     }

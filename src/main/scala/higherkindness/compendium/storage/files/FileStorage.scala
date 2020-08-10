@@ -20,7 +20,7 @@ import java.io.{File, FilenameFilter, PrintWriter}
 
 import cats.effect.Sync
 import cats.implicits._
-import higherkindness.compendium.core.refinements.{ProtocolId, ProtocolVersion}
+import higherkindness.compendium.core.refinements.ProtocolId
 import higherkindness.compendium.models.config.FileStorageConfig
 import higherkindness.compendium.models._
 import higherkindness.compendium.storage.Storage
@@ -32,11 +32,11 @@ object FileStorage {
    *
    * - protocol identifier should comply with
    * [[higherkindness.compendium.core.refinements.ProtocolId]] predicates
-   * - version should be a positive zero-leftpadded five digits version number like 00001
+   * - version should be a version like format: xx.yy.zz, xx.yy, or xx
    * - extension is `protocol`
    */
   private[storage] def buildFilename(id: ProtocolId, version: ProtocolVersion): String =
-    s"${id.value}_${f"${version.value}%05d"}.protocol"
+    s"${id.value}_${version.show}.protocol"
 
   def apply[F[_]: Sync](config: FileStorageConfig): Storage[F] =
     new Storage[F] {
