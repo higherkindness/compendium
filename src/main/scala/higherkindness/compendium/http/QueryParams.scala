@@ -17,7 +17,7 @@
 package higherkindness.compendium.http
 
 import higherkindness.compendium.core.refinements.ProtocolVersion
-import higherkindness.compendium.models.IdlName
+import higherkindness.compendium.models.{IdlName, ValidationBool}
 import org.http4s.QueryParamDecoder
 import org.http4s.dsl.impl.{
   OptionalValidatingQueryParamDecoderMatcher,
@@ -38,4 +38,13 @@ object QueryParams {
     )("ProtocolVersion")
 
   object ProtoVersion extends OptionalValidatingQueryParamDecoderMatcher[ProtocolVersion]("version")
+
+  implicit val validationDecoderQueryParam: QueryParamDecoder[ValidationBool] =
+    QueryParamDecoder.fromUnsafeCast[ValidationBool](qp => ValidationBool.withName(qp.value))(
+      "ValidationBool"
+    )
+
+  object ValidationParam
+      extends OptionalValidatingQueryParamDecoderMatcher[ValidationBool]("validation")
+
 }

@@ -20,13 +20,19 @@ import cats.effect.Sync
 import cats.implicits._
 import higherkindness.compendium.core.refinements._
 import higherkindness.compendium.metadata.MetadataStorage
+import higherkindness.compendium.models.ValidationBool.{False, True}
 import higherkindness.compendium.models._
 import higherkindness.compendium.storage.Storage
 import higherkindness.compendium.transformer.ProtocolTransformer
 
 trait CompendiumService[F[_]] {
 
-  def storeProtocol(id: ProtocolId, protocol: Protocol, idlName: IdlName): F[ProtocolVersion]
+  def storeProtocol(
+      id: ProtocolId,
+      protocol: Protocol,
+      idlName: IdlName,
+      validation: Option[ValidationBool]
+  ): F[ProtocolVersion]
   def retrieveProtocol(id: ProtocolId, version: Option[ProtocolVersion]): F[FullProtocol]
   def existsProtocol(id: ProtocolId): F[Boolean]
   def transformProtocol(fullProtocol: FullProtocol, target: IdlName): F[FullProtocol]
@@ -44,13 +50,31 @@ object CompendiumService {
       override def storeProtocol(
           id: ProtocolId,
           protocol: Protocol,
-          idlName: IdlName
-      ): F[ProtocolVersion] =
-        for {
-          _       <- ProtocolUtils[F].validateProtocol(protocol, idlName)
-          version <- MetadataStorage[F].store(id, idlName)
-          _       <- Storage[F].store(id, version, protocol)
-        } yield version
+          idlName: IdlName,
+          validation: Option[ValidationBool]
+      ): F[ProtocolVersion] = {
+
+        def storeWithValidation(
+            id: ProtocolId,
+            protocol: Protocol,
+            idlName: IdlName
+        ): F[ProtocolVersion] =
+          for {
+            version <- MetadataStorage[F].store(id, idlName)
+            _       <- Storage[F].store(id, version, protocol)
+          } yield version
+
+        validation.fold(storeWithValidation(id, protocol, idlName)) {
+          case True => storeWithValidation(id, protocol, idlName)
+          case False =>
+            for {
+
+              _       <- ProtocolUtils[F].validateProtocol(protocol, idlName)
+              version <- MetadataStorage[F].store(id, idlName)
+              _       <- Storage[F].store(id, version, protocol)
+            } yield version
+        }
+      }
 
       override def retrieveProtocol(
           id: ProtocolId,
@@ -74,7 +98,8 @@ object CompendiumService {
           storeProtocol(
             fullProtocol.metadata.id,
             fullProtocol.protocol,
-            fullProtocol.metadata.idlName
+            fullProtocol.metadata.idlName,
+            Some(ValidationBool.False)
           ).as(fullProtocol)
         }
     }
