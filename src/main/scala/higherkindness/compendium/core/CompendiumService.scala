@@ -60,6 +60,7 @@ object CompendiumService {
             idlName: IdlName
         ): F[ProtocolVersion] =
           for {
+            _       <- ProtocolUtils[F].validateProtocol(protocol, idlName)
             version <- MetadataStorage[F].store(id, idlName)
             _       <- Storage[F].store(id, version, protocol)
           } yield version
@@ -68,8 +69,6 @@ object CompendiumService {
           case True => storeWithValidation(id, protocol, idlName)
           case False =>
             for {
-
-              _       <- ProtocolUtils[F].validateProtocol(protocol, idlName)
               version <- MetadataStorage[F].store(id, idlName)
               _       <- Storage[F].store(id, version, protocol)
             } yield version
