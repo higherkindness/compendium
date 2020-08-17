@@ -20,6 +20,7 @@ import cats.effect.IO
 import cats.syntax.all._
 import higherkindness.compendium.CompendiumArbitrary._
 import higherkindness.compendium.metadata.MetadataStorageStub
+import higherkindness.compendium.models.ValidationBool.{False, True}
 import higherkindness.compendium.models.{IdlName, Protocol, ProtocolMetadata}
 import higherkindness.compendium.storage.StorageStub
 import higherkindness.compendium.transformer.skeuomorph.SkeuomorphProtocolTransformer
@@ -34,7 +35,7 @@ object CompendiumServiceSpec extends Specification with ScalaCheck {
   private val dummyIdlName: IdlName   = IdlName.Mu
 
   "Store protocol" >> {
-    "Given a valid protocol it is stored" >> prop { metadata: ProtocolMetadata =>
+    "Given a valid protocol it is validated and stored" >> prop { metadata: ProtocolMetadata =>
       implicit val dbService     = new MetadataStorageStub(true)
       implicit val storage       = new StorageStub(dummyProtocol.some, metadata.id, metadata.version)
       implicit val protocolUtils = new ProtocolUtilsStub(dummyProtocol, true)
@@ -42,22 +43,52 @@ object CompendiumServiceSpec extends Specification with ScalaCheck {
 
       CompendiumService
         .impl[IO]
-        .storeProtocol(metadata.id, dummyProtocol, dummyIdlName)
+        .storeProtocol(metadata.id, dummyProtocol, dummyIdlName, Some(True))
         .map(_ => success)
         .unsafeRunSync()
     }
 
-    "Given an invalid protocol an error is raised" >> prop { metadata: ProtocolMetadata =>
-      implicit val dbService     = new MetadataStorageStub(true)
-      implicit val storage       = new StorageStub(dummyProtocol.some, metadata.id, metadata.version)
-      implicit val protocolUtils = new ProtocolUtilsStub(dummyProtocol, false)
-      implicit val transformer   = SkeuomorphProtocolTransformer[IO]
+    "Given an invalid protocol it tries to validate it and an error is raised" >> prop {
+      metadata: ProtocolMetadata =>
+        implicit val dbService     = new MetadataStorageStub(true)
+        implicit val storage       = new StorageStub(dummyProtocol.some, metadata.id, metadata.version)
+        implicit val protocolUtils = new ProtocolUtilsStub(dummyProtocol, false)
+        implicit val transformer   = SkeuomorphProtocolTransformer[IO]
 
-      CompendiumService
-        .impl[IO]
-        .storeProtocol(metadata.id, dummyProtocol, dummyIdlName)
-        .unsafeRunSync must throwA[org.apache.avro.SchemaParseException]
+        CompendiumService
+          .impl[IO]
+          .storeProtocol(metadata.id, dummyProtocol, dummyIdlName, Some(True))
+          .unsafeRunSync must throwA[org.apache.avro.SchemaParseException]
     }
+
+    "Given a valid protocol it is stored without validating it" >> prop {
+      metadata: ProtocolMetadata =>
+        implicit val dbService     = new MetadataStorageStub(true)
+        implicit val storage       = new StorageStub(dummyProtocol.some, metadata.id, metadata.version)
+        implicit val protocolUtils = new ProtocolUtilsStub(dummyProtocol, true)
+        implicit val transformer   = SkeuomorphProtocolTransformer[IO]
+
+        CompendiumService
+          .impl[IO]
+          .storeProtocol(metadata.id, dummyProtocol, dummyIdlName, Some(False))
+          .map(_ => success)
+          .unsafeRunSync()
+    }
+
+    "Given an invalid protocol it is stored without validating it" >> prop {
+      metadata: ProtocolMetadata =>
+        implicit val dbService     = new MetadataStorageStub(true)
+        implicit val storage       = new StorageStub(dummyProtocol.some, metadata.id, metadata.version)
+        implicit val protocolUtils = new ProtocolUtilsStub(dummyProtocol, false)
+        implicit val transformer   = SkeuomorphProtocolTransformer[IO]
+
+        CompendiumService
+          .impl[IO]
+          .storeProtocol(metadata.id, dummyProtocol, dummyIdlName, Some(False))
+          .map(_ => success)
+          .unsafeRunSync()
+    }
+
   }
 
   "Retrieve protocol" >> {

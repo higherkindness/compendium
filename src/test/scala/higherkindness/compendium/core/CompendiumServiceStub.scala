@@ -26,7 +26,8 @@ class CompendiumServiceStub(protocolOpt: Option[FullProtocol], exists: Boolean)
   override def storeProtocol(
       id: ProtocolId,
       protocol: Protocol,
-      idlName: IdlName
+      idlName: IdlName,
+      validation: Option[ValidationBool]
   ): IO[ProtocolVersion] =
     IO.pure(protocolOpt.map(_.metadata.version).getOrElse(ProtocolVersion(1)))
 
