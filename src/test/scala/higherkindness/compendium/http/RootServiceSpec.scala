@@ -136,7 +136,8 @@ object RootServiceSpec extends Specification with ScalaCheck {
         override def storeProtocol(
             id: ProtocolId,
             protocol: Protocol,
-            idlNames: IdlName
+            idlNames: IdlName,
+            validation: Option[ValidationBool]
         ): IO[ProtocolVersion] =
           IO.raiseError[ProtocolVersion](SchemaParseException(""))
       }
