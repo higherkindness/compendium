@@ -30,11 +30,10 @@ object CompendiumServerStream {
   def serverStream[F[_]: ConcurrentEffect: Timer](
       httpConf: HttpConfig,
       service: HttpRoutes[F]
-  ): Stream[F, ExitCode] = {
+  ): Stream[F, ExitCode] =
     BlazeServerBuilder[F](ec)
       .bindHttp(httpConf.port, httpConf.host)
       .withHttpApp(service.orNotFound)
       .serve
-  }
 
 }
