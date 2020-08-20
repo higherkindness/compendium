@@ -130,7 +130,7 @@ object RootServiceSpec extends Specification with ScalaCheck {
     }
   }
 
-  "POST /protocol/id?idlName={idlName}" >> {
+  "POST /protocol/id?idlName={idlName}[& ValidationParam={booleanValidated}]" >> {
     "If protocol returns an invalid avro schema returns BadRequest" >> {
       implicit val compendiumService = new CompendiumServiceStub(None, false) {
         override def storeProtocol(
@@ -241,6 +241,46 @@ object RootServiceSpec extends Specification with ScalaCheck {
           .unsafeRunSync
           .map(_.value) === Some(s"/protocol/$id?idlName=avro")
     }
+
+    "If validation param is invalid returns bad Request" >> {
+      implicit val compendiumService =
+        CompendiumServiceStub(Some(dummyProtocol(ProtocolId("id"))), false)
+
+      val request: Request[IO] =
+        Request[IO](
+          method = Method.POST,
+          uri = Uri(
+            path = s"/protocol/id",
+            query = Query("idlName" -> Option("avro"), "validation" -> Option("asdf"))
+          )
+        )
+      val response = RootService.rootRouteService[IO].orNotFound(request).unsafeRunSync
+
+      response.status == Status.BadRequest
+    }
+
+    "If validation param is false and protocol is invalid it returns anyway Created with id in the body and location in the headers" >> prop {
+      id: ProtocolId =>
+        implicit val compendiumService = CompendiumServiceStub(None, false)
+
+        val request: Request[IO] =
+          Request[IO](
+            method = Method.POST,
+            uri = Uri(
+              path = s"/protocol/${id.value}",
+              query = Query("idlName" -> Option("avro"), "validation" -> Option("false"))
+            )
+          ).withEntity(dummyProtocol(id).protocol)
+
+        val response = RootService.rootRouteService[IO].orNotFound(request).unsafeRunSync
+
+        response.status === Status.Created
+        response.headers.find(_.name == "Location".ci).map(_.value) === Some(
+          s"/protocol/$id?idlName=avro&validation=false"
+        )
+        response.as[Int].unsafeRunSync === 1 // Default version number when POSTing new protocols
+    }
+
   }
 
   "GET /protocol/id/transformation?target={target}[&version={version}]" >> {

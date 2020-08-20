@@ -43,6 +43,7 @@ object RoutesMiddleware {
           case e: ProtocolNotFound          => notFound(e.getMessage)
           case e: UnknownIdlName            => badRequest(e.getMessage)
           case e: ProtocolVersionError      => badRequest(e.getMessage)
+          case e: OptValidationError        => badRequest(e.getMessage)
           case e                            => genResponse(Status.InternalServerError, e.getMessage)
         }
       }
