@@ -20,8 +20,7 @@ import cats.effect.IO
 import cats.syntax.all._
 import higherkindness.compendium.CompendiumArbitrary._
 import higherkindness.compendium.metadata.MetadataStorageStub
-import higherkindness.compendium.models.ValidationBool.{False, True}
-import higherkindness.compendium.models.{IdlName, Protocol, ProtocolMetadata}
+import higherkindness.compendium.models.{IdlName, Protocol, ProtocolMetadata, ValidationBool}
 import higherkindness.compendium.storage.StorageStub
 import higherkindness.compendium.transformer.skeuomorph.SkeuomorphProtocolTransformer
 import org.specs2.ScalaCheck
@@ -43,7 +42,7 @@ object CompendiumServiceSpec extends Specification with ScalaCheck {
 
       CompendiumService
         .impl[IO]
-        .storeProtocol(metadata.id, dummyProtocol, dummyIdlName, Some(True))
+        .storeProtocol(metadata.id, dummyProtocol, dummyIdlName, Some(ValidationBool(true)))
         .map(_ => success)
         .unsafeRunSync()
     }
@@ -57,7 +56,7 @@ object CompendiumServiceSpec extends Specification with ScalaCheck {
 
         CompendiumService
           .impl[IO]
-          .storeProtocol(metadata.id, dummyProtocol, dummyIdlName, Some(True))
+          .storeProtocol(metadata.id, dummyProtocol, dummyIdlName, Some(ValidationBool(true)))
           .unsafeRunSync must throwA[org.apache.avro.SchemaParseException]
     }
 
@@ -70,7 +69,7 @@ object CompendiumServiceSpec extends Specification with ScalaCheck {
 
         CompendiumService
           .impl[IO]
-          .storeProtocol(metadata.id, dummyProtocol, dummyIdlName, Some(False))
+          .storeProtocol(metadata.id, dummyProtocol, dummyIdlName, Some(ValidationBool(false)))
           .map(_ => success)
           .unsafeRunSync()
     }
@@ -84,7 +83,7 @@ object CompendiumServiceSpec extends Specification with ScalaCheck {
 
         CompendiumService
           .impl[IO]
-          .storeProtocol(metadata.id, dummyProtocol, dummyIdlName, Some(False))
+          .storeProtocol(metadata.id, dummyProtocol, dummyIdlName, Some(ValidationBool(false)))
           .map(_ => success)
           .unsafeRunSync()
     }

@@ -255,7 +255,6 @@ object RootServiceSpec extends Specification with ScalaCheck {
           )
         )
       val response = RootService.rootRouteService[IO].orNotFound(request).unsafeRunSync
-
       response.status == Status.BadRequest
     }
 

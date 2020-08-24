@@ -20,7 +20,7 @@ import cats.effect.Sync
 import cats.implicits._
 import higherkindness.compendium.core.refinements._
 import higherkindness.compendium.metadata.MetadataStorage
-import higherkindness.compendium.models.ValidationBool.{False, True}
+import higherkindness.compendium.models.ValidationBool
 import higherkindness.compendium.models._
 import higherkindness.compendium.storage.Storage
 import higherkindness.compendium.transformer.ProtocolTransformer
@@ -65,14 +65,13 @@ object CompendiumService {
             _       <- Storage[F].store(id, version, protocol)
           } yield version
 
-        validation.fold(storeWithValidation(id, protocol, idlName)) {
-          case True => storeWithValidation(id, protocol, idlName)
-          case False =>
-            for {
-              version <- MetadataStorage[F].store(id, idlName)
-              _       <- Storage[F].store(id, version, protocol)
-            } yield version
+        validation.getOrElse(ValidationBool(true)) match {
+
+          case ValidationBool(true) => storeWithValidation(id, protocol, idlName)
+          case ValidationBool(false) =>
+            MetadataStorage[F].store(id, idlName).flatTap(Storage[F].store(id, _, protocol))
         }
+
       }
 
       override def retrieveProtocol(
@@ -98,7 +97,7 @@ object CompendiumService {
             fullProtocol.metadata.id,
             fullProtocol.protocol,
             fullProtocol.metadata.idlName,
-            Some(ValidationBool.True)
+            Some(ValidationBool(true))
           ).as(fullProtocol)
         }
     }

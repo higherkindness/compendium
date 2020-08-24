@@ -16,15 +16,4 @@
 
 package higherkindness.compendium.models
 
-import enumeratum.EnumEntry.Lowercase
-import enumeratum._
-
-sealed trait ValidationBool extends EnumEntry {}
-
-object ValidationBool extends Enum[ValidationBool] with CirceEnum[ValidationBool] {
-  val values = findValues
-
-  case object True  extends ValidationBool with Lowercase
-  case object False extends ValidationBool with Lowercase
-
-}
+final case class ValidationBool(value: Boolean) extends AnyVal

@@ -46,24 +46,15 @@ object RootService {
         F.fromValidated(validation)
       }
 
-    def booleanValidation(
-        maybeBoolValidated: Option[ValidatedNel[ParseFailure, ValidationBool]]
-    ): F[Option[ValidationBool]] =
-      maybeBoolValidated.traverse { validated =>
-        val validation = validated.leftMap(errs => OptValidationError(errs.toList.mkString))
-        F.fromValidated(validation)
-      }
-
     val routes = HttpRoutes.of[F] {
       case req @ POST -> Root / "protocol" / id :? IdlNameParam(
             idlNameValidated
-          ) +& ValidationParam(booleanValidated) =>
+          ) +& ValidationParam(validBool) =>
         for {
           protocolId <- ProtocolId.parseOrRaise(id)
           idlName    <- idlValidation(idlNameValidated)
-          validation <- booleanValidation(booleanValidated)
           protocol   <- req.as[Protocol]
-          version    <- CompendiumService[F].storeProtocol(protocolId, protocol, idlName, validation)
+          version    <- CompendiumService[F].storeProtocol(protocolId, protocol, idlName, validBool)
           response   <- Created(version.value)
         } yield response.putHeaders(Location(req.uri.withPath(s"${req.uri.path}")))
 
