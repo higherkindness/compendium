@@ -98,7 +98,7 @@ object CompendiumService {
             fullProtocol.metadata.id,
             fullProtocol.protocol,
             fullProtocol.metadata.idlName,
-            Some(ValidationBool.False)
+            Some(ValidationBool.True)
           ).as(fullProtocol)
         }
     }
